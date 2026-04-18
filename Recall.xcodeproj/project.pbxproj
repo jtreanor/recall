@@ -9,11 +9,13 @@
 /* Begin PBXBuildFile section */
 		BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */; };
 		D05BC71223E7823E3A0D7A77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356D46F64C1F802B1B2CE108 /* AppDelegate.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Recall.entitlements; sourceTree = "<group>"; };
 		356D46F64C1F802B1B2CE108 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitor.swift; sourceTree = "<group>"; };
 		589D612419DE8AD691D1CD7C /* Recall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C7DCFFF6657825023FD43FA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecallApp.swift; sourceTree = "<group>"; };
@@ -24,6 +26,7 @@
 			isa = PBXGroup;
 			children = (
 				356D46F64C1F802B1B2CE108 /* AppDelegate.swift */,
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */,
 				5C7DCFFF6657825023FD43FA /* Info.plist */,
 				02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */,
 				E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */,
@@ -107,6 +110,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D05BC71223E7823E3A0D7A77 /* AppDelegate.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* ClipboardMonitor.swift in Sources */,
 				BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
