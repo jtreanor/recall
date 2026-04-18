@@ -35,11 +35,11 @@ The MVP is a working, daily-usable clipboard manager. It must:
 **Acceptance criteria:** App launches, appears in menu bar, can be quit.
 
 ### Milestone 1.2 — Clipboard monitor
-- [ ] `ClipboardMonitor` class: `DispatchSourceTimer` at 0.75s interval
-- [ ] Detects `changeCount` change on `NSPasteboard.general`
-- [ ] Reads plain text items
-- [ ] Reads image items (TIFF/PNG), converts to PNG, generates 200×150 thumbnail
-- [ ] Emits items via `Combine` publisher or delegate callback
+- [x] `ClipboardMonitor` class: `DispatchSourceTimer` at 0.75s interval
+- [x] Detects `changeCount` change on `NSPasteboard.general`
+- [x] Reads plain text items
+- [x] Reads image items (TIFF/PNG), converts to PNG, generates 200×150 thumbnail
+- [x] Emits items via `Combine` publisher or delegate callback
 
 **Acceptance criteria:** Copy text → item appears in in-memory array. Copy image → thumbnail generated.
 
@@ -80,6 +80,7 @@ The MVP is a working, daily-usable clipboard manager. It must:
 - Daily-use loop works reliably in 10 manual test sessions
 - No crashes on text and image clipboard items
 - Memory RSS < 60MB with overlay open
+- All unit tests pass (`xcodebuild test -scheme Recall -destination 'platform=macOS'`)
 
 ---
 
@@ -127,7 +128,7 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 1 — Foundation  
-**Milestone:** 1.1 complete; next is 1.2 (Clipboard monitor)
+**Milestone:** 1.2 complete; next is 1.3 (Local persistence)
 
 ---
 

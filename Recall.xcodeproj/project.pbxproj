@@ -9,14 +9,19 @@
 /* Begin PBXBuildFile section */
 		BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */; };
 		D05BC71223E7823E3A0D7A77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356D46F64C1F802B1B2CE108 /* AppDelegate.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */; };
+		BB11AABB11AABB11AABB11AA /* ClipboardMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22AABB22AABB22AABB22AA /* ClipboardMonitorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Recall.entitlements; sourceTree = "<group>"; };
 		356D46F64C1F802B1B2CE108 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitor.swift; sourceTree = "<group>"; };
 		589D612419DE8AD691D1CD7C /* Recall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C7DCFFF6657825023FD43FA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecallApp.swift; sourceTree = "<group>"; };
+		BB22AABB22AABB22AABB22AA /* ClipboardMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitorTests.swift; sourceTree = "<group>"; };
+		BB33AABB33AABB33AABB33AA /* RecallTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecallTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -24,6 +29,7 @@
 			isa = PBXGroup;
 			children = (
 				356D46F64C1F802B1B2CE108 /* AppDelegate.swift */,
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */,
 				5C7DCFFF6657825023FD43FA /* Info.plist */,
 				02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */,
 				E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */,
@@ -35,14 +41,24 @@
 			isa = PBXGroup;
 			children = (
 				589D612419DE8AD691D1CD7C /* Recall.app */,
+				BB33AABB33AABB33AABB33AA /* RecallTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		BB44AABB44AABB44AABB44AA /* RecallTests */ = {
+			isa = PBXGroup;
+			children = (
+				BB22AABB22AABB22AABB22AA /* ClipboardMonitorTests.swift */,
+			);
+			path = RecallTests;
 			sourceTree = "<group>";
 		};
 		E3D300D57C7BE46807A96B09 = {
 			isa = PBXGroup;
 			children = (
 				2398648CEC1DEFD2236E8232 /* Recall */,
+				BB44AABB44AABB44AABB44AA /* RecallTests */,
 				8FB9A9AFFDDAA5852104C602 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +83,24 @@
 			productReference = 589D612419DE8AD691D1CD7C /* Recall.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BB55AABB55AABB55AABB55AA /* RecallTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BBDDAABBDDAABBDDAABBDDAA /* Build configuration list for PBXNativeTarget "RecallTests" */;
+			buildPhases = (
+				BB66AABB66AABB66AABB66AA /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BB88AABB88AABB88AABB88AA /* PBXTargetDependency */,
+			);
+			name = RecallTests;
+			packageProductDependencies = (
+			);
+			productName = RecallTests;
+			productReference = BB33AABB33AABB33AABB33AA /* RecallTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -79,6 +113,11 @@
 					8A1CA7FAB5EF7FFF7C657008 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
+					};
+					BB55AABB55AABB55AABB55AA = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = 8A1CA7FAB5EF7FFF7C657008;
 					};
 				};
 			};
@@ -97,6 +136,7 @@
 			projectRoot = "";
 			targets = (
 				8A1CA7FAB5EF7FFF7C657008 /* Recall */,
+				BB55AABB55AABB55AABB55AA /* RecallTests */,
 			);
 		};
 /* End PBXProject section */
@@ -107,11 +147,38 @@
 			buildActionMask = 2147483647;
 			files = (
 				D05BC71223E7823E3A0D7A77 /* AppDelegate.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* ClipboardMonitor.swift in Sources */,
 				BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BB66AABB66AABB66AABB66AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB11AABB11AABB11AABB11AA /* ClipboardMonitorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		BB77AABB77AABB77AABB77AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8B2E7D481A738D1E6488DE92 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8A1CA7FAB5EF7FFF7C657008;
+			remoteInfo = Recall;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		BB88AABB88AABB88AABB88AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8A1CA7FAB5EF7FFF7C657008 /* Recall */;
+			targetProxy = BB77AABB77AABB77AABB77AA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		5C05BE411EE81AC9652F9F93 /* Release */ = {
@@ -281,6 +348,34 @@
 			};
 			name = Release;
 		};
+		BB99AABB99AABB99AABB99AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.recall.RecallTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Recall.app/Contents/MacOS/Recall";
+			};
+			name = Debug;
+		};
+		BBCCAABBCCAABBCCAABBCCAA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.recall.RecallTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Recall.app/Contents/MacOS/Recall";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -298,6 +393,15 @@
 			buildConfigurations = (
 				6581C2D0C73D87341BEA84E5 /* Debug */,
 				5C05BE411EE81AC9652F9F93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BBDDAABBDDAABBDDAABBDDAA /* Build configuration list for PBXNativeTarget "RecallTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB99AABB99AABB99AABB99AA /* Debug */,
+				BBCCAABBCCAABBCCAABBCCAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
