@@ -63,9 +63,9 @@ The MVP is a working, daily-usable clipboard manager. It must:
 **Acceptance criteria:** Panel opens, shows history items, looks clean.
 
 ### Milestone 1.5 — Global hotkey
-- [ ] `HotkeyManager` using Carbon `RegisterEventHotKey`
-- [ ] Default: `⌘⇧V`
-- [ ] Toggles overlay open/closed
+- [x] `HotkeyManager` using Carbon `RegisterEventHotKey`
+- [x] Default: `⌘⇧V`
+- [x] Toggles overlay open/closed
 
 **Acceptance criteria:** `⌘⇧V` from any app opens/closes the overlay.
 
@@ -128,7 +128,7 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 1 — Foundation  
-**Milestone:** 1.4 complete; next is 1.5 (Global hotkey)
+**Milestone:** 1.5 complete; next is 1.6 (Keyboard navigation + paste-back)
 
 ---
 
