@@ -11,6 +11,9 @@
 		D05BC71223E7823E3A0D7A77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356D46F64C1F802B1B2CE108 /* AppDelegate.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */; };
 		BB11AABB11AABB11AABB11AA /* ClipboardMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22AABB22AABB22AABB22AA /* ClipboardMonitorTests.swift */; };
+		CC22DDCC22DDCC22DDCC22DD /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DDCC11DDCC11DDCC11DD /* Database.swift */; };
+		CC44DDCC44DDCC44DDCC44DD /* HistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC33DDCC33DDCC33DDCC33DD /* HistoryStore.swift */; };
+		CC66DDCC66DDCC66DDCC66DD /* HistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC55DDCC55DDCC55DDCC55DD /* HistoryStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +25,9 @@
 		E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecallApp.swift; sourceTree = "<group>"; };
 		BB22AABB22AABB22AABB22AA /* ClipboardMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitorTests.swift; sourceTree = "<group>"; };
 		BB33AABB33AABB33AABB33AA /* RecallTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecallTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC11DDCC11DDCC11DDCC11DD /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
+		CC33DDCC33DDCC33DDCC33DD /* HistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStore.swift; sourceTree = "<group>"; };
+		CC55DDCC55DDCC55DDCC55DD /* HistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -30,6 +36,8 @@
 			children = (
 				356D46F64C1F802B1B2CE108 /* AppDelegate.swift */,
 				F2E1D0C9B8A7F6E5D4C3B2A1 /* ClipboardMonitor.swift */,
+				CC11DDCC11DDCC11DDCC11DD /* Database.swift */,
+				CC33DDCC33DDCC33DDCC33DD /* HistoryStore.swift */,
 				5C7DCFFF6657825023FD43FA /* Info.plist */,
 				02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */,
 				E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */,
@@ -50,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				BB22AABB22AABB22AABB22AA /* ClipboardMonitorTests.swift */,
+				CC55DDCC55DDCC55DDCC55DD /* HistoryStoreTests.swift */,
 			);
 			path = RecallTests;
 			sourceTree = "<group>";
@@ -148,6 +157,8 @@
 			files = (
 				D05BC71223E7823E3A0D7A77 /* AppDelegate.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* ClipboardMonitor.swift in Sources */,
+				CC22DDCC22DDCC22DDCC22DD /* Database.swift in Sources */,
+				CC44DDCC44DDCC44DDCC44DD /* HistoryStore.swift in Sources */,
 				BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -157,6 +168,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB11AABB11AABB11AABB11AA /* ClipboardMonitorTests.swift in Sources */,
+				CC66DDCC66DDCC66DDCC66DD /* HistoryStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
