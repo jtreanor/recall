@@ -53,12 +53,12 @@ The MVP is a working, daily-usable clipboard manager. It must:
 **Acceptance criteria:** Items survive app relaunch. Duplicates collapse to most recent.
 
 ### Milestone 1.4 — Overlay panel
-- [ ] `OverlayPanel: NSPanel` subclass: `.floating` level, vibrancy, rounded corners
-- [ ] `NSHostingView<OverlayView>` as content view
-- [ ] `OverlayView` (SwiftUI): `List` or `ScrollView + LazyVStack` of `ClipboardItemRow`
-- [ ] `ClipboardItemRow`: text preview (truncated) or image thumbnail; selection highlight
-- [ ] Shows centered on main screen
-- [ ] Dismisses on Escape, click-outside, or after paste
+- [x] `OverlayPanel: NSPanel` subclass: `.floating` level, vibrancy, rounded corners
+- [x] `NSHostingView<OverlayView>` as content view
+- [x] `OverlayView` (SwiftUI): `ScrollView + LazyVStack` of `ClipboardItemRow`
+- [x] `ClipboardItemRow`: text preview (truncated) or image thumbnail; selection highlight
+- [x] Shows centered on main screen
+- [x] Dismisses on Escape (via `NSEvent.addLocalMonitorForEvents`)
 
 **Acceptance criteria:** Panel opens, shows history items, looks clean.
 
@@ -128,7 +128,7 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 1 — Foundation  
-**Milestone:** 1.3 complete; next is 1.4 (Overlay panel)
+**Milestone:** 1.4 complete; next is 1.5 (Global hotkey)
 
 ---
 
