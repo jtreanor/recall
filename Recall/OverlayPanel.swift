@@ -2,6 +2,8 @@ import AppKit
 
 final class OverlayPanel: NSPanel {
     var onDismiss: (() -> Void)?
+    var onPaste: (() -> Void)?
+    weak var overlayState: OverlayState?
     private var localEventMonitor: Any?
 
     init() {
@@ -47,11 +49,23 @@ final class OverlayPanel: NSPanel {
         centerOnMainScreen()
         makeKeyAndOrderFront(nil)
         localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 { // Escape
-                self?.hide()
+            guard let self else { return event }
+            switch event.keyCode {
+            case 53: // Escape
+                self.hide()
                 return nil
+            case 125: // Down arrow
+                self.overlayState?.moveSelection(by: 1)
+                return nil
+            case 126: // Up arrow
+                self.overlayState?.moveSelection(by: -1)
+                return nil
+            case 36, 76: // Return, Enter (numpad)
+                self.onPaste?()
+                return nil
+            default:
+                return event
             }
-            return event
         }
     }
 

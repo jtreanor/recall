@@ -19,6 +19,9 @@
 		EE55FFEE55FFEE55FFEE55FF /* OverlayStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE44FFEE44FFEE44FFEE44FF /* OverlayStateTests.swift */; };
 		FF11AAFFAABBCCDD11223344 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00AAFFAABBCCDD11223344 /* HotkeyManager.swift */; };
 		FF33AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift */; };
+		AA22BBAA22BBAA22BBAA22BB /* AccessibilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BBAA11BBAA11BBAA11BB /* AccessibilityManager.swift */; };
+		AA44BBAA44BBAA44BBAA44BB /* AccessibilityManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */; };
+		AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +41,9 @@
 		EE44FFEE44FFEE44FFEE44FF /* OverlayStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayStateTests.swift; sourceTree = "<group>"; };
 		FF00AAFFAABBCCDD11223344 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		FF22AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManagerTests.swift; sourceTree = "<group>"; };
+		AA11BBAA11BBAA11BBAA11BB /* AccessibilityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityManager.swift; sourceTree = "<group>"; };
+		AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityManagerTests.swift; sourceTree = "<group>"; };
+		AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -51,6 +57,7 @@
 				EE00FFEE00FFEE00FFEE00FF /* OverlayPanel.swift */,
 				EE22FFEE22FFEE22FFEE22FF /* OverlayView.swift */,
 				FF00AAFFAABBCCDD11223344 /* HotkeyManager.swift */,
+				AA11BBAA11BBAA11BBAA11BB /* AccessibilityManager.swift */,
 				5C7DCFFF6657825023FD43FA /* Info.plist */,
 				02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */,
 				E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */,
@@ -74,6 +81,8 @@
 				CC55DDCC55DDCC55DDCC55DD /* HistoryStoreTests.swift */,
 				EE44FFEE44FFEE44FFEE44FF /* OverlayStateTests.swift */,
 				FF22AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift */,
+				AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */,
+				AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */,
 			);
 			path = RecallTests;
 			sourceTree = "<group>";
@@ -177,6 +186,7 @@
 				EE11FFEE11FFEE11FFEE11FF /* OverlayPanel.swift in Sources */,
 				EE33FFEE33FFEE33FFEE33FF /* OverlayView.swift in Sources */,
 				FF11AAFFAABBCCDD11223344 /* HotkeyManager.swift in Sources */,
+				AA22BBAA22BBAA22BBAA22BB /* AccessibilityManager.swift in Sources */,
 				BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,6 +199,8 @@
 				CC66DDCC66DDCC66DDCC66DD /* HistoryStoreTests.swift in Sources */,
 				EE55FFEE55FFEE55FFEE55FF /* OverlayStateTests.swift in Sources */,
 				FF33AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift in Sources */,
+				AA44BBAA44BBAA44BBAA44BB /* AccessibilityManagerTests.swift in Sources */,
+				AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
