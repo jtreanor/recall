@@ -10,6 +10,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var overlayPanel: OverlayPanel?
     let overlayState = OverlayState()
+    private var hotkeyManager: HotkeyManager?
+    private(set) var isOverlayVisible = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -17,6 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupHistoryStore()
         setupOverlayPanel()
         startClipboardMonitor()
+        setupHotkey()
     }
 
     private func setupHistoryStore() {
@@ -59,12 +62,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showOverlay() {
+        isOverlayVisible = true
         overlayState.selectedIndex = 0
         overlayPanel?.show()
     }
 
     func hideOverlay() {
+        isOverlayVisible = false
         overlayPanel?.hide()
+    }
+
+    private func setupHotkey() {
+        hotkeyManager = HotkeyManager { [weak self] in
+            guard let self else { return }
+            if self.isOverlayVisible {
+                self.hideOverlay()
+            } else {
+                self.showOverlay()
+            }
+        }
+        hotkeyManager?.register()
     }
 
     private func setupStatusItem() {
