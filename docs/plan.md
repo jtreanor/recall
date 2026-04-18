@@ -80,6 +80,7 @@ The MVP is a working, daily-usable clipboard manager. It must:
 - Daily-use loop works reliably in 10 manual test sessions
 - No crashes on text and image clipboard items
 - Memory RSS < 60MB with overlay open
+- All unit tests pass (`xcodebuild test -scheme Recall -destination 'platform=macOS'`)
 
 ---
 

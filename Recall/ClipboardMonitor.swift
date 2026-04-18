@@ -30,7 +30,7 @@ final class ClipboardMonitor {
         timer = nil
     }
 
-    private func poll() {
+    func poll() {
         let pb = NSPasteboard.general
         let count = pb.changeCount
         guard count != lastChangeCount else { return }
@@ -51,12 +51,12 @@ final class ClipboardMonitor {
         }
     }
 
-    private func makePNG(from image: NSImage) -> Data? {
+    func makePNG(from image: NSImage) -> Data? {
         guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         return NSBitmapImageRep(cgImage: cgImage).representation(using: .png, properties: [:])
     }
 
-    private func makeThumbnail(from image: NSImage) -> NSImage? {
+    func makeThumbnail(from image: NSImage) -> NSImage? {
         let srcSize = image.size
         guard srcSize.width > 0, srcSize.height > 0 else { return nil }
 

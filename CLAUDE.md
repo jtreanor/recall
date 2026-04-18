@@ -21,6 +21,13 @@
 - Optimize for great daily-use feel, not feature completeness
 - If a change doesn't improve the core loop, defer it
 
+## Testing
+- Every milestone must include unit tests covering its new logic
+- Test target: `RecallTests` (XCTest, linked against the Recall app via `@testable import`)
+- Run tests before opening a PR: `xcodebuild test -project Recall.xcodeproj -scheme Recall -destination 'platform=macOS'`
+- Keep logic off `private` when it needs to be tested — prefer `internal` and `@testable import`
+- Tests go in `RecallTests/`, one file per source file being tested
+
 ## Plan maintenance
 - Update `docs/plan.md` when implementation diverges from plan
 - Mark milestones complete as they are finished
