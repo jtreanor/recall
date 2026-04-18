@@ -44,11 +44,11 @@ The MVP is a working, daily-usable clipboard manager. It must:
 **Acceptance criteria:** Copy text → item appears in in-memory array. Copy image → thumbnail generated.
 
 ### Milestone 1.3 — Local persistence
-- [ ] SQLite3 wrapper (`Database.swift`) using `libsqlite3` (no SPM dependency)
-- [ ] Schema: `items` table per research doc
-- [ ] `HistoryStore` CRUD: insert, fetchAll (newest first), delete, prune to 500
-- [ ] Image files written to `~/Library/Application Support/Recall/images/`
-- [ ] Deduplication on `content_hash`
+- [x] SQLite3 wrapper (`Database.swift`) using `libsqlite3` (no SPM dependency)
+- [x] Schema: `items` table per research doc
+- [x] `HistoryStore` CRUD: insert, fetchAll (newest first), delete, prune to 500
+- [x] Image files written to `~/Library/Application Support/Recall/images/`
+- [x] Deduplication on `content_hash`
 
 **Acceptance criteria:** Items survive app relaunch. Duplicates collapse to most recent.
 
@@ -128,7 +128,7 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 1 — Foundation  
-**Milestone:** 1.2 complete; next is 1.3 (Local persistence)
+**Milestone:** 1.3 complete; next is 1.4 (Overlay panel)
 
 ---
 
