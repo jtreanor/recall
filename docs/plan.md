@@ -26,11 +26,11 @@ The MVP is a working, daily-usable clipboard manager. It must:
 **Goal:** Working daily-use app. No polish, but the core loop functions reliably.
 
 ### Milestone 1.1 — Project scaffold
-- [ ] Xcode project: macOS app target, minimum deployment macOS 13
-- [ ] `NSApplicationDelegate`, `.accessory` activation policy (menu bar icon only)
-- [ ] Basic menu bar `NSStatusItem` with "Quit" item
-- [ ] Hardened runtime, no sandbox, provisioning profile for notarization
-- [ ] `CLAUDE.md` and `docs/` committed to `master`; all feature work on branches
+- [x] Xcode project: macOS app target, minimum deployment macOS 13
+- [x] `NSApplicationDelegate`, `.accessory` activation policy (menu bar icon only)
+- [x] Basic menu bar `NSStatusItem` with "Quit" item
+- [x] Hardened runtime, no sandbox, provisioning profile for notarization
+- [x] `CLAUDE.md` and `docs/` committed to `master`; all feature work on branches
 
 **Acceptance criteria:** App launches, appears in menu bar, can be quit.
 
@@ -126,8 +126,8 @@ _Only pursue if daily use reveals a genuine gap._
 
 ## Current Status
 
-**Phase:** Pre-implementation  
-**Next task:** See below
+**Phase:** Phase 1 — Foundation  
+**Milestone:** 1.1 complete; next is 1.2 (Clipboard monitor)
 
 ---
 

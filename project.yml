@@ -1,0 +1,30 @@
+name: Recall
+options:
+  bundleIdPrefix: com.recall
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "15"
+  generateEmptyDirectories: true
+
+targets:
+  Recall:
+    type: application
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - Recall
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.recall.app
+        PRODUCT_NAME: Recall
+        SWIFT_VERSION: 5.9
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: Recall/Recall.entitlements
+        INFOPLIST_FILE: Recall/Info.plist
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    entitlements:
+      path: Recall/Recall.entitlements
