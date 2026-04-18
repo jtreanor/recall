@@ -70,9 +70,9 @@ The MVP is a working, daily-usable clipboard manager. It must:
 **Acceptance criteria:** `⌘⇧V` from any app opens/closes the overlay.
 
 ### Milestone 1.6 — Keyboard navigation + paste-back
-- [ ] Arrow up/down moves selection; view auto-scrolls to keep selection visible
-- [ ] Enter: write item to `NSPasteboard.general`, dismiss panel, re-activate previous app, post synthetic `⌘V` via `CGEvent` after 50ms delay
-- [ ] `AccessibilityManager`: checks `AXIsProcessTrusted`, prompts on first launch
+- [x] Arrow up/down moves selection; view auto-scrolls to keep selection visible
+- [x] Enter: write item to `NSPasteboard.general`, dismiss panel, re-activate previous app, post synthetic `⌘V` via `CGEvent` after 50ms delay
+- [x] `AccessibilityManager`: checks `AXIsProcessTrusted`, prompts on first launch
 
 **Acceptance criteria:** Full loop works — open overlay, arrow to item, press Enter, item is pasted into previous app.
 
@@ -128,7 +128,7 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 1 — Foundation  
-**Milestone:** 1.5 complete; next is 1.6 (Keyboard navigation + paste-back)
+**Milestone:** 1.6 complete; Phase 1 core loop done — manual testing and polish next
 
 ---
 

@@ -16,6 +16,58 @@ final class OverlayStateTests: XCTestCase {
         XCTAssertEqual(state.selectedIndex, 3)
     }
 
+    // MARK: - moveSelection tests
+
+    func testMoveSelectionDownIncrements() {
+        let state = OverlayState()
+        state.items = makeItems(count: 5)
+        state.selectedIndex = 0
+        state.moveSelection(by: 1)
+        XCTAssertEqual(state.selectedIndex, 1)
+    }
+
+    func testMoveSelectionUpDecrements() {
+        let state = OverlayState()
+        state.items = makeItems(count: 5)
+        state.selectedIndex = 2
+        state.moveSelection(by: -1)
+        XCTAssertEqual(state.selectedIndex, 1)
+    }
+
+    func testMoveSelectionClampsAtBottom() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.selectedIndex = 2
+        state.moveSelection(by: 1)
+        XCTAssertEqual(state.selectedIndex, 2)
+    }
+
+    func testMoveSelectionClampsAtTop() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.selectedIndex = 0
+        state.moveSelection(by: -1)
+        XCTAssertEqual(state.selectedIndex, 0)
+    }
+
+    func testMoveSelectionIgnoredWhenEmpty() {
+        let state = OverlayState()
+        state.items = []
+        state.selectedIndex = 0
+        state.moveSelection(by: 1)
+        XCTAssertEqual(state.selectedIndex, 0)
+    }
+
+    private func makeItems(count: Int) -> [HistoryItem] {
+        (0..<count).map { i in
+            HistoryItem(
+                id: Int64(i), kind: .text,
+                text: "item \(i)", imagePath: nil,
+                contentHash: "hash\(i)", createdAt: Date()
+            )
+        }
+    }
+
     func testItemsPublishedOnChange() {
         let state = OverlayState()
         let expectation = XCTestExpectation(description: "items published")

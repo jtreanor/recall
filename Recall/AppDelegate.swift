@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let overlayState = OverlayState()
     private var hotkeyManager: HotkeyManager?
     private(set) var isOverlayVisible = false
+    private var previousApp: NSRunningApplication?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -20,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupOverlayPanel()
         startClipboardMonitor()
         setupHotkey()
+        AccessibilityManager.requestAccessibilityIfNeeded()
     }
 
     private func setupHistoryStore() {
@@ -38,6 +40,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hostingView.autoresizingMask = [.width, .height]
         (panel.contentView as? NSVisualEffectView)?.addSubview(hostingView)
         hostingView.frame = panel.contentView?.bounds ?? .zero
+        panel.overlayState = overlayState
+        panel.onPaste = { [weak self] in self?.pasteSelectedItem() }
         overlayPanel = panel
     }
 
@@ -62,6 +66,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showOverlay() {
+        previousApp = NSWorkspace.shared.frontmostApplication
         isOverlayVisible = true
         overlayState.selectedIndex = 0
         overlayPanel?.show()
@@ -70,6 +75,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func hideOverlay() {
         isOverlayVisible = false
         overlayPanel?.hide()
+    }
+
+    func pasteSelectedItem() {
+        let idx = overlayState.selectedIndex
+        guard idx < overlayState.items.count else { return }
+        let item = overlayState.items[idx]
+        writeToPasteboard(item)
+        let app = previousApp
+        hideOverlay()
+        app?.activate(options: .activateIgnoringOtherApps)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            AppDelegate.postCommandV()
+        }
+    }
+
+    func writeToPasteboard(_ item: HistoryItem) {
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        if item.kind == .text, let text = item.text {
+            pb.setString(text, forType: .string)
+        } else if item.kind == .image, let path = item.imagePath,
+                  let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+            pb.setData(data, forType: .png)
+        }
+    }
+
+    private static func postCommandV() {
+        let src = CGEventSource(stateID: .hidSystemState)
+        let vKey: CGKeyCode = 9 // V
+        let down = CGEvent(keyboardEventSource: src, virtualKey: vKey, keyDown: true)
+        down?.flags = .maskCommand
+        let up = CGEvent(keyboardEventSource: src, virtualKey: vKey, keyDown: false)
+        up?.flags = .maskCommand
+        down?.post(tap: .cgSessionEventTap)
+        up?.post(tap: .cgSessionEventTap)
     }
 
     private func setupHotkey() {
@@ -109,6 +149,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 final class OverlayState: ObservableObject {
     @Published var items: [HistoryItem] = []
     @Published var selectedIndex: Int = 0
+
+    func moveSelection(by delta: Int) {
+        guard !items.isEmpty else { return }
+        selectedIndex = max(0, min(items.count - 1, selectedIndex + delta))
+    }
 }
 
 private struct OverlayRootView: View {
