@@ -212,8 +212,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Validation Phase (between Phase 1 and Phase 2)  
-**Milestone:** Phase 1 complete (all milestones 1.1–1.6 done); starting Session V.1 — Test Suite Stability  
-**Next task:** Run unit test suite 3× on branch `validation/test-stability`; fix any flaky tests; open PR
+**Milestone:** Session V.1 complete (38/38 tests, 3 consecutive runs, zero flakiness, no fixes required); starting Session V.2 — Integration + UI Tests  
+**Next task:** Write integration tests on branch `validation/integration-tests` per Session V.2 spec
 
 ---
 
