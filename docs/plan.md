@@ -212,8 +212,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Validation Phase (between Phase 1 and Phase 2)  
-**Milestone:** Session V.1 complete (38/38 tests, 3 consecutive runs, zero flakiness, no fixes required); starting Session V.2 — Integration + UI Tests  
-**Next task:** Write integration tests on branch `validation/integration-tests` per Session V.2 spec
+**Milestone:** Session V.2 complete (42/42 tests, 3 consecutive runs, zero flakiness; 4 integration tests added, duplicate reordering bug fixed); PR #9 open  
+**Next task:** Session V.3 — Interactive Manual Testing on branch `validation/manual-testing-fixes`
 
 ---
 

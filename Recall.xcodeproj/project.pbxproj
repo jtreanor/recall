@@ -22,6 +22,7 @@
 		AA22BBAA22BBAA22BBAA22BB /* AccessibilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BBAA11BBAA11BBAA11BB /* AccessibilityManager.swift */; };
 		AA44BBAA44BBAA44BBAA44BB /* AccessibilityManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */; };
 		AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */; };
+		BB77CCBB77CCBB77CCBB77CC /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		AA11BBAA11BBAA11BBAA11BB /* AccessibilityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityManager.swift; sourceTree = "<group>"; };
 		AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityManagerTests.swift; sourceTree = "<group>"; };
 		AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateTests.swift; sourceTree = "<group>"; };
+		BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -83,6 +85,7 @@
 				FF22AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift */,
 				AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */,
 				AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */,
+				BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */,
 			);
 			path = RecallTests;
 			sourceTree = "<group>";
@@ -201,6 +204,7 @@
 				FF33AAFFAABBCCDD55667788 /* HotkeyManagerTests.swift in Sources */,
 				AA44BBAA44BBAA44BBAA44BB /* AccessibilityManagerTests.swift in Sources */,
 				AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */,
+				BB77CCBB77CCBB77CCBB77CC /* IntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
