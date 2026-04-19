@@ -79,7 +79,11 @@ final class HistoryStore {
     private func insertText(_ text: String) throws -> HistoryItem? {
         guard let data = text.data(using: .utf8) else { return nil }
         let hash = sha256(data)
-        guard try !hashExists(hash) else { return nil }
+        if try hashExists(hash) {
+            let now = Int64(Date().timeIntervalSince1970)
+            try db.run("UPDATE items SET updated_at = ? WHERE content_hash = ?", .int64(now), .text(hash))
+            return nil
+        }
         let now = Int64(Date().timeIntervalSince1970)
         try db.run(
             "INSERT INTO items (created_at, updated_at, type, text_content, content_hash) VALUES (?,?,?,?,?)",
@@ -93,7 +97,11 @@ final class HistoryStore {
 
     private func insertImage(png: Data) throws -> HistoryItem? {
         let hash = sha256(png)
-        guard try !hashExists(hash) else { return nil }
+        if try hashExists(hash) {
+            let now = Int64(Date().timeIntervalSince1970)
+            try db.run("UPDATE items SET updated_at = ? WHERE content_hash = ?", .int64(now), .text(hash))
+            return nil
+        }
         let filePath = imagesDir.appendingPathComponent("\(hash).png").path
         try png.write(to: URL(fileURLWithPath: filePath))
         let now = Int64(Date().timeIntervalSince1970)

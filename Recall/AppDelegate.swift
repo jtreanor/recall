@@ -56,9 +56,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func handleClipboardItem(_ item: ClipboardItem) {
         guard let store = historyStore else { return }
         do {
-            guard let inserted = try store.insert(item: item) else { return }
+            let inserted = try store.insert(item: item)
             let n = try store.count()
-            print("[Recall] Stored \(inserted.kind) \(inserted.id); history count: \(n)")
+            if let inserted {
+                print("[Recall] Stored \(inserted.kind) \(inserted.id); history count: \(n)")
+            }
             overlayState.items = (try? store.fetchAll()) ?? []
         } catch {
             print("[Recall] Store error: \(error)")
