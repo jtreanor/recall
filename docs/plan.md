@@ -211,9 +211,9 @@ _Only pursue if daily use reveals a genuine gap._
 
 ## Current Status
 
-**Phase:** Validation Phase (between Phase 1 and Phase 2)  
-**Milestone:** Session V.2 complete (42/42 tests, 3 consecutive runs, zero flakiness; 4 integration tests added, duplicate reordering bug fixed); PR #9 open  
-**Next task:** Session V.3 — Interactive Manual Testing on branch `validation/manual-testing-fixes`
+**Phase:** Validation Phase complete — Phase 2 may begin  
+**Milestone:** All three Validation sessions merged (V.1, V.2, V.3). Six bugs found and fixed in V.3.  
+**Next task:** Begin Phase 2 — Polish
 
 ---
 
