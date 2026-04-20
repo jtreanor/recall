@@ -56,7 +56,8 @@ final class IntegrationTests: XCTestCase {
         // Re-insert "alpha" (duplicate). Its updated_at should be bumped, moving it to top.
         Thread.sleep(forTimeInterval: 1.1)
         let dup = try store.insert(item: .text("alpha"))
-        XCTAssertNil(dup, "duplicate insert should return nil")
+        XCTAssertNotNil(dup, "duplicate insert should return the existing item")
+        XCTAssertEqual(dup?.text, "alpha")
 
         let items = try store.fetchAll()
         XCTAssertEqual(items.count, 2, "still exactly two items")

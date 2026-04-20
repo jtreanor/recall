@@ -32,11 +32,14 @@ final class HistoryStoreTests: XCTestCase {
         XCTAssertEqual(all[0].text, "hello")
     }
 
-    func testDuplicateTextSkipped() throws {
+    func testDuplicateTextMovesToTop() throws {
         try store.insert(item: .text("hello"))
-        let second = try store.insert(item: .text("hello"))
-        XCTAssertNil(second)
-        XCTAssertEqual(try store.fetchAll().count, 1)
+        try store.insert(item: .text("world"))
+        let dup = try XCTUnwrap(store.insert(item: .text("hello")))
+        XCTAssertEqual(dup.text, "hello")
+        let all = try store.fetchAll()
+        XCTAssertEqual(all.count, 2)
+        XCTAssertEqual(all[0].text, "hello")
     }
 
     func testFetchAllNewestFirst() throws {
@@ -109,12 +112,16 @@ final class HistoryStoreTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: path))
     }
 
-    func testDuplicateImageSkipped() throws {
+    func testDuplicateImageMovesToTop() throws {
         let png = makePNG()
+        let png2 = makePNG(seed: 99)
         try store.insert(item: .image(png: png, thumbnail: NSImage()))
-        let second = try store.insert(item: .image(png: png, thumbnail: NSImage()))
-        XCTAssertNil(second)
-        XCTAssertEqual(try store.fetchAll().count, 1)
+        try store.insert(item: .image(png: png2, thumbnail: NSImage()))
+        let dup = try XCTUnwrap(store.insert(item: .image(png: png, thumbnail: NSImage())))
+        XCTAssertEqual(dup.kind, .image)
+        let all = try store.fetchAll()
+        XCTAssertEqual(all.count, 2)
+        XCTAssertEqual(all[0].id, dup.id)
     }
 
     func testPruneDeletesImageFiles() throws {

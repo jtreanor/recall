@@ -11,14 +11,15 @@ struct OverlayView: View {
                 LazyVStack(spacing: 2) {
                     ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                         ClipboardItemRow(item: item, isSelected: index == selectedIndex)
-                            .id(index)
+                            .id(item.id)
                             .onTapGesture { selectedIndex = index }
                     }
                 }
                 .padding(8)
             }
             .onChange(of: selectedIndex) { newIndex in
-                withAnimation { proxy.scrollTo(newIndex, anchor: .center) }
+                guard newIndex < items.count else { return }
+                withAnimation { proxy.scrollTo(items[newIndex].id, anchor: .center) }
             }
         }
         .frame(width: 480, height: 400)

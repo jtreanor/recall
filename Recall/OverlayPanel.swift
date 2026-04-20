@@ -5,6 +5,7 @@ final class OverlayPanel: NSPanel {
     var onPaste: (() -> Void)?
     weak var overlayState: OverlayState?
     private var localEventMonitor: Any?
+    private var globalEventMonitor: Any?
 
     init() {
         super.init(
@@ -48,6 +49,9 @@ final class OverlayPanel: NSPanel {
     func show() {
         centerOnMainScreen()
         makeKeyAndOrderFront(nil)
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            self?.hide()
+        }
         localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
             switch event.keyCode {
@@ -70,6 +74,10 @@ final class OverlayPanel: NSPanel {
     }
 
     func hide() {
+        if let monitor = globalEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalEventMonitor = nil
+        }
         if let monitor = localEventMonitor {
             NSEvent.removeMonitor(monitor)
             localEventMonitor = nil

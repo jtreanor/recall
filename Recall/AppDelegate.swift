@@ -6,12 +6,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private let clipboardMonitor = ClipboardMonitor()
     private var cancellables = Set<AnyCancellable>()
-    private var historyStore: HistoryStore?
+    var historyStore: HistoryStore?
 
     private var overlayPanel: OverlayPanel?
     let overlayState = OverlayState()
     private var hotkeyManager: HotkeyManager?
-    private(set) var isOverlayVisible = false
+    var isOverlayVisible = false
     private var previousApp: NSRunningApplication?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -41,6 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         (panel.contentView as? NSVisualEffectView)?.addSubview(hostingView)
         hostingView.frame = panel.contentView?.bounds ?? .zero
         panel.overlayState = overlayState
+        panel.onDismiss = { [weak self] in self?.isOverlayVisible = false }
         panel.onPaste = { [weak self] in self?.pasteSelectedItem() }
         overlayPanel = panel
     }
@@ -71,6 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         previousApp = NSWorkspace.shared.frontmostApplication
         isOverlayVisible = true
         overlayState.selectedIndex = 0
+        overlayState.items = (try? historyStore?.fetchAll()) ?? overlayState.items
         overlayPanel?.show()
     }
 
@@ -87,7 +89,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let app = previousApp
         hideOverlay()
         app?.activate(options: .activateIgnoringOtherApps)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             AppDelegate.postCommandV()
         }
     }

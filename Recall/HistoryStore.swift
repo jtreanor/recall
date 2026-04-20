@@ -79,12 +79,11 @@ final class HistoryStore {
     private func insertText(_ text: String) throws -> HistoryItem? {
         guard let data = text.data(using: .utf8) else { return nil }
         let hash = sha256(data)
-        if try hashExists(hash) {
-            let now = Int64(Date().timeIntervalSince1970)
-            try db.run("UPDATE items SET updated_at = ? WHERE content_hash = ?", .int64(now), .text(hash))
-            return nil
+        let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
+        if let existing = try itemForHash(hash) {
+            try db.run("UPDATE items SET updated_at = ? WHERE id = ?", .int64(now), .int64(existing.id))
+            return existing
         }
-        let now = Int64(Date().timeIntervalSince1970)
         try db.run(
             "INSERT INTO items (created_at, updated_at, type, text_content, content_hash) VALUES (?,?,?,?,?)",
             .int64(now), .int64(now), .text("text"), .text(text), .text(hash)
@@ -97,14 +96,13 @@ final class HistoryStore {
 
     private func insertImage(png: Data) throws -> HistoryItem? {
         let hash = sha256(png)
-        if try hashExists(hash) {
-            let now = Int64(Date().timeIntervalSince1970)
-            try db.run("UPDATE items SET updated_at = ? WHERE content_hash = ?", .int64(now), .text(hash))
-            return nil
+        let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
+        if let existing = try itemForHash(hash) {
+            try db.run("UPDATE items SET updated_at = ? WHERE id = ?", .int64(now), .int64(existing.id))
+            return existing
         }
         let filePath = imagesDir.appendingPathComponent("\(hash).png").path
         try png.write(to: URL(fileURLWithPath: filePath))
-        let now = Int64(Date().timeIntervalSince1970)
         try db.run(
             "INSERT INTO items (created_at, updated_at, type, image_path, content_hash) VALUES (?,?,?,?,?)",
             .int64(now), .int64(now), .text("image"), .text(filePath), .text(hash)
@@ -115,9 +113,12 @@ final class HistoryStore {
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
     }
 
-    private func hashExists(_ hash: String) throws -> Bool {
-        let rows = try db.query("SELECT 1 FROM items WHERE content_hash = ? LIMIT 1", .text(hash))
-        return !rows.isEmpty
+    private func itemForHash(_ hash: String) throws -> HistoryItem? {
+        let rows = try db.query(
+            "SELECT id, created_at, type, text_content, image_path, content_hash FROM items WHERE content_hash = ? LIMIT 1",
+            .text(hash)
+        )
+        return rows.first.flatMap(row(from:))
     }
 
     private func imagePathFor(id: Int64) throws -> String? {
