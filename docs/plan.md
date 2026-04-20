@@ -170,19 +170,158 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 ## Phase 2 — Polish
 
-**Goal:** Feels genuinely good to use. Ready to share.
+**Goal:** Feels genuinely good to use — a Paste-style horizontal card tray that slides up from the bottom of the screen. Ready to share.
 
-- [ ] Animation: overlay fades in/out (100ms, spring easing)
-- [ ] Source-app icon in item row (optional, small)
-- [ ] Configurable hotkey (stored in `UserDefaults`, UI in a minimal settings panel)
-- [ ] History limit preference (50 / 200 / 500)
-- [ ] Clear history action in menu bar
-- [ ] Better empty state in overlay
-- [ ] Keyboard shortcut: `⌘K` to clear filter (if search added)
-- [ ] App icon, menu bar icon (template image)
-- [ ] Notarization and direct download distribution
-- [ ] Scroll momentum and overscan feel polished in list
-- [ ] Graceful degradation when Accessibility permission denied (copy to clipboard, show toast "Copied — paste manually")
+**Reference UI:** Full-width overlay anchored to the bottom of the screen. Items are horizontal cards in a single scrollable row. Vibrancy/blur background, rounded top corners. Slides up on open, slides down on dismiss.
+
+---
+
+### Milestone 2.1 — Clipboard Monitor Efficiency
+
+**Goal:** Eliminate unnecessary CPU wake-ups; pause polling when the machine is asleep or the screen is locked.
+
+- [ ] Bump polling interval from 0.75s to 1.0s (negligible UX impact; saves ~25% timer wakes)
+- [ ] Add `leeway` to `DispatchSourceTimer` (e.g. 200ms) so the OS can coalesce wakes
+- [ ] Observe `NSWorkspace.screensDidSleepNotification` → suspend timer
+- [ ] Observe `NSWorkspace.screensDidWakeNotification` → resume timer
+- [ ] Observe `NSWorkspace.willSleepNotification` / `didWakeNotification` for system sleep/wake
+
+**Notes:** Polling `changeCount` is the only viable approach on macOS — no push API exists. These changes make it power-friendly without sacrificing responsiveness.
+
+**Acceptance criteria:** App polls 1/s while screen is on; timer is fully suspended while screen is off. Unit test: monitor suspends/resumes correctly on sleep/wake notifications.
+
+---
+
+### Milestone 2.2 — Bottom-Anchored Overlay Panel
+
+**Goal:** Replace the centered floating panel with a full-width tray anchored to the bottom of the screen.
+
+- [ ] Resize `OverlayPanel` to full screen width, fixed height (~180pt)
+- [ ] Position: bottom of the main screen, y = 0 (above Dock)
+- [ ] Rounded top corners only (12pt radius via `NSBezierPath` mask or SwiftUI `UnevenRoundedRectangle`)
+- [ ] Background: `NSVisualEffectView` with `.hudWindow` or `.popover` material (system-matched blur)
+- [ ] Window level: `.floating` (sits above normal windows, below menu bar)
+- [ ] Remove old centered-panel sizing logic
+
+**Acceptance criteria:** Panel opens at screen bottom, full width, correct height, blurred background, rounded top corners only.
+
+---
+
+### Milestone 2.3 — Slide Animation
+
+**Goal:** Overlay slides up from below the screen edge; slides down to dismiss.
+
+- [ ] On open: panel starts at `y = -panelHeight`, animates to `y = 0` with a spring (stiffness ~280, damping ~0.82, ~280ms)
+- [ ] On dismiss: reverse — slide to `y = -panelHeight`, then `orderOut`
+- [ ] Use `NSAnimationContext` or `SwiftUI withAnimation` driving an `NSPanel.setFrame` call
+- [ ] Escape and hotkey-toggle both trigger the slide-out dismiss path (not instant `orderOut`)
+
+**Acceptance criteria:** Overlay smoothly slides up; dismisses smoothly down. No flash or jump at start/end of animation.
+
+---
+
+### Milestone 2.4 — Horizontal Card Layout
+
+**Goal:** Replace vertical list with a horizontal row of item cards, matching Paste-style layout.
+
+- [ ] Replace `LazyVStack` + `ScrollView(.vertical)` with `ScrollView(.horizontal)` + `LazyHStack`
+- [ ] Card size: 120×140pt (text items); 120×140pt (image items, thumbnail fills top ~80pt)
+- [ ] Card anatomy (text): small source-app icon (top-left, 16pt), content preview (2–3 lines, truncated), relative timestamp (bottom, caption style)
+- [ ] Card anatomy (image): thumbnail fills top portion; source-app icon + timestamp at bottom
+- [ ] Selected card: subtle scale(1.05) + elevated shadow; non-selected: normal
+- [ ] Update keyboard navigation: arrow-left / arrow-right move selection; Enter pastes
+
+**Acceptance criteria:** Items render as horizontal cards. Arrow keys navigate left/right. Selected card is visually distinct.
+
+---
+
+### Milestone 2.5 — Source App Capture and Display
+
+**Goal:** Record which app was frontmost at copy time; show its icon on each card.
+
+- [ ] In `ClipboardMonitor`: capture `NSWorkspace.shared.frontmostApplication` at the moment of clipboard change detection; record `bundleIdentifier` and `localizedName`
+- [ ] Add `source_bundle_id TEXT` column to the `items` SQLite table (migration: `ALTER TABLE items ADD COLUMN source_bundle_id TEXT`)
+- [ ] `HistoryStore.insert` persists the bundle ID
+- [ ] In `ClipboardItemRow`: resolve `NSWorkspace.shared.icon(forFile:)` or `NSWorkspace.shared.icon(forApp:)` from bundle ID; display as 16pt icon
+- [ ] Fallback: generic document icon if bundle ID is nil or app not found
+
+**Acceptance criteria:** Cards show the icon of the app that copied the item. Existing items (no bundle ID) show fallback icon without crashing.
+
+---
+
+### Milestone 2.6 — Empty State and Visual Refinements
+
+**Goal:** App feels considered and complete even before any items exist.
+
+- [ ] Empty state view inside the overlay: centered icon + "Nothing copied yet" message
+- [ ] Refine card typography: primary content in `.body`, timestamp in `.caption2`, muted color
+- [ ] Subtle card background (e.g. `.thinMaterial` or semi-transparent white/dark) differentiating cards from the panel background
+- [ ] Scroll indicator hidden (`.scrollIndicators(.hidden)`) for cleaner look
+- [ ] Ensure panel height accommodates Dock (detect Dock edge and adjust `y` origin accordingly)
+
+**Acceptance criteria:** Empty state renders correctly. Cards are readable and visually distinct from the panel background.
+
+---
+
+### Milestone 2.7 — App Icon and Menu Bar Icon
+
+**Goal:** Ship with real assets, not placeholders.
+
+- [ ] Menu bar icon: template image (monochrome, 18×18pt @2x) — a simple clipboard or stack glyph
+- [ ] App icon: 1024×1024pt master, exported to all required sizes via `AppIcon.appiconset`
+- [ ] Menu bar icon uses `NSImage(named:)` with `isTemplate = true` so it adapts to light/dark menu bar
+
+**Acceptance criteria:** Menu bar icon appears correctly in both light and dark menu bars. App icon shows in Finder and Launchpad.
+
+---
+
+### Milestone 2.8 — Settings Panel
+
+**Goal:** Users can customize the hotkey and history size without editing plist files.
+
+- [ ] `SettingsWindowController`: plain `NSPanel` (not sheet), opens from menu bar "Settings…" item
+- [ ] Hotkey recorder: click-to-record field that captures the next key combination; persisted in `UserDefaults`
+- [ ] History limit segmented control: 50 / 200 / 500; persisted in `UserDefaults`; `HistoryStore` reads this on prune
+- [ ] "Clear All History" button with confirmation alert
+- [ ] `HotkeyManager` re-registers hotkey when setting changes
+
+**Acceptance criteria:** Hotkey can be changed without relaunch. History limit preference is respected on next prune. Clear history removes all items from both SQLite and the image directory.
+
+---
+
+### Milestone 2.9 — Graceful Accessibility Permission Handling
+
+**Goal:** App remains useful even if Accessibility permission is denied.
+
+- [ ] On Enter with permission denied: write item to clipboard, dismiss overlay, show a brief heads-up (`.bezel`-style toast or `NSUserNotification`) — "Copied — paste manually with ⌘V"
+- [ ] Menu bar: show "⚠ Accessibility required" item when permission is missing; clicking opens System Settings to the Accessibility pane
+- [ ] Do not spam permission prompts; check once at launch and once when the user triggers paste
+
+**Acceptance criteria:** With Accessibility denied, Enter still copies the item and shows a toast. Menu bar warns the user with a clear action.
+
+---
+
+### Milestone 2.10 — Notarization and Distribution
+
+**Goal:** App can be downloaded and run by anyone without Gatekeeper warnings.
+
+- [ ] Confirm Hardened Runtime entitlements are correct (no `com.apple.security.cs.disable-library-validation` unless needed)
+- [ ] `codesign --deep --strict` passes cleanly
+- [ ] `xcrun notarytool submit` succeeds and stapling completes
+- [ ] Create a `.dmg` with the app for direct distribution
+- [ ] Document the notarization steps in `docs/distribution.md`
+
+**Acceptance criteria:** Downloaded `.dmg` opens without Gatekeeper warning on a clean Mac (or Gatekeeper bypass is not required — notarization ticket is stapled).
+
+---
+
+### Phase 2 complete when:
+- Overlay is a bottom-anchored, slide-up horizontal card tray
+- Source app icons appear on all new items
+- App and menu bar icons are real assets
+- Settings panel covers hotkey + history limit + clear
+- Graceful fallback when Accessibility is denied
+- App is notarized and distributable
 
 ---
 
@@ -211,9 +350,9 @@ _Only pursue if daily use reveals a genuine gap._
 
 ## Current Status
 
-**Phase:** Validation Phase complete — Phase 2 may begin  
-**Milestone:** All three Validation sessions merged (V.1, V.2, V.3). Six bugs found and fixed in V.3.  
-**Next task:** Begin Phase 2 — Polish
+**Phase:** Phase 2 — Polish  
+**Milestone:** None started. Validation Phase fully complete (V.1, V.2, V.3 merged).  
+**Next task:** Milestone 2.1 — Clipboard Monitor Efficiency (quick win before UI overhaul)
 
 ---
 
