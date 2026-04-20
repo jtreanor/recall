@@ -180,11 +180,11 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Eliminate unnecessary CPU wake-ups; pause polling when the machine is asleep or the screen is locked.
 
-- [ ] Bump polling interval from 0.75s to 1.0s (negligible UX impact; saves ~25% timer wakes)
-- [ ] Add `leeway` to `DispatchSourceTimer` (e.g. 200ms) so the OS can coalesce wakes
-- [ ] Observe `NSWorkspace.screensDidSleepNotification` → suspend timer
-- [ ] Observe `NSWorkspace.screensDidWakeNotification` → resume timer
-- [ ] Observe `NSWorkspace.willSleepNotification` / `didWakeNotification` for system sleep/wake
+- [x] Bump polling interval from 0.75s to 1.0s (negligible UX impact; saves ~25% timer wakes)
+- [x] Add `leeway` to `DispatchSourceTimer` (e.g. 200ms) so the OS can coalesce wakes
+- [x] Observe `NSWorkspace.screensDidSleepNotification` → suspend timer
+- [x] Observe `NSWorkspace.screensDidWakeNotification` → resume timer
+- [x] Observe `NSWorkspace.willSleepNotification` / `didWakeNotification` for system sleep/wake
 
 **Notes:** Polling `changeCount` is the only viable approach on macOS — no push API exists. These changes make it power-friendly without sacrificing responsiveness.
 
@@ -351,8 +351,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** None started. Validation Phase fully complete (V.1, V.2, V.3 merged).  
-**Next task:** Milestone 2.1 — Clipboard Monitor Efficiency (quick win before UI overhaul)
+**Milestone:** 2.1 complete (PR #11 open). Validation Phase fully complete (V.1, V.2, V.3 merged).  
+**Next task:** Milestone 2.2 — Bottom-Anchored Overlay Panel
 
 ---
 
