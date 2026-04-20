@@ -22,7 +22,7 @@ struct OverlayView: View {
                 withAnimation { proxy.scrollTo(items[newIndex].id, anchor: .center) }
             }
         }
-        .frame(width: 480, height: 400)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.clear)
     }
 }

@@ -196,12 +196,12 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Replace the centered floating panel with a full-width tray anchored to the bottom of the screen.
 
-- [ ] Resize `OverlayPanel` to full screen width, fixed height (~180pt)
-- [ ] Position: bottom of the main screen, y = 0 (above Dock)
-- [ ] Rounded top corners only (12pt radius via `NSBezierPath` mask or SwiftUI `UnevenRoundedRectangle`)
-- [ ] Background: `NSVisualEffectView` with `.hudWindow` or `.popover` material (system-matched blur)
-- [ ] Window level: `.floating` (sits above normal windows, below menu bar)
-- [ ] Remove old centered-panel sizing logic
+- [x] Resize `OverlayPanel` to full screen width, fixed height (~180pt)
+- [x] Position: bottom of the main screen, y = 0 (above Dock)
+- [x] Rounded top corners only (12pt radius via `CALayer.maskedCorners`)
+- [x] Background: `NSVisualEffectView` with `.hudWindow` material (system-matched blur)
+- [x] Window level: `.floating` (sits above normal windows, below menu bar)
+- [x] Remove old centered-panel sizing logic
 
 **Acceptance criteria:** Panel opens at screen bottom, full width, correct height, blurred background, rounded top corners only.
 
@@ -351,8 +351,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.1 complete (PR #11 open). Validation Phase fully complete (V.1, V.2, V.3 merged).  
-**Next task:** Milestone 2.2 — Bottom-Anchored Overlay Panel
+**Milestone:** 2.2 complete. Validation Phase fully complete (V.1, V.2, V.3 merged).  
+**Next task:** Milestone 2.3 — Slide Animation
 
 ---
 

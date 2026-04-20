@@ -1,6 +1,7 @@
 import AppKit
 
 final class OverlayPanel: NSPanel {
+    static let panelHeight: CGFloat = 180
     var onDismiss: (() -> Void)?
     var onPaste: (() -> Void)?
     weak var overlayState: OverlayState?
@@ -20,7 +21,7 @@ final class OverlayPanel: NSPanel {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         backgroundColor = .clear
-        hasShadow = true
+        hasShadow = false
         isOpaque = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
@@ -29,25 +30,26 @@ final class OverlayPanel: NSPanel {
         visual.state = .active
         visual.wantsLayer = true
         visual.layer?.cornerRadius = 12
+        visual.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         visual.layer?.masksToBounds = true
         contentView = visual
     }
 
     override var canBecomeKey: Bool { true }
 
-    func centerOnMainScreen() {
+    func positionAtScreenBottom() {
         guard let screen = NSScreen.main else { return }
-        let sw = screen.visibleFrame.width
-        let sh = screen.visibleFrame.height
-        let pw: CGFloat = 480
-        let ph: CGFloat = 400
-        let ox = screen.visibleFrame.minX + (sw - pw) / 2
-        let oy = screen.visibleFrame.minY + (sh - ph) / 2
-        setFrame(CGRect(x: ox, y: oy, width: pw, height: ph), display: false)
+        let frame = CGRect(
+            x: screen.frame.minX,
+            y: screen.visibleFrame.minY,
+            width: screen.frame.width,
+            height: OverlayPanel.panelHeight
+        )
+        setFrame(frame, display: false)
     }
 
     func show() {
-        centerOnMainScreen()
+        positionAtScreenBottom()
         makeKeyAndOrderFront(nil)
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             self?.hide()
