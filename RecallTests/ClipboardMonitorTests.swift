@@ -94,6 +94,84 @@ final class ClipboardMonitorTests: XCTestCase {
         XCTAssertEqual(count, 1)
     }
 
+    // MARK: - suspend / resume on sleep/wake
+
+    func testSuspendStopsPolling() {
+        monitor.start()
+        monitor.suspend()
+        XCTAssertTrue(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testResumeAfterSuspend() {
+        monitor.start()
+        monitor.suspend()
+        monitor.resume()
+        XCTAssertFalse(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testSuspendIsIdempotent() {
+        monitor.start()
+        monitor.suspend()
+        monitor.suspend()
+        XCTAssertTrue(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testResumeIsIdempotentWhenNotSuspended() {
+        monitor.start()
+        monitor.resume()
+        XCTAssertFalse(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testScreensSleepNotificationSuspendsTimer() {
+        monitor.start()
+        NSWorkspace.shared.notificationCenter.post(
+            name: NSWorkspace.screensDidSleepNotification, object: nil
+        )
+        XCTAssertTrue(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testScreensWakeNotificationResumesTimer() {
+        monitor.start()
+        monitor.suspend()
+        NSWorkspace.shared.notificationCenter.post(
+            name: NSWorkspace.screensDidWakeNotification, object: nil
+        )
+        XCTAssertFalse(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testSystemSleepNotificationSuspendsTimer() {
+        monitor.start()
+        NSWorkspace.shared.notificationCenter.post(
+            name: NSWorkspace.willSleepNotification, object: nil
+        )
+        XCTAssertTrue(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testSystemWakeNotificationResumesTimer() {
+        monitor.start()
+        monitor.suspend()
+        NSWorkspace.shared.notificationCenter.post(
+            name: NSWorkspace.didWakeNotification, object: nil
+        )
+        XCTAssertFalse(monitor.isSuspended)
+        monitor.stop()
+    }
+
+    func testStopWhileSuspendedDoesNotCrash() {
+        monitor.start()
+        monitor.suspend()
+        monitor.stop()
+        XCTAssertFalse(monitor.isSuspended)
+        XCTAssertFalse(monitor.isRunning)
+    }
+
     // MARK: - helpers
 
     private func solidColorImage(size: CGSize) -> NSImage {

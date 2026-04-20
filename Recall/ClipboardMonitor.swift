@@ -12,22 +12,70 @@ final class ClipboardMonitor {
     private let queue = DispatchQueue(label: "com.recall.clipboard", qos: .utility)
     private var timer: DispatchSourceTimer?
     private var lastChangeCount: Int
+    private var sleepWakeObservers: [NSObjectProtocol] = []
+    private(set) var isSuspended = false
+    var isRunning: Bool { timer != nil }
 
     init() {
         lastChangeCount = NSPasteboard.general.changeCount
+        registerSleepWakeObservers()
+    }
+
+    deinit {
+        let nc = NSWorkspace.shared.notificationCenter
+        sleepWakeObservers.forEach { nc.removeObserver($0) }
     }
 
     func start() {
         let t = DispatchSource.makeTimerSource(queue: queue)
-        t.schedule(deadline: .now() + 0.75, repeating: 0.75)
+        t.schedule(deadline: .now() + 1.0, repeating: 1.0, leeway: .milliseconds(200))
         t.setEventHandler { [weak self] in self?.poll() }
         t.resume()
         timer = t
+        isSuspended = false
     }
 
     func stop() {
+        if isSuspended {
+            timer?.resume()
+            isSuspended = false
+        }
         timer?.cancel()
         timer = nil
+    }
+
+    func suspend() {
+        guard !isSuspended, timer != nil else { return }
+        timer?.suspend()
+        isSuspended = true
+    }
+
+    func resume() {
+        guard isSuspended, timer != nil else { return }
+        timer?.resume()
+        isSuspended = false
+    }
+
+    private func registerSleepWakeObservers() {
+        let nc = NSWorkspace.shared.notificationCenter
+        let suspendOn: [NSNotification.Name] = [
+            NSWorkspace.screensDidSleepNotification,
+            NSWorkspace.willSleepNotification
+        ]
+        let resumeOn: [NSNotification.Name] = [
+            NSWorkspace.screensDidWakeNotification,
+            NSWorkspace.didWakeNotification
+        ]
+        for name in suspendOn {
+            sleepWakeObservers.append(
+                nc.addObserver(forName: name, object: nil, queue: nil) { [weak self] _ in self?.suspend() }
+            )
+        }
+        for name in resumeOn {
+            sleepWakeObservers.append(
+                nc.addObserver(forName: name, object: nil, queue: nil) { [weak self] _ in self?.resume() }
+            )
+        }
     }
 
     func poll() {
