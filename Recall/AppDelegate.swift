@@ -6,7 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private let clipboardMonitor = ClipboardMonitor()
     private var cancellables = Set<AnyCancellable>()
-    private var historyStore: HistoryStore?
+    var historyStore: HistoryStore?
 
     private var overlayPanel: OverlayPanel?
     let overlayState = OverlayState()
