@@ -23,6 +23,7 @@
 		AA44BBAA44BBAA44BBAA44BB /* AccessibilityManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */; };
 		AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */; };
 		BB77CCBB77CCBB77CCBB77CC /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */; };
+		DD11EEDD11EEDD11EEDD11EE /* OverlayPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00EEDD00EEDD00EEDD00EE /* OverlayPanelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 		AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityManagerTests.swift; sourceTree = "<group>"; };
 		AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateTests.swift; sourceTree = "<group>"; };
 		BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
+		DD00EEDD00EEDD00EEDD00EE /* OverlayPanelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPanelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -86,6 +88,7 @@
 				AA33BBAA33BBAA33BBAA33BB /* AccessibilityManagerTests.swift */,
 				AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */,
 				BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */,
+				DD00EEDD00EEDD00EEDD00EE /* OverlayPanelTests.swift */,
 			);
 			path = RecallTests;
 			sourceTree = "<group>";
@@ -205,6 +208,7 @@
 				AA44BBAA44BBAA44BBAA44BB /* AccessibilityManagerTests.swift in Sources */,
 				AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */,
 				BB77CCBB77CCBB77CCBB77CC /* IntegrationTests.swift in Sources */,
+				DD11EEDD11EEDD11EEDD11EE /* OverlayPanelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
