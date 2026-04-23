@@ -16,7 +16,7 @@ struct HistoryItem {
 }
 
 final class HistoryStore {
-    static let historyLimit = 500
+    static var historyLimit: Int { SettingsManager.shared.historyLimit }
 
     private let db: Database
     private let imagesDir: URL
@@ -68,6 +68,16 @@ final class HistoryStore {
             }
             try db.run("DELETE FROM items WHERE id = ?", .int64(id))
         }
+    }
+
+    func clearAll() throws {
+        let rows = try db.query("SELECT image_path FROM items WHERE image_path IS NOT NULL")
+        for r in rows {
+            if let path = r["image_path"]?.stringValue {
+                try? FileManager.default.removeItem(atPath: path)
+            }
+        }
+        try db.run("DELETE FROM items")
     }
 
     func count() throws -> Int {

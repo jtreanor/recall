@@ -6,33 +6,36 @@ final class HotkeyManager {
     private var hotkeyRef: EventHotKeyRef?
     private let callback: () -> Void
 
-    // keyCode 9 = V, cmdKey | shiftKey
-    private let keyCode: UInt32 = 9
-    private let modifiers: UInt32 = UInt32(cmdKey | shiftKey)
-
     init(callback: @escaping () -> Void) {
         self.callback = callback
     }
 
     func register() {
-        var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
+        if eventHandler == nil {
+            var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
+            InstallEventHandler(
+                GetApplicationEventTarget(),
+                { _, event, userData -> OSStatus in
+                    guard let userData else { return OSStatus(eventNotHandledErr) }
+                    let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
+                    DispatchQueue.main.async { manager.callback() }
+                    return noErr
+                },
+                1,
+                &eventType,
+                Unmanaged.passUnretained(self).toOpaque(),
+                &eventHandler
+            )
+        }
+        registerHotkey()
+    }
 
-        InstallEventHandler(
-            GetApplicationEventTarget(),
-            { _, event, userData -> OSStatus in
-                guard let userData else { return OSStatus(eventNotHandledErr) }
-                let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
-                DispatchQueue.main.async { manager.callback() }
-                return noErr
-            },
-            1,
-            &eventType,
-            Unmanaged.passUnretained(self).toOpaque(),
-            &eventHandler
-        )
-
-        let hotkeyID = EventHotKeyID(signature: fourCharCode("RCLV"), id: 1)
-        RegisterEventHotKey(keyCode, modifiers, hotkeyID, GetApplicationEventTarget(), 0, &hotkeyRef)
+    func reregister() {
+        if let ref = hotkeyRef {
+            UnregisterEventHotKey(ref)
+            hotkeyRef = nil
+        }
+        registerHotkey()
     }
 
     func unregister() {
@@ -44,6 +47,13 @@ final class HotkeyManager {
             RemoveEventHandler(handler)
             eventHandler = nil
         }
+    }
+
+    private func registerHotkey() {
+        let keyCode = SettingsManager.shared.hotkeyKeyCode
+        let modifiers = SettingsManager.shared.hotkeyModifiers
+        let hotkeyID = EventHotKeyID(signature: fourCharCode("RCLV"), id: 1)
+        RegisterEventHotKey(keyCode, modifiers, hotkeyID, GetApplicationEventTarget(), 0, &hotkeyRef)
     }
 
     deinit {
