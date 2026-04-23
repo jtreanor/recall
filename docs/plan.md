@@ -224,12 +224,12 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Replace vertical list with a horizontal row of item cards, matching Paste-style layout.
 
-- [ ] Replace `LazyVStack` + `ScrollView(.vertical)` with `ScrollView(.horizontal)` + `LazyHStack`
-- [ ] Card size: 120×140pt (text items); 120×140pt (image items, thumbnail fills top ~80pt)
-- [ ] Card anatomy (text): small source-app icon (top-left, 16pt), content preview (2–3 lines, truncated), relative timestamp (bottom, caption style)
-- [ ] Card anatomy (image): thumbnail fills top portion; source-app icon + timestamp at bottom
-- [ ] Selected card: subtle scale(1.05) + elevated shadow; non-selected: normal
-- [ ] Update keyboard navigation: arrow-left / arrow-right move selection; Enter pastes
+- [x] Replace `LazyVStack` + `ScrollView(.vertical)` with `ScrollView(.horizontal)` + `LazyHStack`
+- [x] Card size: 120×140pt (text items); 120×140pt (image items, thumbnail fills top ~80pt)
+- [x] Card anatomy (text): small source-app icon (top-left, 16pt), content preview (2–3 lines, truncated), relative timestamp (bottom, caption style)
+- [x] Card anatomy (image): thumbnail fills top portion; source-app icon + timestamp at bottom
+- [x] Selected card: subtle scale(1.05) + elevated shadow; non-selected: normal
+- [x] Update keyboard navigation: arrow-left / arrow-right move selection; Enter pastes
 
 **Acceptance criteria:** Items render as horizontal cards. Arrow keys navigate left/right. Selected card is visually distinct.
 
@@ -351,8 +351,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.3 complete. Validation Phase fully complete (V.1, V.2, V.3 merged).  
-**Next task:** Milestone 2.4 — Horizontal Card Layout
+**Milestone:** 2.4 complete. Validation Phase fully complete (V.1, V.2, V.3 merged).  
+**Next task:** Milestone 2.5 — Source App Capture and Display
 
 ---
 
