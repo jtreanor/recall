@@ -38,19 +38,33 @@ final class OverlayPanel: NSPanel {
     override var canBecomeKey: Bool { true }
 
     func positionAtScreenBottom() {
-        guard let screen = NSScreen.main else { return }
-        let frame = CGRect(
+        setFrame(visibleFrame(), display: false)
+    }
+
+    // Returns the on-screen resting frame.
+    func visibleFrame() -> CGRect {
+        guard let screen = NSScreen.main else { return .zero }
+        return CGRect(
             x: screen.frame.minX,
             y: screen.visibleFrame.minY,
             width: screen.frame.width,
             height: OverlayPanel.panelHeight
         )
-        setFrame(frame, display: false)
+    }
+
+    // Returns the off-screen starting frame (below the screen edge).
+    func offscreenFrame() -> CGRect {
+        let vf = visibleFrame()
+        return vf.offsetBy(dx: 0, dy: -OverlayPanel.panelHeight)
     }
 
     func show() {
-        positionAtScreenBottom()
+        let target = visibleFrame()
+        let start = offscreenFrame()
+
+        setFrame(start, display: false)
         makeKeyAndOrderFront(nil)
+
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             self?.hide()
         }
@@ -73,9 +87,29 @@ final class OverlayPanel: NSPanel {
                 return event
             }
         }
+
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.28
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            self.animator().setFrame(target, display: true)
+        }
     }
 
     func hide() {
+        removeEventMonitors()
+        onDismiss?()
+
+        let end = offscreenFrame()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.22
+            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            self.animator().setFrame(end, display: true)
+        } completionHandler: {
+            self.orderOut(nil)
+        }
+    }
+
+    private func removeEventMonitors() {
         if let monitor = globalEventMonitor {
             NSEvent.removeMonitor(monitor)
             globalEventMonitor = nil
@@ -84,7 +118,5 @@ final class OverlayPanel: NSPanel {
             NSEvent.removeMonitor(monitor)
             localEventMonitor = nil
         }
-        onDismiss?()
-        orderOut(nil)
     }
 }

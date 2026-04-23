@@ -211,10 +211,10 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Overlay slides up from below the screen edge; slides down to dismiss.
 
-- [ ] On open: panel starts at `y = -panelHeight`, animates to `y = 0` with a spring (stiffness ~280, damping ~0.82, ~280ms)
-- [ ] On dismiss: reverse — slide to `y = -panelHeight`, then `orderOut`
-- [ ] Use `NSAnimationContext` or `SwiftUI withAnimation` driving an `NSPanel.setFrame` call
-- [ ] Escape and hotkey-toggle both trigger the slide-out dismiss path (not instant `orderOut`)
+- [x] On open: panel starts at `y = -panelHeight`, animates to `y = 0` with a spring (stiffness ~280, damping ~0.82, ~280ms)
+- [x] On dismiss: reverse — slide to `y = -panelHeight`, then `orderOut`
+- [x] Use `NSAnimationContext` or `SwiftUI withAnimation` driving an `NSPanel.setFrame` call
+- [x] Escape and hotkey-toggle both trigger the slide-out dismiss path (not instant `orderOut`)
 
 **Acceptance criteria:** Overlay smoothly slides up; dismisses smoothly down. No flash or jump at start/end of animation.
 
@@ -351,8 +351,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.2 complete. Validation Phase fully complete (V.1, V.2, V.3 merged).  
-**Next task:** Milestone 2.3 — Slide Animation
+**Milestone:** 2.3 complete. Validation Phase fully complete (V.1, V.2, V.3 merged).  
+**Next task:** Milestone 2.4 — Horizontal Card Layout
 
 ---
 
