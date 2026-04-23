@@ -49,15 +49,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func startClipboardMonitor() {
         clipboardMonitor.itemPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] item in self?.handleClipboardItem(item) }
+            .sink { [weak self] captured in self?.handleCapturedItem(captured) }
             .store(in: &cancellables)
         clipboardMonitor.start()
     }
 
-    private func handleClipboardItem(_ item: ClipboardItem) {
+    private func handleCapturedItem(_ captured: CapturedItem) {
         guard let store = historyStore else { return }
         do {
-            let inserted = try store.insert(item: item)
+            let inserted = try store.insert(item: captured.item, sourceBundleId: captured.sourceBundleId)
             let n = try store.count()
             if let inserted {
                 print("[Recall] Stored \(inserted.kind) \(inserted.id); history count: \(n)")

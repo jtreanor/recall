@@ -21,7 +21,7 @@ final class AppDelegateTests: XCTestCase {
         let item = HistoryItem(
             id: 1, kind: .text,
             text: "hello paste", imagePath: nil,
-            contentHash: "abc", createdAt: Date()
+            contentHash: "abc", sourceBundleId: nil, createdAt: Date()
         )
         delegate.writeToPasteboard(item)
         XCTAssertEqual(NSPasteboard.general.string(forType: .string), "hello paste")
@@ -31,7 +31,7 @@ final class AppDelegateTests: XCTestCase {
         let item = HistoryItem(
             id: 2, kind: .image,
             text: nil, imagePath: "/nonexistent/path.png",
-            contentHash: "def", createdAt: Date()
+            contentHash: "def", sourceBundleId: nil, createdAt: Date()
         )
         NSPasteboard.general.clearContents()
         delegate.writeToPasteboard(item)

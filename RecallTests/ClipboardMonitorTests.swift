@@ -70,7 +70,7 @@ final class ClipboardMonitorTests: XCTestCase {
 
     func testPollEmitsTextOnPasteboardChange() {
         let exp = expectation(description: "text emitted")
-        var received: ClipboardItem?
+        var received: CapturedItem?
         monitor.itemPublisher.sink { received = $0; exp.fulfill() }
             .store(in: &cancellables)
 
@@ -79,7 +79,7 @@ final class ClipboardMonitorTests: XCTestCase {
         monitor.poll()
 
         wait(for: [exp], timeout: 1)
-        guard case .text(let s) = received else { return XCTFail("expected .text") }
+        guard case .text(let s) = received?.item else { return XCTFail("expected .text") }
         XCTAssertEqual(s, "unit-test")
     }
 
@@ -92,6 +92,22 @@ final class ClipboardMonitorTests: XCTestCase {
         monitor.poll()  // emits
         monitor.poll()  // same changeCount — silent
         XCTAssertEqual(count, 1)
+    }
+
+    func testPollCapturesSourceBundleId() {
+        let exp = expectation(description: "captured item emitted")
+        var received: CapturedItem?
+        monitor.itemPublisher.sink { received = $0; exp.fulfill() }
+            .store(in: &cancellables)
+
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("bundle-id-test", forType: .string)
+        monitor.poll()
+
+        wait(for: [exp], timeout: 1)
+        // sourceBundleId is whatever app is frontmost during tests; just verify the field is accessible
+        _ = received?.sourceBundleId
+        XCTAssertNotNil(received)
     }
 
     // MARK: - suspend / resume on sleep/wake

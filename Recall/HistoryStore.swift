@@ -7,6 +7,7 @@ struct HistoryItem {
     let text: String?
     let imagePath: String?
     let contentHash: String
+    let sourceBundleId: String?
     let createdAt: Date
 
     enum Kind: String {
@@ -36,16 +37,16 @@ final class HistoryStore {
     }
 
     @discardableResult
-    func insert(item: ClipboardItem) throws -> HistoryItem? {
+    func insert(item: ClipboardItem, sourceBundleId: String? = nil) throws -> HistoryItem? {
         switch item {
-        case .text(let s):       return try insertText(s)
-        case .image(let png, _): return try insertImage(png: png)
+        case .text(let s):       return try insertText(s, sourceBundleId: sourceBundleId)
+        case .image(let png, _): return try insertImage(png: png, sourceBundleId: sourceBundleId)
         }
     }
 
     func fetchAll() throws -> [HistoryItem] {
         try db.query(
-            "SELECT id, created_at, type, text_content, image_path, content_hash FROM items ORDER BY updated_at DESC, id DESC"
+            "SELECT id, created_at, type, text_content, image_path, content_hash, source_bundle_id FROM items ORDER BY updated_at DESC, id DESC"
         ).compactMap(row(from:))
     }
 
@@ -76,7 +77,7 @@ final class HistoryStore {
 
     // MARK: - Private
 
-    private func insertText(_ text: String) throws -> HistoryItem? {
+    private func insertText(_ text: String, sourceBundleId: String?) throws -> HistoryItem? {
         guard let data = text.data(using: .utf8) else { return nil }
         let hash = sha256(data)
         let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
@@ -84,17 +85,19 @@ final class HistoryStore {
             try db.run("UPDATE items SET updated_at = ? WHERE id = ?", .int64(now), .int64(existing.id))
             return existing
         }
+        let bundleParam: DBParam = sourceBundleId.map { .text($0) } ?? .null
         try db.run(
-            "INSERT INTO items (created_at, updated_at, type, text_content, content_hash) VALUES (?,?,?,?,?)",
-            .int64(now), .int64(now), .text("text"), .text(text), .text(hash)
+            "INSERT INTO items (created_at, updated_at, type, text_content, content_hash, source_bundle_id) VALUES (?,?,?,?,?,?)",
+            .int64(now), .int64(now), .text("text"), .text(text), .text(hash), bundleParam
         )
         let id = db.lastInsertRowid
         try pruneToLimit(Self.historyLimit)
         return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, contentHash: hash,
+                           sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
     }
 
-    private func insertImage(png: Data) throws -> HistoryItem? {
+    private func insertImage(png: Data, sourceBundleId: String?) throws -> HistoryItem? {
         let hash = sha256(png)
         let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
         if let existing = try itemForHash(hash) {
@@ -103,19 +106,21 @@ final class HistoryStore {
         }
         let filePath = imagesDir.appendingPathComponent("\(hash).png").path
         try png.write(to: URL(fileURLWithPath: filePath))
+        let bundleParam: DBParam = sourceBundleId.map { .text($0) } ?? .null
         try db.run(
-            "INSERT INTO items (created_at, updated_at, type, image_path, content_hash) VALUES (?,?,?,?,?)",
-            .int64(now), .int64(now), .text("image"), .text(filePath), .text(hash)
+            "INSERT INTO items (created_at, updated_at, type, image_path, content_hash, source_bundle_id) VALUES (?,?,?,?,?,?)",
+            .int64(now), .int64(now), .text("image"), .text(filePath), .text(hash), bundleParam
         )
         let id = db.lastInsertRowid
         try pruneToLimit(Self.historyLimit)
         return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, contentHash: hash,
+                           sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
     }
 
     private func itemForHash(_ hash: String) throws -> HistoryItem? {
         let rows = try db.query(
-            "SELECT id, created_at, type, text_content, image_path, content_hash FROM items WHERE content_hash = ? LIMIT 1",
+            "SELECT id, created_at, type, text_content, image_path, content_hash, source_bundle_id FROM items WHERE content_hash = ? LIMIT 1",
             .text(hash)
         )
         return rows.first.flatMap(row(from:))
@@ -137,6 +142,7 @@ final class HistoryStore {
             text: r["text_content"]?.stringValue,
             imagePath: r["image_path"]?.stringValue,
             contentHash: hash,
+            sourceBundleId: r["source_bundle_id"]?.stringValue,
             createdAt: Date(timeIntervalSince1970: TimeInterval(ts))
         )
     }

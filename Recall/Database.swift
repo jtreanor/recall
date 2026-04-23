@@ -92,6 +92,8 @@ final class Database {
         );
         CREATE INDEX IF NOT EXISTS idx_updated ON items(updated_at DESC);
         """)
+        // Additive migration — silently ignored if column already exists
+        try? exec("ALTER TABLE items ADD COLUMN source_bundle_id TEXT")
     }
 
     private func prepare(_ sql: String) throws -> OpaquePointer? {
