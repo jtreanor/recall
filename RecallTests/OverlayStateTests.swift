@@ -68,6 +68,42 @@ final class OverlayStateTests: XCTestCase {
         }
     }
 
+    // MARK: - Horizontal navigation (left/right arrow semantics)
+
+    func testRightArrowAdvancesSelection() {
+        let state = OverlayState()
+        state.items = makeItems(count: 5)
+        state.selectedIndex = 1
+        // Right arrow maps to moveSelection(by: 1)
+        state.moveSelection(by: 1)
+        XCTAssertEqual(state.selectedIndex, 2)
+    }
+
+    func testLeftArrowRetreatSelection() {
+        let state = OverlayState()
+        state.items = makeItems(count: 5)
+        state.selectedIndex = 3
+        // Left arrow maps to moveSelection(by: -1)
+        state.moveSelection(by: -1)
+        XCTAssertEqual(state.selectedIndex, 2)
+    }
+
+    func testRightArrowClampsAtLastCard() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.selectedIndex = 2
+        state.moveSelection(by: 1)
+        XCTAssertEqual(state.selectedIndex, 2)
+    }
+
+    func testLeftArrowClampsAtFirstCard() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.selectedIndex = 0
+        state.moveSelection(by: -1)
+        XCTAssertEqual(state.selectedIndex, 0)
+    }
+
     func testItemsPublishedOnChange() {
         let state = OverlayState()
         let expectation = XCTestExpectation(description: "items published")
