@@ -73,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         previousApp = NSWorkspace.shared.frontmostApplication
         isOverlayVisible = true
         overlayState.selectedIndex = 0
+        try? historyStore?.pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         overlayState.items = (try? historyStore?.fetchAll()) ?? overlayState.items
         overlayPanel?.show()
     }

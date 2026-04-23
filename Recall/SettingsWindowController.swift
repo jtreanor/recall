@@ -38,6 +38,12 @@ struct SettingsManager {
         nonmutating set { defaults.set(newValue, forKey: "historyLimit") }
     }
 
+    // 0 = never expire
+    var itemMaxAgeSecs: Int {
+        get { defaults.integer(forKey: "itemMaxAgeSecs") } // 0 when unset = never
+        nonmutating set { defaults.set(newValue, forKey: "itemMaxAgeSecs") }
+    }
+
     func setHotkey(keyCode: UInt32, modifiers: UInt32) {
         self.hotkeyKeyCode = keyCode
         self.hotkeyModifiers = modifiers
@@ -52,7 +58,7 @@ final class SettingsWindowController: NSWindowController {
 
     convenience init() {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 340, height: 220),
+            contentRect: NSRect(x: 0, y: 0, width: 340, height: 265),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -85,6 +91,7 @@ struct SettingsView: View {
     @State private var keyCode: UInt32 = SettingsManager.shared.hotkeyKeyCode
     @State private var modifiers: UInt32 = SettingsManager.shared.hotkeyModifiers
     @State private var historyLimit: Int = SettingsManager.shared.historyLimit
+    @State private var maxAgeSecs: Int = SettingsManager.shared.itemMaxAgeSecs
     @State private var showClearConfirm = false
 
     var body: some View {
@@ -111,6 +118,22 @@ struct SettingsView: View {
                 .frame(width: 160)
                 .onChange(of: historyLimit) { newValue in
                     SettingsManager.shared.historyLimit = newValue
+                }
+            }
+
+            // Item expiry row
+            HStack {
+                Text("Item Expiry")
+                    .frame(width: 130, alignment: .leading)
+                Picker("", selection: $maxAgeSecs) {
+                    Text("Never").tag(0)
+                    Text("1 Day").tag(86_400)
+                    Text("1 Week").tag(604_800)
+                    Text("1 Month").tag(2_592_000)
+                }
+                .frame(width: 160)
+                .onChange(of: maxAgeSecs) { newValue in
+                    SettingsManager.shared.itemMaxAgeSecs = newValue
                 }
             }
 

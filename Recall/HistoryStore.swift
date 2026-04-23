@@ -70,6 +70,22 @@ final class HistoryStore {
         }
     }
 
+    func pruneExpired(_ maxAgeSecs: Int) throws {
+        guard maxAgeSecs > 0 else { return }
+        let cutoff = Int64((Date().timeIntervalSince1970 - TimeInterval(maxAgeSecs)) * 1_000_000)
+        let rows = try db.query(
+            "SELECT id, image_path FROM items WHERE updated_at < ?", .int64(cutoff)
+        )
+        for r in rows {
+            if let path = r["image_path"]?.stringValue {
+                try? FileManager.default.removeItem(atPath: path)
+            }
+            if let id = r["id"]?.int64Value {
+                try db.run("DELETE FROM items WHERE id = ?", .int64(id))
+            }
+        }
+    }
+
     func clearAll() throws {
         let rows = try db.query("SELECT image_path FROM items WHERE image_path IS NOT NULL")
         for r in rows {
@@ -102,6 +118,7 @@ final class HistoryStore {
         )
         let id = db.lastInsertRowid
         try pruneToLimit(Self.historyLimit)
+        try pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, contentHash: hash,
                            sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
@@ -123,6 +140,7 @@ final class HistoryStore {
         )
         let id = db.lastInsertRowid
         try pruneToLimit(Self.historyLimit)
+        try pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, contentHash: hash,
                            sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
@@ -155,6 +173,11 @@ final class HistoryStore {
             sourceBundleId: r["source_bundle_id"]?.stringValue,
             createdAt: Date(timeIntervalSince1970: TimeInterval(ts))
         )
+    }
+
+    // Sets updated_at on all rows — used in tests to simulate aged items.
+    func backdateAll(to timestamp: Int64) throws {
+        try db.run("UPDATE items SET updated_at = ?", .int64(timestamp))
     }
 
     private func sha256(_ data: Data) -> String {

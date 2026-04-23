@@ -57,6 +57,17 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(manager.historyLimit, 200)
     }
 
+    func testDefaultItemMaxAgeSecs() {
+        let manager = makeManager()
+        XCTAssertEqual(manager.itemMaxAgeSecs, 0) // 0 = never
+    }
+
+    func testSaveAndReadItemMaxAgeSecs() {
+        let manager = makeManager()
+        manager.itemMaxAgeSecs = 86_400
+        XCTAssertEqual(manager.itemMaxAgeSecs, 86_400)
+    }
+
     func testSetHotkey() {
         let manager = makeManager()
         manager.setHotkey(keyCode: 12, modifiers: UInt32(cmdKey))
@@ -107,6 +118,42 @@ final class HistoryStoreClearAllTests: XCTestCase {
     func testClearAllOnEmptyStoreIsNoop() throws {
         XCTAssertNoThrow(try store.clearAll())
         XCTAssertEqual(try store.count(), 0)
+    }
+
+    func testPruneExpiredRemovesOldItems() throws {
+        // Insert an item then back-date it beyond the cutoff
+        try store.insert(item: .text("old"))
+        backdateAllItems(by: 200)
+        try store.insert(item: .text("new"))
+        // Prune items older than 100s; "old" is 200s old, "new" is fresh
+        try store.pruneExpired(100)
+        XCTAssertEqual(try store.count(), 1)
+        let remaining = try store.fetchAll()
+        XCTAssertEqual(remaining.first?.text, "new")
+    }
+
+    func testPruneExpiredWithZeroIsNoop() throws {
+        try store.insert(item: .text("item"))
+        backdateAllItems(by: 9999)
+        try store.pruneExpired(0) // 0 = never expire
+        XCTAssertEqual(try store.count(), 1)
+    }
+
+    func testPruneExpiredRemovesImageFiles() throws {
+        let png = makePNG()
+        let thumb = NSImage(size: CGSize(width: 2, height: 2))
+        try store.insert(item: .image(png: png, thumbnail: thumb))
+        backdateAllItems(by: 200)
+        try store.pruneExpired(100)
+        XCTAssertEqual(try store.count(), 0)
+        let files = try FileManager.default.contentsOfDirectory(atPath: imagesDir.path)
+        XCTAssertTrue(files.isEmpty)
+    }
+
+    // Rewrite updated_at of every row to (now - offsetSeconds) * 1_000_000
+    private func backdateAllItems(by offsetSeconds: TimeInterval) {
+        let ts = Int64((Date().timeIntervalSince1970 - offsetSeconds) * 1_000_000)
+        try? store.backdateAll(to: ts)
     }
 
     // MARK: - Helpers
