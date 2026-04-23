@@ -41,6 +41,12 @@
 - Wait for review and merge; do not self-merge
 - Commit messages: imperative mood, short subject line
 
+## Xcode project generation
+- `project.yml` is the source of truth — never edit `Recall.xcodeproj/project.pbxproj` directly
+- After adding or removing Swift files, run `xcodegen generate` to regenerate the project
+- New files under `Recall/` or `RecallTests/` are picked up automatically (glob source pattern)
+- Always commit the regenerated `Recall.xcodeproj` alongside any new source files
+
 ## Distribution
 - Target: direct distribution (notarized), not Mac App Store
 - No sandbox; Hardened Runtime enabled

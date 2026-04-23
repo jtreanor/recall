@@ -281,11 +281,11 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Users can customize the hotkey and history size without editing plist files.
 
-- [ ] `SettingsWindowController`: plain `NSPanel` (not sheet), opens from menu bar "Settings…" item
-- [ ] Hotkey recorder: click-to-record field that captures the next key combination; persisted in `UserDefaults`
-- [ ] History limit segmented control: 50 / 200 / 500; persisted in `UserDefaults`; `HistoryStore` reads this on prune
-- [ ] "Clear All History" button with confirmation alert
-- [ ] `HotkeyManager` re-registers hotkey when setting changes
+- [x] `SettingsWindowController`: plain `NSPanel` (not sheet), opens from menu bar "Settings…" item
+- [x] Hotkey recorder: click-to-record field that captures the next key combination; persisted in `UserDefaults`
+- [x] History limit segmented control: 50 / 200 / 500; persisted in `UserDefaults`; `HistoryStore` reads this on prune
+- [x] "Clear All History" button with confirmation alert
+- [x] `HotkeyManager` re-registers hotkey when setting changes
 
 **Acceptance criteria:** Hotkey can be changed without relaunch. History limit preference is respected on next prune. Clear history removes all items from both SQLite and the image directory.
 
@@ -353,8 +353,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.7 complete.  
-**Next task:** Milestone 2.8 — Settings Panel
+**Milestone:** 2.8 complete.  
+**Next task:** Milestone 2.9 — Graceful Accessibility Permission Handling
 
 ---
 

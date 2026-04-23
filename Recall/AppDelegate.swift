@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hotkeyManager: HotkeyManager?
     var isOverlayVisible = false
     private var previousApp: NSRunningApplication?
+    private var settingsWindowController: SettingsWindowController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -72,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         previousApp = NSWorkspace.shared.frontmostApplication
         isOverlayVisible = true
         overlayState.selectedIndex = 0
+        try? historyStore?.pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         overlayState.items = (try? historyStore?.fetchAll()) ?? overlayState.items
         overlayPanel?.show()
     }
@@ -140,6 +142,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Show Recall", action: #selector(showRecall), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Quit Recall", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
@@ -147,6 +150,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func showRecall() {
         showOverlay()
+    }
+
+    @objc private func openSettings() {
+        if settingsWindowController == nil {
+            let controller = SettingsWindowController()
+            controller.configureContent(
+                onHotkeyChanged: { [weak self] in self?.hotkeyManager?.reregister() },
+                onClearHistory: { [weak self] in self?.clearHistory() }
+            )
+            settingsWindowController = controller
+        }
+        settingsWindowController?.show()
+    }
+
+    private func clearHistory() {
+        do {
+            try historyStore?.clearAll()
+            overlayState.items = []
+        } catch {
+            print("[Recall] Failed to clear history: \(error)")
+        }
     }
 
     @objc private func quitApp() {
