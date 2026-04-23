@@ -269,9 +269,9 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Ship with real assets, not placeholders.
 
-- [ ] Menu bar icon: template image (monochrome, 18×18pt @2x) — a simple clipboard or stack glyph
-- [ ] App icon: 1024×1024pt master, exported to all required sizes via `AppIcon.appiconset`
-- [ ] Menu bar icon uses `NSImage(named:)` with `isTemplate = true` so it adapts to light/dark menu bar
+- [x] Menu bar icon: template image (monochrome, 18×18pt @2x) — a simple clipboard or stack glyph
+- [x] App icon: 1024×1024pt master, exported to all required sizes via `AppIcon.appiconset`
+- [x] Menu bar icon uses `NSImage(named:)` with `isTemplate = true` so it adapts to light/dark menu bar
 
 **Acceptance criteria:** Menu bar icon appears correctly in both light and dark menu bars. App icon shows in Finder and Launchpad.
 
@@ -353,8 +353,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.6 complete.  
-**Next task:** Milestone 2.7 — App Icon and Menu Bar Icon
+**Milestone:** 2.7 complete.  
+**Next task:** Milestone 2.8 — Settings Panel
 
 ---
 

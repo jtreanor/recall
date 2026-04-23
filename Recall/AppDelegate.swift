@@ -133,8 +133,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         guard let button = statusItem?.button else { return }
-        button.image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: "Recall")
-        button.image?.isTemplate = true
+        if let icon = NSImage(named: "MenuBarIcon") {
+            icon.isTemplate = true
+            button.image = icon
+        }
 
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Show Recall", action: #selector(showRecall), keyEquivalent: ""))

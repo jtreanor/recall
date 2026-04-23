@@ -28,3 +28,17 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     entitlements:
       path: Recall/Recall.entitlements
+
+  RecallTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - RecallTests
+    dependencies:
+      - target: Recall
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.recall.app.tests
+        SWIFT_VERSION: 5.9
+        GENERATE_INFOPLIST_FILE: YES
