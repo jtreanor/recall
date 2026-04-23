@@ -61,9 +61,9 @@ struct ClipboardItemCard: View {
 
     private var textCardContent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(systemName: "doc.text")
-                .font(.system(size: 13))
-                .foregroundStyle(.tertiary)
+            Image(nsImage: appIcon(for: item.sourceBundleId))
+                .resizable()
+                .frame(width: 16, height: 16)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 5)
 
@@ -100,9 +100,9 @@ struct ClipboardItemCard: View {
             .clipped()
 
             HStack {
-                Image(systemName: "photo")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
+                Image(nsImage: appIcon(for: item.sourceBundleId))
+                    .resizable()
+                    .frame(width: 16, height: 16)
                 Spacer()
                 Text(relativeTimestamp(item.createdAt))
                     .font(.caption2)
@@ -112,6 +112,14 @@ struct ClipboardItemCard: View {
             .padding(.vertical, 6)
         }
         .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func appIcon(for bundleId: String?) -> NSImage {
+        if let bundleId,
+           let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
+            return NSWorkspace.shared.icon(forFile: url.path)
+        }
+        return NSImage(systemSymbolName: "doc", accessibilityDescription: nil) ?? NSImage()
     }
 
     private func relativeTimestamp(_ date: Date) -> String {

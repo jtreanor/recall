@@ -28,7 +28,7 @@ final class IntegrationTests: XCTestCase {
         let monitor = ClipboardMonitor()
         var cancellables = Set<AnyCancellable>()
         monitor.itemPublisher
-            .sink { [weak self] item in try? self?.store.insert(item: item) }
+            .sink { [weak self] captured in try? self?.store.insert(item: captured.item, sourceBundleId: captured.sourceBundleId) }
             .store(in: &cancellables)
 
         NSPasteboard.general.clearContents()

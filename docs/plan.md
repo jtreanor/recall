@@ -241,11 +241,11 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** Record which app was frontmost at copy time; show its icon on each card.
 
-- [ ] In `ClipboardMonitor`: capture `NSWorkspace.shared.frontmostApplication` at the moment of clipboard change detection; record `bundleIdentifier` and `localizedName`
-- [ ] Add `source_bundle_id TEXT` column to the `items` SQLite table (migration: `ALTER TABLE items ADD COLUMN source_bundle_id TEXT`)
-- [ ] `HistoryStore.insert` persists the bundle ID
-- [ ] In `ClipboardItemRow`: resolve `NSWorkspace.shared.icon(forFile:)` or `NSWorkspace.shared.icon(forApp:)` from bundle ID; display as 16pt icon
-- [ ] Fallback: generic document icon if bundle ID is nil or app not found
+- [x] In `ClipboardMonitor`: capture `NSWorkspace.shared.frontmostApplication` at the moment of clipboard change detection; record `bundleIdentifier` and `localizedName`
+- [x] Add `source_bundle_id TEXT` column to the `items` SQLite table (migration: `ALTER TABLE items ADD COLUMN source_bundle_id TEXT`)
+- [x] `HistoryStore.insert` persists the bundle ID
+- [x] In `ClipboardItemRow`: resolve `NSWorkspace.shared.icon(forFile:)` or `NSWorkspace.shared.icon(forApp:)` from bundle ID; display as 16pt icon
+- [x] Fallback: generic document icon if bundle ID is nil or app not found
 
 **Acceptance criteria:** Cards show the icon of the app that copied the item. Existing items (no bundle ID) show fallback icon without crashing.
 
@@ -353,8 +353,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.4 complete. Validation Phase fully complete (V.1, V.2, V.3 merged).  
-**Next task:** Milestone 2.5 — Source App Capture and Display
+**Milestone:** 2.5 complete.  
+**Next task:** Milestone 2.6 — Empty State and Visual Refinements
 
 ---
 

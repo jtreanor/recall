@@ -6,8 +6,13 @@ enum ClipboardItem {
     case image(png: Data, thumbnail: NSImage)
 }
 
+struct CapturedItem {
+    let item: ClipboardItem
+    let sourceBundleId: String?
+}
+
 final class ClipboardMonitor {
-    let itemPublisher = PassthroughSubject<ClipboardItem, Never>()
+    let itemPublisher = PassthroughSubject<CapturedItem, Never>()
 
     private let queue = DispatchQueue(label: "com.recall.clipboard", qos: .utility)
     private var timer: DispatchSourceTimer?
@@ -84,8 +89,10 @@ final class ClipboardMonitor {
         guard count != lastChangeCount else { return }
         lastChangeCount = count
 
+        let bundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+
         if let text = pb.string(forType: .string), !text.isEmpty {
-            itemPublisher.send(.text(text))
+            itemPublisher.send(CapturedItem(item: .text(text), sourceBundleId: bundleId))
             return
         }
 
@@ -94,7 +101,7 @@ final class ClipboardMonitor {
                   let image = NSImage(data: data) else { continue }
             guard let png = makePNG(from: image),
                   let thumb = makeThumbnail(from: image) else { return }
-            itemPublisher.send(.image(png: png, thumbnail: thumb))
+            itemPublisher.send(CapturedItem(item: .image(png: png, thumbnail: thumb), sourceBundleId: bundleId))
             return
         }
     }

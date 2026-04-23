@@ -141,6 +141,27 @@ final class HistoryStoreTests: XCTestCase {
         }
     }
 
+    // MARK: - sourceBundleId
+
+    func testInsertTextPersistsBundleId() throws {
+        try store.insert(item: .text("bundle test"), sourceBundleId: "com.apple.finder")
+        let all = try store.fetchAll()
+        XCTAssertEqual(all[0].sourceBundleId, "com.apple.finder")
+    }
+
+    func testInsertTextNilBundleIdIsNil() throws {
+        try store.insert(item: .text("no bundle"))
+        let all = try store.fetchAll()
+        XCTAssertNil(all[0].sourceBundleId)
+    }
+
+    func testInsertImagePersistsBundleId() throws {
+        let png = makePNG()
+        try store.insert(item: .image(png: png, thumbnail: NSImage()), sourceBundleId: "com.apple.safari")
+        let all = try store.fetchAll()
+        XCTAssertEqual(all[0].sourceBundleId, "com.apple.safari")
+    }
+
     // MARK: - count
 
     func testCountMatchesFetchAll() throws {

@@ -63,7 +63,7 @@ final class OverlayStateTests: XCTestCase {
             HistoryItem(
                 id: Int64(i), kind: .text,
                 text: "item \(i)", imagePath: nil,
-                contentHash: "hash\(i)", createdAt: Date()
+                contentHash: "hash\(i)", sourceBundleId: nil, createdAt: Date()
             )
         }
     }
@@ -116,7 +116,7 @@ final class OverlayStateTests: XCTestCase {
         let item = HistoryItem(
             id: 1, kind: .text,
             text: "hello", imagePath: nil,
-            contentHash: "abc", createdAt: Date()
+            contentHash: "abc", sourceBundleId: nil, createdAt: Date()
         )
         state.items = [item]
 
