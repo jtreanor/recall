@@ -87,9 +87,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let item = overlayState.items[idx]
         writeToPasteboard(item)
         let app = previousApp
-        hideOverlay()
+        // Activate before starting hide animation so the previous app has
+        // the full animation duration (~220ms) to take focus before ⌘V fires.
         app?.activate(options: .activateIgnoringOtherApps)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        hideOverlay()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             AppDelegate.postCommandV()
         }
     }

@@ -233,6 +233,8 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Acceptance criteria:** Items render as horizontal cards. Arrow keys navigate left/right. Selected card is visually distinct.
 
+**Manual testing note (2026-04-23):** Tested after 2.4 landed. Paste-back was broken — the M2.3 slide animation (220ms) meant ⌘V fired while the panel was still on screen. Fixed by calling `activate()` before the animation starts and posting ⌘V at 180ms (after the animation, now 150ms). Both text and image paste confirmed working in TextEdit and Terminal.
+
 ---
 
 ### Milestone 2.5 — Source App Capture and Display

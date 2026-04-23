@@ -101,7 +101,7 @@ final class OverlayPanel: NSPanel {
 
         let end = offscreenFrame()
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.22
+            context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             self.animator().setFrame(end, display: true)
         } completionHandler: {
