@@ -74,10 +74,10 @@ final class OverlayPanel: NSPanel {
             case 53: // Escape
                 self.hide()
                 return nil
-            case 125: // Down arrow
+            case 124: // Right arrow
                 self.overlayState?.moveSelection(by: 1)
                 return nil
-            case 126: // Up arrow
+            case 123: // Left arrow
                 self.overlayState?.moveSelection(by: -1)
                 return nil
             case 36, 76: // Return, Enter (numpad)
