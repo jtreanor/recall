@@ -24,6 +24,7 @@
 		AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */; };
 		BB77CCBB77CCBB77CCBB77CC /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */; };
 		DD11EEDD11EEDD11EEDD11EE /* OverlayPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00EEDD00EEDD00EEDD00EE /* OverlayPanelTests.swift */; };
+		EE77FFEE77FFEE77FFEE77FF /* OverlayViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE66FFEE66FFEE66FFEE66FF /* OverlayViewTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateTests.swift; sourceTree = "<group>"; };
 		BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
 		DD00EEDD00EEDD00EEDD00EE /* OverlayPanelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPanelTests.swift; sourceTree = "<group>"; };
+		EE66FFEE66FFEE66FFEE66FF /* OverlayViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayViewTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -89,6 +91,7 @@
 				AA66BBAA66BBAA66BBAA66BB /* AppDelegateTests.swift */,
 				BB88CCBB88CCBB88CCBB88CC /* IntegrationTests.swift */,
 				DD00EEDD00EEDD00EEDD00EE /* OverlayPanelTests.swift */,
+				EE66FFEE66FFEE66FFEE66FF /* OverlayViewTests.swift */,
 			);
 			path = RecallTests;
 			sourceTree = "<group>";
@@ -209,6 +212,7 @@
 				AA55BBAA55BBAA55BBAA55BB /* AppDelegateTests.swift in Sources */,
 				BB77CCBB77CCBB77CCBB77CC /* IntegrationTests.swift in Sources */,
 				DD11EEDD11EEDD11EEDD11EE /* OverlayPanelTests.swift in Sources */,
+				EE77FFEE77FFEE77FFEE77FF /* OverlayViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

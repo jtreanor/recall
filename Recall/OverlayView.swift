@@ -6,26 +6,44 @@ struct OverlayView: View {
     @Binding var selectedIndex: Int
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 10) {
-                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                        ClipboardItemCard(item: item, isSelected: index == selectedIndex)
-                            .id(item.id)
-                            .onTapGesture { selectedIndex = index }
+        if items.isEmpty {
+            EmptyStateView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 10) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                            ClipboardItemCard(item: item, isSelected: index == selectedIndex)
+                                .id(item.id)
+                                .onTapGesture { selectedIndex = index }
+                        }
                     }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 14)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 14)
+                .scrollIndicators(.hidden)
+                .onChange(of: selectedIndex) { newIndex in
+                    guard newIndex < items.count else { return }
+                    withAnimation { proxy.scrollTo(items[newIndex].id, anchor: .center) }
+                }
             }
-            .scrollIndicators(.hidden)
-            .onChange(of: selectedIndex) { newIndex in
-                guard newIndex < items.count else { return }
-                withAnimation { proxy.scrollTo(items[newIndex].id, anchor: .center) }
-            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.clear)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.clear)
+    }
+}
+
+struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "clipboard")
+                .font(.system(size: 28, weight: .light))
+                .foregroundStyle(.tertiary)
+            Text("Nothing copied yet")
+                .font(.body)
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
@@ -39,7 +57,7 @@ struct ClipboardItemCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .fill(.regularMaterial)
+                .fill(.thinMaterial)
                 .shadow(color: isSelected ? .black.opacity(0.35) : .black.opacity(0.12),
                         radius: isSelected ? 10 : 4,
                         y: isSelected ? 4 : 2)
@@ -68,7 +86,7 @@ struct ClipboardItemCard: View {
                 .padding(.bottom, 5)
 
             Text(item.text ?? "")
-                .font(.system(size: 11))
+                .font(.body)
                 .foregroundStyle(.primary)
                 .lineLimit(4)
                 .truncationMode(.tail)

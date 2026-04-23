@@ -255,11 +255,11 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** App feels considered and complete even before any items exist.
 
-- [ ] Empty state view inside the overlay: centered icon + "Nothing copied yet" message
-- [ ] Refine card typography: primary content in `.body`, timestamp in `.caption2`, muted color
-- [ ] Subtle card background (e.g. `.thinMaterial` or semi-transparent white/dark) differentiating cards from the panel background
-- [ ] Scroll indicator hidden (`.scrollIndicators(.hidden)`) for cleaner look
-- [ ] Ensure panel height accommodates Dock (detect Dock edge and adjust `y` origin accordingly)
+- [x] Empty state view inside the overlay: centered icon + "Nothing copied yet" message
+- [x] Refine card typography: primary content in `.body`, timestamp in `.caption2`, muted color
+- [x] Subtle card background (`.thinMaterial`) differentiating cards from the panel background (`.hudWindow`)
+- [x] Scroll indicator hidden (`.scrollIndicators(.hidden)`) for cleaner look
+- [x] Ensure panel height accommodates Dock (uses `screen.visibleFrame.minY` — already handled)
 
 **Acceptance criteria:** Empty state renders correctly. Cards are readable and visually distinct from the panel background.
 
@@ -353,8 +353,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.5 complete.  
-**Next task:** Milestone 2.6 — Empty State and Visual Refinements
+**Milestone:** 2.6 complete.  
+**Next task:** Milestone 2.7 — App Icon and Menu Bar Icon
 
 ---
 
