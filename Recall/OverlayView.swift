@@ -20,7 +20,8 @@ struct OverlayView: View {
                         }
                     }
                     .padding(.horizontal, 14)
-                    .padding(.vertical, 14)
+                    .padding(.bottom, 12)
+                    .padding(.top, 6)
                 }
                 .scrollIndicators(.hidden)
                 .onChange(of: selectedIndex) { newIndex in
@@ -51,8 +52,8 @@ struct ClipboardItemCard: View {
     let item: HistoryItem
     let isSelected: Bool
 
-    private static let cardWidth: CGFloat = 120
-    private static let cardHeight: CGFloat = 140
+    private static let cardWidth: CGFloat = 150
+    private static let cardHeight: CGFloat = 150
 
     var body: some View {
         ZStack {
@@ -69,8 +70,7 @@ struct ClipboardItemCard: View {
             }
         }
         .frame(width: Self.cardWidth, height: Self.cardHeight)
-        .scaleEffect(isSelected ? 1.05 : 1.0)
-        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isSelected)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)
                 .stroke(isSelected ? Color.accentColor.opacity(0.7) : Color.clear, lineWidth: 1.5)

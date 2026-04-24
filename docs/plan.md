@@ -303,7 +303,21 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 ---
 
-### Milestone 2.10 — Notarization and Distribution
+### Milestone 2.10 — UI Polish (card layout, timestamps, image clipping)
+
+**Goal:** Fix visual and functional rough edges surfaced during daily use.
+
+- [ ] **Timestamp fix:** `createdAt` was stored as microseconds but converted back as seconds (dates far in future → always "just now"). Fix: divide stored `Int64` by 1,000,000 when constructing `Date` in `row(from:)`, `insertText`, and `insertImage`
+- [ ] **Image overflow:** Images with `.fill` escaped card borders. Fix: add `.clipShape(RoundedRectangle(cornerRadius: 10))` to the card's outer `.frame` so all content is masked to the card shape
+- [ ] **Card size:** Increase card dimensions from 120×140 to 150×150 to reduce cramping
+- [ ] **Remove scale on selection:** Drop `.scaleEffect(1.05)` — the highlight border is sufficient visual feedback
+- [ ] **Reduce top gap:** Change `.padding(.vertical, 14)` to `.padding(.bottom, 12).padding(.top, 6)` and shrink panel height from 180 to 172 to eliminate the unused gap at the top of the tray
+
+**Acceptance criteria:** Timestamps show correct relative age (e.g. "13m ago", "2h ago"). Images are fully contained within their card. Cards feel spacious. Selected card shows only the accent border highlight, no size change. The tray has minimal dead space above the cards.
+
+---
+
+### Milestone 2.11 — Notarization and Distribution
 
 **Goal:** App can be downloaded and run by anyone without Gatekeeper warnings.
 
@@ -323,6 +337,7 @@ Build the app and walk through a manual checklist interactively. Each step below
 - App and menu bar icons are real assets
 - Settings panel covers hotkey + history limit + clear
 - Graceful fallback when Accessibility is denied
+- UI polish: correct timestamps, image clipping, comfortable card sizing
 - App is notarized and distributable
 
 ---
@@ -353,8 +368,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.9 complete.  
-**Next task:** Milestone 2.10 — Notarization and Distribution
+**Milestone:** 2.10 in progress (UI polish fixes).  
+**Next task:** Milestone 2.11 — Notarization and Distribution
 
 ---
 
