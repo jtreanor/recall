@@ -68,6 +68,12 @@ final class IntegrationTests: XCTestCase {
     // MARK: - History cap
 
     func testHistoryCap_501Items_ResultsInExactly500() throws {
+        // Override any user-configured limit so the test always runs against 500.
+        let defaults = UserDefaults.standard
+        let savedLimit = defaults.integer(forKey: "historyLimit")
+        defaults.set(500, forKey: "historyLimit")
+        defer { defaults.set(savedLimit, forKey: "historyLimit") }
+
         for i in 0..<501 {
             try store.insert(item: .text("item \(i)"))
         }

@@ -14,6 +14,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var isOverlayVisible = false
     private var previousApp: NSRunningApplication?
     private var settingsWindowController: SettingsWindowController?
+    private let toastController = ToastWindowController()
+    private var accessibilityWarningItem: NSMenuItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -88,6 +90,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard idx < overlayState.items.count else { return }
         let item = overlayState.items[idx]
         writeToPasteboard(item)
+
+        guard AccessibilityManager.isAccessibilityTrusted() else {
+            hideOverlay()
+            toastController.show(message: "Copied — paste manually with ⌘V")
+            return
+        }
+
         let app = previousApp
         // Activate before starting hide animation so the previous app has
         // the full animation duration (~220ms) to take focus before ⌘V fires.
@@ -141,11 +150,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let menu = NSMenu()
+        menu.delegate = self
+
+        let warningItem = NSMenuItem(
+            title: "⚠ Accessibility required",
+            action: #selector(openAccessibilitySettings),
+            keyEquivalent: ""
+        )
+        warningItem.isHidden = true
+        menu.addItem(warningItem)
+        accessibilityWarningItem = warningItem
+
         menu.addItem(NSMenuItem(title: "Show Recall", action: #selector(showRecall), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Quit Recall", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
+    }
+
+    @objc private func openAccessibilitySettings() {
+        AccessibilityManager.openAccessibilitySettings()
     }
 
     @objc private func showRecall() {
@@ -175,6 +199,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func quitApp() {
         NSApp.terminate(nil)
+    }
+}
+
+extension AppDelegate: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) {
+        accessibilityWarningItem?.isHidden = AccessibilityManager.isAccessibilityTrusted()
     }
 }
 

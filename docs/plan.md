@@ -295,9 +295,9 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 **Goal:** App remains useful even if Accessibility permission is denied.
 
-- [ ] On Enter with permission denied: write item to clipboard, dismiss overlay, show a brief heads-up (`.bezel`-style toast or `NSUserNotification`) — "Copied — paste manually with ⌘V"
-- [ ] Menu bar: show "⚠ Accessibility required" item when permission is missing; clicking opens System Settings to the Accessibility pane
-- [ ] Do not spam permission prompts; check once at launch and once when the user triggers paste
+- [x] On Enter with permission denied: write item to clipboard, dismiss overlay, show a brief heads-up (`.bezel`-style toast or `NSUserNotification`) — "Copied — paste manually with ⌘V"
+- [x] Menu bar: show "⚠ Accessibility required" item when permission is missing; clicking opens System Settings to the Accessibility pane
+- [x] Do not spam permission prompts; check once at launch and once when the user triggers paste
 
 **Acceptance criteria:** With Accessibility denied, Enter still copies the item and shows a toast. Menu bar warns the user with a clear action.
 
@@ -353,8 +353,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 2 — Polish  
-**Milestone:** 2.8 complete.  
-**Next task:** Milestone 2.9 — Graceful Accessibility Permission Handling
+**Milestone:** 2.9 complete.  
+**Next task:** Milestone 2.10 — Notarization and Distribution
 
 ---
 
