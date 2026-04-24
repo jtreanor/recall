@@ -18,6 +18,8 @@
 		3AB89595C7AEFA5AFBDAF18E /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0299D3B7B2584D1147D4DB4 /* SettingsWindowController.swift */; };
 		637624C57A5049C273770226 /* HistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB98E87C158327C5CD8FE6 /* HistoryStoreTests.swift */; };
 		72B2EBA5105A912BA31BD433 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F28DE604BDCFE84A1CCCAA /* Database.swift */; };
+		75C306FCB9FB1E8A8122B5B8 /* ToastWindowControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C68EE843EEB950480D2A844 /* ToastWindowControllerTests.swift */; };
+		88D20552ED8A9B5479EF625E /* ToastWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB2B7A9805BB64FA890CB85 /* ToastWindowController.swift */; };
 		A3757397A724D8D626EA6E0E /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284B953BCE0412CF3E2CB36B /* ClipboardMonitor.swift */; };
 		A5AC08EF1E9871FDB7D472BA /* OverlayStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC03DA3A49AA413522CA25B4 /* OverlayStateTests.swift */; };
 		B783DF3B931FAB9E3D89ADA3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4646E22534FFA6986EBF387 /* Assets.xcassets */; };
@@ -47,6 +49,7 @@
 		356D46F64C1F802B1B2CE108 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3DB9AA9609FD196788B1C711 /* OverlayPanelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPanelTests.swift; sourceTree = "<group>"; };
 		4398C8568120709C883538CD /* OverlayViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayViewTests.swift; sourceTree = "<group>"; };
+		4C68EE843EEB950480D2A844 /* ToastWindowControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastWindowControllerTests.swift; sourceTree = "<group>"; };
 		589D612419DE8AD691D1CD7C /* Recall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C7DCFFF6657825023FD43FA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8B6B3F2B6973E26BB0C23B2F /* AccessibilityManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityManagerTests.swift; sourceTree = "<group>"; };
@@ -66,6 +69,7 @@
 		F2FFB915586C8ABFDAFDF221 /* OverlayPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPanel.swift; sourceTree = "<group>"; };
 		F8D61052424BA9FC653F3678 /* SettingsWindowControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowControllerTests.swift; sourceTree = "<group>"; };
 		FD59A4EC7D1E113DAAD3D352 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
+		FDB2B7A9805BB64FA890CB85 /* ToastWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -85,6 +89,7 @@
 				02DFC7E558100DB03DC3B6F3 /* Recall.entitlements */,
 				E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */,
 				E0299D3B7B2584D1147D4DB4 /* SettingsWindowController.swift */,
+				FDB2B7A9805BB64FA890CB85 /* ToastWindowController.swift */,
 			);
 			path = Recall;
 			sourceTree = "<group>";
@@ -111,6 +116,7 @@
 				BC03DA3A49AA413522CA25B4 /* OverlayStateTests.swift */,
 				4398C8568120709C883538CD /* OverlayViewTests.swift */,
 				F8D61052424BA9FC653F3678 /* SettingsWindowControllerTests.swift */,
+				4C68EE843EEB950480D2A844 /* ToastWindowControllerTests.swift */,
 			);
 			path = RecallTests;
 			sourceTree = "<group>";
@@ -224,6 +230,7 @@
 				A5AC08EF1E9871FDB7D472BA /* OverlayStateTests.swift in Sources */,
 				D17E0011E35427C7EFC8A1C8 /* OverlayViewTests.swift in Sources */,
 				028E9BF205D704A0BED76170 /* SettingsWindowControllerTests.swift in Sources */,
+				75C306FCB9FB1E8A8122B5B8 /* ToastWindowControllerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,6 +248,7 @@
 				CDB954B96599F7E7E2BCD6CE /* OverlayView.swift in Sources */,
 				BAA10D066C94E7388F660A23 /* RecallApp.swift in Sources */,
 				3AB89595C7AEFA5AFBDAF18E /* SettingsWindowController.swift in Sources */,
+				88D20552ED8A9B5479EF625E /* ToastWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

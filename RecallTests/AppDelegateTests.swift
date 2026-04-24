@@ -96,6 +96,20 @@ final class AppDelegateTests: XCTestCase {
         XCTAssertTrue(delegate.isOverlayVisible)
     }
 
+    // MARK: - Milestone 2.9: Paste always writes clipboard regardless of AX status
+
+    func testPasteSelectedItemWritesClipboardEvenWhenCalledWithItem() throws {
+        let store = makeTestStore()
+        try store.insert(item: .text("ax-test content"))
+        delegate.historyStore = store
+        delegate.showOverlay()
+
+        // writeToPasteboard is called before the AX check, so clipboard is
+        // always updated even if AX is denied and ⌘V is not posted.
+        delegate.pasteSelectedItem()
+        XCTAssertEqual(NSPasteboard.general.string(forType: .string), "ax-test content")
+    }
+
     // MARK: - Helpers
 
     private func makeTestStore() -> HistoryStore {
