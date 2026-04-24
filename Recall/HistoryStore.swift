@@ -121,7 +121,7 @@ final class HistoryStore {
         try pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, contentHash: hash,
                            sourceBundleId: sourceBundleId,
-                           createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
+                           createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000))
     }
 
     private func insertImage(png: Data, sourceBundleId: String?) throws -> HistoryItem? {
@@ -143,7 +143,7 @@ final class HistoryStore {
         try pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, contentHash: hash,
                            sourceBundleId: sourceBundleId,
-                           createdAt: Date(timeIntervalSince1970: TimeInterval(now)))
+                           createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000))
     }
 
     private func itemForHash(_ hash: String) throws -> HistoryItem? {
@@ -171,7 +171,7 @@ final class HistoryStore {
             imagePath: r["image_path"]?.stringValue,
             contentHash: hash,
             sourceBundleId: r["source_bundle_id"]?.stringValue,
-            createdAt: Date(timeIntervalSince1970: TimeInterval(ts))
+            createdAt: Date(timeIntervalSince1970: TimeInterval(ts) / 1_000_000)
         )
     }
 
