@@ -6,6 +6,8 @@ import Combine
 final class IntegrationTests: XCTestCase {
     var tempDir: URL!
     var store: HistoryStore!
+    var defaultsSuiteName: String!
+    var testSettings: SettingsManager!
 
     override func setUp() {
         super.setUp()
@@ -13,12 +15,18 @@ final class IntegrationTests: XCTestCase {
         let imagesDir = tempDir.appendingPathComponent("images")
         try! FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
         let db = try! Database(path: tempDir.appendingPathComponent("test.db").path)
-        store = HistoryStore(db: db, imagesDir: imagesDir)
+        defaultsSuiteName = "RecallIntegrationTests.\(UUID().uuidString)"
+        let testDefaults = UserDefaults(suiteName: defaultsSuiteName)!
+        testDefaults.set(500, forKey: "historyLimit")
+        testSettings = SettingsManager(defaults: testDefaults)
+        store = HistoryStore(db: db, imagesDir: imagesDir, settings: testSettings)
     }
 
     override func tearDown() {
         store = nil
+        testSettings = nil
         try? FileManager.default.removeItem(at: tempDir)
+        UserDefaults.standard.removePersistentDomain(forName: defaultsSuiteName)
         super.tearDown()
     }
 
@@ -68,11 +76,7 @@ final class IntegrationTests: XCTestCase {
     // MARK: - History cap
 
     func testHistoryCap_501Items_ResultsInExactly500() throws {
-        // Override any user-configured limit so the test always runs against 500.
-        let defaults = UserDefaults.standard
-        let savedLimit = defaults.integer(forKey: "historyLimit")
-        defaults.set(500, forKey: "historyLimit")
-        defer { defaults.set(savedLimit, forKey: "historyLimit") }
+        testSettings.historyLimit = 500
 
         for i in 0..<501 {
             try store.insert(item: .text("item \(i)"))
