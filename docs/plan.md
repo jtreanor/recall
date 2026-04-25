@@ -389,45 +389,46 @@ The app shows a generic grid icon instead of the Recall icon in Privacy & Securi
 
 ---
 
-### Milestone 3.3 — UI Iteration: Selection State
+### Milestone 3.3 — Security Refinements
 
-**Branch:** `feature/ui-selection-state`
+**Branch:** `feature/security-refinements`
 
-**Session protocol (collaborative):** Claude implements and presents three distinct selection treatments as swappable variants, user compares them live, and picks one.
+**Goal:** Handle sensitive clipboard content (passwords, secrets) carefully — prevent long-lived storage of credentials in history.
 
-- [ ] Implement three variants: (1) current — border only; (2) subtle zoom — `scaleEffect(1.05)` with spring + border; (3) elevated glow — stronger shadow + lighter card background, no scale
-- [ ] Build and present each for live comparison; adopt the chosen variant
-- [ ] Remove the rejected variants; no dead code remains
+**Detection strategy:**
+
+The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, which 1Password, Keychain, and many other credential tools set when placing a password on the clipboard. This is the de-facto macOS standard for "treat this as sensitive". Supplement with known password-manager bundle IDs.
+
+- [ ] **Conceal-type detection:** In `ClipboardMonitor`, check whether `NSPasteboard.general` contains the type `org.nspasteboard.ConcealedType` at copy time. If present, mark the item as sensitive.
+- [ ] **Bundle ID detection:** Mark as sensitive if `source_bundle_id` matches a known password-manager list (e.g. `com.1password.1password`, `com.agilebits.onepassword7`, `com.1password7`, `com.bitwarden`, `com.dashlane.Dashlane`, `com.lastpass.LastPass`, `in.sinew.Enpass-Desktop`).
+- [ ] **Browser extension heuristic (best-effort):** If source is a browser (`com.google.Chrome`, `com.apple.Safari`, `org.mozilla.firefox`, `com.microsoft.edgemac`) and the pasteboard also carries `org.nspasteboard.ConcealedType`, still mark as sensitive. This covers the 1Password / Bitwarden browser extension case.
+- [ ] **Schema:** Add `is_sensitive INTEGER NOT NULL DEFAULT 0` and `expires_at INTEGER` columns to the `items` table (migration via `ALTER TABLE`).
+- [ ] **Auto-expiry:** Sensitive items get `expires_at = created_at + 15 minutes`. `HistoryStore.fetchAll` filters out expired sensitive items. A periodic sweep (every 5 minutes, tied to the existing clipboard timer) deletes expired rows and their image files.
+- [ ] **Visual treatment:** Sensitive cards display `"••••••••"` as content preview and a lock icon instead of the source-app icon. No actual password text is ever rendered in the overlay.
+- [ ] **Settings toggle:** Add "Store sensitive items" switch in Settings (default: on). When off, sensitive items are never written to the database — they are silently skipped by `HistoryStore.insert`.
+
+**Acceptance criteria:** Copying a password from 1Password results in a masked card that disappears from history after 15 minutes. Copying from a browser that carries `ConcealedType` is treated identically. The "Store sensitive items" toggle prevents any storage when disabled. Non-sensitive items are completely unaffected.
+
+**Research notes (pre-implementation):** Before coding, verify `org.nspasteboard.ConcealedType` behaviour by logging all pasteboard types when copying from 1Password and from the 1Password Chrome extension. Adjust detection logic if the extension does not set the type.
 
 ---
 
-### Milestone 3.4 — UI Iteration: Panel Layout
-
-**Branch:** `feature/ui-panel-layout`
-
-**Session protocol (collaborative):** User provides reference screenshots at session start; Claude proposes 2–3 concrete layout variants with specific measurements; user picks one; Claude implements.
-
-- [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
-- [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
-- [ ] Implement the agreed variant; no unexplained magic numbers
-
----
-
-### Milestone 3.5 — Click to Paste
+### Milestone 3.4 — Click to Paste
 
 **Branch:** `feature/click-to-paste`
 
-**Goal:** Clicking a card pastes it, matching pointer-interaction expectations.
+**Goal:** Clicking a card pastes it; Backspace deletes the selected item — both matching pointer and keyboard expectations.
 
 - [ ] Add `.onTapGesture` to `ClipboardItemRow` that sets selection briefly then pastes (same action as Enter)
 - [ ] Confirm `NSPanel` focus handling is correct so `⌘V` posts successfully after a mouse click
+- [ ] Handle `Backspace` / `Delete` key in the overlay's key monitor: delete the currently selected item from `HistoryStore`, remove it from the in-memory list, and advance selection to the next item (or previous if it was the last)
 - [ ] Existing keyboard flow unaffected
 
-**Acceptance criteria:** Single click on any card pastes it and dismisses the panel, identically to pressing Enter.
+**Acceptance criteria:** Single click on any card pastes it and dismisses the panel, identically to pressing Enter. Pressing Backspace removes the selected item without dismissing the panel; selection moves to an adjacent card.
 
 ---
 
-### Milestone 3.6 — Basic Text Search
+### Milestone 3.5 — Basic Text Search
 
 **Branch:** `feature/text-search`
 
@@ -442,11 +443,65 @@ The app shows a generic grid icon instead of the Recall icon in Privacy & Securi
 
 ---
 
+### Milestone 3.6 — UI Iteration: Selection State
+
+**Branch:** `feature/ui-selection-state`
+
+**Session protocol (collaborative):** Claude implements and presents three distinct selection treatments as swappable variants, user compares them live, and picks one.
+
+- [ ] Implement three variants: (1) current — border only; (2) subtle zoom — `scaleEffect(1.05)` with spring + border; (3) elevated glow — stronger shadow + lighter card background, no scale
+- [ ] Build and present each for live comparison; adopt the chosen variant
+- [ ] Remove the rejected variants; no dead code remains
+
+---
+
+### Milestone 3.7 — UI Iteration: Panel Layout
+
+**Branch:** `feature/ui-panel-layout`
+
+**Session protocol (collaborative):** User provides reference screenshots at session start; Claude proposes 2–3 concrete layout variants with specific measurements; user picks one; Claude implements.
+
+- [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
+- [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
+- [ ] Implement the agreed variant; no unexplained magic numbers
+
+---
+
+### Milestone 3.8 — Test Coverage Review
+
+**Branch:** `feature/test-coverage`
+
+**Goal:** Audit and close gaps in the test suite before going public. By this point the app has meaningful security logic, delete behaviour, and search — all of which need reliable test coverage.
+
+**Unit tests (gaps to address):**
+- [ ] `ClipboardMonitor` sensitive-item detection: mock pasteboard types and verify `is_sensitive` is set correctly for each detection signal (ConcealedType, bundle ID list, browser + ConcealedType)
+- [ ] `HistoryStore` expiry: insert a sensitive item with a past `expires_at`; confirm `fetchAll` excludes it and the sweep deletes it
+- [ ] `HistoryStore` delete: insert items, delete one by ID, confirm it is gone and others remain
+- [ ] Text search filtering logic: given a list of items, confirm the filter produces the correct subset for various query strings (empty, exact match, partial, no match, image exclusion)
+
+**Integration tests (gaps to address):**
+- [ ] Full sensitive-item cycle: simulate a `ConcealedType` clipboard change → item written with `is_sensitive=1` and correct `expires_at` → after simulated expiry, `fetchAll` returns empty
+- [ ] Delete from store: insert via clipboard simulation → delete via `HistoryStore.delete` → confirm item absent from a fresh `fetchAll`
+
+**UI / manual test checklist (to be run and confirmed before PR):**
+- [ ] Click to paste dismisses the panel and pastes the correct item
+- [ ] Backspace on a selected card removes it; selection moves correctly; panel stays open
+- [ ] Search field filters in real time; images hidden; Escape clears then dismisses
+- [ ] Sensitive card shows masked content and lock icon; disappears after 15 minutes
+- [ ] "Store sensitive items" off → copying from 1Password adds nothing to history
+
+**Acceptance criteria:** All unit and integration tests pass on 3 consecutive runs. The manual checklist above is confirmed interactively. No test is skipped or disabled.
+
+---
+
 ### Phase 3 complete when:
 - [ ] Tests are isolated from production state and pass regardless of user settings
 - [ ] Open at Login setting works and persists
-- [ ] Selection state, panel layout, and click-to-paste are polished and user-confirmed
+- [ ] Sensitive items handled securely with auto-expiry and visual masking
+- [ ] Click to paste works; Backspace deletes items
 - [ ] Basic text search works for text items
+- [ ] Selection state, panel layout polished and user-confirmed
+- [ ] Test coverage reviewed and gaps closed
 
 ---
 
@@ -488,8 +543,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** 3.2 complete. Starting 3.3 (UI iteration: selection state).  
-**Next task:** M3.3 — implement three selection state variants for user comparison.
+**Milestone:** 3.2 complete. Starting 3.3 (security refinements).  
+**Next task:** M3.3 — research `org.nspasteboard.ConcealedType` behaviour, then implement sensitive-item detection, auto-expiry, and masked card display.
 
 ---
 
