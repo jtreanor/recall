@@ -342,6 +342,17 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 ---
 
+## Phase 4 — Open Source and Distribution
+
+_Pursue when the app is stable enough to share publicly._
+
+- [ ] **Open source the repo** — make `jtreanor/recall` public on GitHub; add `LICENSE` (MIT) and a proper `README.md` with screenshots, install instructions, and feature overview
+- [ ] **Automated binary releases** — GitHub Actions workflow triggered on version tags: builds a universal Release binary, runs `scripts/distribute.sh`, uploads `Recall-{version}.dmg` as a GitHub Release asset
+- [ ] **Homebrew tap** — create `jtreanor/homebrew-recall`; write a cask (`recall.rb`) that points at the GitHub Release DMG and uses a `postflight` block to remove the quarantine xattr so users get zero Gatekeeper friction: `brew install --cask jtreanor/recall/recall`
+- [ ] **Notarization** (optional upgrade) — if Apple Developer Program membership ($99/yr) becomes worthwhile, wire up `scripts/distribute.sh --notarize` in CI and drop the `postflight` quarantine removal from the cask
+
+---
+
 ## Phase 3 — Extended (If Needed)
 
 _Only pursue if daily use reveals a genuine gap._
