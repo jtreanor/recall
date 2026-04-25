@@ -38,7 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupOverlayPanel() {
         let panel = OverlayPanel()
-        let rootView = OverlayRootView(state: overlayState)
+        let rootView = OverlayRootView(state: overlayState, onPaste: { [weak self] in self?.pasteSelectedItem() })
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
         (panel.contentView as? NSVisualEffectView)?.addSubview(hostingView)
@@ -46,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.overlayState = overlayState
         panel.onDismiss = { [weak self] in self?.isOverlayVisible = false }
         panel.onPaste = { [weak self] in self?.pasteSelectedItem() }
+        panel.onDelete = { [weak self] in self?.deleteSelectedItem() }
         overlayPanel = panel
     }
 
@@ -104,6 +105,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hideOverlay()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             AppDelegate.postCommandV()
+        }
+    }
+
+    func deleteSelectedItem() {
+        let idx = overlayState.selectedIndex
+        guard idx < overlayState.items.count else { return }
+        let item = overlayState.items[idx]
+        try? historyStore?.delete(id: item.id)
+        overlayState.items.remove(at: idx)
+        if !overlayState.items.isEmpty {
+            overlayState.selectedIndex = min(idx, overlayState.items.count - 1)
+        } else {
+            overlayState.selectedIndex = 0
         }
     }
 
@@ -220,8 +234,9 @@ final class OverlayState: ObservableObject {
 
 private struct OverlayRootView: View {
     @ObservedObject var state: OverlayState
+    var onPaste: (() -> Void)?
 
     var body: some View {
-        OverlayView(items: state.items, selectedIndex: $state.selectedIndex)
+        OverlayView(items: state.items, selectedIndex: $state.selectedIndex, onPaste: onPaste)
     }
 }

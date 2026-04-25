@@ -47,4 +47,17 @@ final class OverlayViewTests: XCTestCase {
         hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 180)
         XCTAssertNotNil(hosting)
     }
+
+    func testOverlayViewAcceptsOnPasteCallback() {
+        var selectedIndex = 0
+        let binding = Binding(get: { selectedIndex }, set: { selectedIndex = $0 })
+        var pasteCalled = false
+        let view = OverlayView(items: [], selectedIndex: binding, onPaste: { pasteCalled = true })
+        let hosting = NSHostingView(rootView: view)
+        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 180)
+        XCTAssertNotNil(hosting)
+        // Confirm the callback closure is retained and callable
+        view.onPaste?()
+        XCTAssertTrue(pasteCalled)
+    }
 }
