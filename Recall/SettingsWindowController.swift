@@ -1,15 +1,33 @@
 import AppKit
 import Carbon
+import ServiceManagement
 import SwiftUI
+
+// MARK: - LoginItemService
+
+protocol LoginItemService {
+    var isEnabled: Bool { get }
+    func setEnabled(_ enabled: Bool) throws
+}
+
+struct SMLoginItemService: LoginItemService {
+    var isEnabled: Bool { SMAppService.mainApp.status == .enabled }
+    func setEnabled(_ enabled: Bool) throws {
+        if enabled { try SMAppService.mainApp.register() }
+        else { try SMAppService.mainApp.unregister() }
+    }
+}
 
 // MARK: - SettingsManager
 
 struct SettingsManager {
     static let shared = SettingsManager()
     private let defaults: UserDefaults
+    private let loginItemService: LoginItemService
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, loginItemService: LoginItemService = SMLoginItemService()) {
         self.defaults = defaults
+        self.loginItemService = loginItemService
     }
 
     var hotkeyKeyCode: UInt32 {
@@ -44,6 +62,11 @@ struct SettingsManager {
         nonmutating set { defaults.set(newValue, forKey: "itemMaxAgeSecs") }
     }
 
+    var openAtLogin: Bool {
+        get { loginItemService.isEnabled }
+        nonmutating set { try? loginItemService.setEnabled(newValue) }
+    }
+
     func setHotkey(keyCode: UInt32, modifiers: UInt32) {
         self.hotkeyKeyCode = keyCode
         self.hotkeyModifiers = modifiers
@@ -58,7 +81,7 @@ final class SettingsWindowController: NSWindowController {
 
     convenience init() {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 340, height: 265),
+            contentRect: NSRect(x: 0, y: 0, width: 340, height: 305),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -92,6 +115,7 @@ struct SettingsView: View {
     @State private var modifiers: UInt32 = SettingsManager.shared.hotkeyModifiers
     @State private var historyLimit: Int = SettingsManager.shared.historyLimit
     @State private var maxAgeSecs: Int = SettingsManager.shared.itemMaxAgeSecs
+    @State private var openAtLogin: Bool = SettingsManager.shared.openAtLogin
     @State private var showClearConfirm = false
 
     var body: some View {
@@ -135,6 +159,19 @@ struct SettingsView: View {
                 .onChange(of: maxAgeSecs) { newValue in
                     SettingsManager.shared.itemMaxAgeSecs = newValue
                 }
+            }
+
+            // Open at Login row
+            HStack {
+                Text("Open at Login")
+                    .frame(width: 130, alignment: .leading)
+                Toggle("", isOn: $openAtLogin)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .onChange(of: openAtLogin) { newValue in
+                        SettingsManager.shared.openAtLogin = newValue
+                    }
+                Spacer()
             }
 
             Divider()

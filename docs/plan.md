@@ -371,17 +371,17 @@ Build the app and walk through a manual checklist interactively. Each step below
 **App icon missing in System Settings (Accessibility list):**
 The app shows a generic grid icon instead of the Recall icon in Privacy & Security → Accessibility. This is typically caused by a missing or incorrectly named icon in `AppIcon.appiconset`, a missing `CFBundleIconName` in `Info.plist`, or the icon not being included in the built app bundle.
 
-- [ ] Inspect the built `.app` bundle (`Contents/Resources/`) to confirm whether `AppIcon.icns` is present
-- [ ] Verify `CFBundleIconName` is set correctly in `Info.plist` (should be `AppIcon`)
-- [ ] Confirm `AppIcon.appiconset` contains at least a 512×512 and 1024×1024 representation (the sizes macOS pulls for system UI)
-- [ ] Rebuild and confirm the correct icon appears in the Accessibility list
+- [x] Inspect the built `.app` bundle (`Contents/Resources/`) to confirm whether `AppIcon.icns` is present
+- [x] Verify `CFBundleIconName` is set correctly in `Info.plist` (should be `AppIcon`)
+- [x] Confirm `AppIcon.appiconset` contains at least a 512×512 and 1024×1024 representation (the sizes macOS pulls for system UI)
+- [x] Rebuild and confirm the correct icon appears in the Accessibility list
 
 **Open at Login:**
 
-- [ ] Add an "Open at Login" toggle to the Settings panel (below the existing controls)
-- [ ] Implement using `SMAppService.mainApp` (macOS 13+ API) — `register()` on enable, `unregister()` on disable
-- [ ] Persist the user's choice in `UserDefaults`; reflect the current `SMAppService` status on Settings open
-- [ ] Handle edge case where the service is already registered from a previous install
+- [x] Add an "Open at Login" toggle to the Settings panel (below the existing controls)
+- [x] Implement using `SMAppService.mainApp` (macOS 13+ API) — `register()` on enable, `unregister()` on disable
+- [x] Persist the user's choice in `UserDefaults`; reflect the current `SMAppService` status on Settings open
+- [x] Handle edge case where the service is already registered from a previous install
 
 **Notes:** `SMAppService` is the modern replacement for `SMLoginItemSetEnabled` / Launch Agents. No entitlement change required for a non-sandboxed app.
 
@@ -488,8 +488,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** 3.1 complete. Starting 3.2 (app icon + open at login).  
-**Next task:** M3.2 — fix app icon in Accessibility list; add Open at Login toggle.
+**Milestone:** 3.2 complete. Starting 3.3 (UI iteration: selection state).  
+**Next task:** M3.3 — implement three selection state variants for user comparison.
 
 ---
 
