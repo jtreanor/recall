@@ -9,6 +9,7 @@ enum ClipboardItem {
 struct CapturedItem {
     let item: ClipboardItem
     let sourceBundleId: String?
+    let isSensitive: Bool
 }
 
 final class ClipboardMonitor {
@@ -83,6 +84,25 @@ final class ClipboardMonitor {
         }
     }
 
+    private static let concealedType = NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")
+
+    static let passwordManagerBundleIds: Set<String> = [
+        "com.1password.1password",
+        "com.agilebits.onepassword7",
+        "com.1password7",
+        "com.bitwarden",
+        "com.dashlane.Dashlane",
+        "com.lastpass.LastPass",
+        "in.sinew.Enpass-Desktop"
+    ]
+
+    private static let browserBundleIds: Set<String> = [
+        "com.google.Chrome",
+        "com.apple.Safari",
+        "org.mozilla.firefox",
+        "com.microsoft.edgemac"
+    ]
+
     func poll() {
         let pb = NSPasteboard.general
         let count = pb.changeCount
@@ -90,9 +110,12 @@ final class ClipboardMonitor {
         lastChangeCount = count
 
         let bundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        let hasConcealed = pb.types?.contains(Self.concealedType) == true
+        let isSensitive = hasConcealed
+            || bundleId.map { Self.passwordManagerBundleIds.contains($0) } == true
 
         if let text = pb.string(forType: .string), !text.isEmpty {
-            itemPublisher.send(CapturedItem(item: .text(text), sourceBundleId: bundleId))
+            itemPublisher.send(CapturedItem(item: .text(text), sourceBundleId: bundleId, isSensitive: isSensitive))
             return
         }
 
@@ -101,7 +124,7 @@ final class ClipboardMonitor {
                   let image = NSImage(data: data) else { continue }
             guard let png = makePNG(from: image),
                   let thumb = makeThumbnail(from: image) else { return }
-            itemPublisher.send(CapturedItem(item: .image(png: png, thumbnail: thumb), sourceBundleId: bundleId))
+            itemPublisher.send(CapturedItem(item: .image(png: png, thumbnail: thumb), sourceBundleId: bundleId, isSensitive: isSensitive))
             return
         }
     }

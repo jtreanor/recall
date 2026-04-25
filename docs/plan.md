@@ -389,7 +389,7 @@ The app shows a generic grid icon instead of the Recall icon in Privacy & Securi
 
 ---
 
-### Milestone 3.3 — Security Refinements
+### Milestone 3.3 — Security Refinements ✅
 
 **Branch:** `feature/security-refinements`
 
@@ -399,13 +399,13 @@ The app shows a generic grid icon instead of the Recall icon in Privacy & Securi
 
 The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, which 1Password, Keychain, and many other credential tools set when placing a password on the clipboard. This is the de-facto macOS standard for "treat this as sensitive". Supplement with known password-manager bundle IDs.
 
-- [ ] **Conceal-type detection:** In `ClipboardMonitor`, check whether `NSPasteboard.general` contains the type `org.nspasteboard.ConcealedType` at copy time. If present, mark the item as sensitive.
-- [ ] **Bundle ID detection:** Mark as sensitive if `source_bundle_id` matches a known password-manager list (e.g. `com.1password.1password`, `com.agilebits.onepassword7`, `com.1password7`, `com.bitwarden`, `com.dashlane.Dashlane`, `com.lastpass.LastPass`, `in.sinew.Enpass-Desktop`).
-- [ ] **Browser extension heuristic (best-effort):** If source is a browser (`com.google.Chrome`, `com.apple.Safari`, `org.mozilla.firefox`, `com.microsoft.edgemac`) and the pasteboard also carries `org.nspasteboard.ConcealedType`, still mark as sensitive. This covers the 1Password / Bitwarden browser extension case.
-- [ ] **Schema:** Add `is_sensitive INTEGER NOT NULL DEFAULT 0` and `expires_at INTEGER` columns to the `items` table (migration via `ALTER TABLE`).
-- [ ] **Auto-expiry:** Sensitive items get `expires_at = created_at + 15 minutes`. `HistoryStore.fetchAll` filters out expired sensitive items. A periodic sweep (every 5 minutes, tied to the existing clipboard timer) deletes expired rows and their image files.
-- [ ] **Visual treatment:** Sensitive cards display `"••••••••"` as content preview and a lock icon instead of the source-app icon. No actual password text is ever rendered in the overlay.
-- [ ] **Settings toggle:** Add "Store sensitive items" switch in Settings (default: on). When off, sensitive items are never written to the database — they are silently skipped by `HistoryStore.insert`.
+- [x] **Conceal-type detection:** In `ClipboardMonitor`, check whether `NSPasteboard.general` contains the type `org.nspasteboard.ConcealedType` at copy time. If present, mark the item as sensitive.
+- [x] **Bundle ID detection:** Mark as sensitive if `source_bundle_id` matches a known password-manager list (e.g. `com.1password.1password`, `com.agilebits.onepassword7`, `com.1password7`, `com.bitwarden`, `com.dashlane.Dashlane`, `com.lastpass.LastPass`, `in.sinew.Enpass-Desktop`).
+- [x] **Browser extension heuristic (best-effort):** If source is a browser (`com.google.Chrome`, `com.apple.Safari`, `org.mozilla.firefox`, `com.microsoft.edgemac`) and the pasteboard also carries `org.nspasteboard.ConcealedType`, still mark as sensitive. This covers the 1Password / Bitwarden browser extension case.
+- [x] **Schema:** Add `is_sensitive INTEGER NOT NULL DEFAULT 0` and `expires_at INTEGER` columns to the `items` table (migration via `ALTER TABLE`).
+- [x] **Auto-expiry:** Sensitive items get `expires_at = created_at + 15 minutes`. `HistoryStore.fetchAll` filters out expired sensitive items. A periodic sweep (every 5 minutes, tied to the existing clipboard timer) deletes expired rows and their image files.
+- [x] **Visual treatment:** Sensitive cards display `"••••••••"` as content preview and a lock icon instead of the source-app icon. No actual password text is ever rendered in the overlay.
+- [x] **Settings toggle:** Add "Store Passwords" switch in Settings (default: on). When off, sensitive items are never written to the database — they are silently skipped by `HistoryStore.insert`.
 
 **Acceptance criteria:** Copying a password from 1Password results in a masked card that disappears from history after 15 minutes. Copying from a browser that carries `ConcealedType` is treated identically. The "Store sensitive items" toggle prevents any storage when disabled. Non-sensitive items are completely unaffected.
 
@@ -543,7 +543,7 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** 3.4 complete. Starting 3.5 (basic text search).  
+**Milestone:** 3.3 and 3.4 complete. Starting 3.5 (basic text search).  
 **Next task:** M3.5 — add search field to overlay, filter cards by case-insensitive substring match, hide image items during active query.
 
 ---

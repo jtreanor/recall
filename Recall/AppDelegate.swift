@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindowController: SettingsWindowController?
     private let toastController = ToastWindowController()
     private var accessibilityWarningItem: NSMenuItem?
+    private var sensitiveItemSweepTimer: DispatchSourceTimer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -23,6 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupHistoryStore()
         setupOverlayPanel()
         startClipboardMonitor()
+        startSensitiveItemSweep()
         setupHotkey()
         AccessibilityManager.requestAccessibilityIfNeeded()
     }
@@ -61,15 +63,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func handleCapturedItem(_ captured: CapturedItem) {
         guard let store = historyStore else { return }
         do {
-            let inserted = try store.insert(item: captured.item, sourceBundleId: captured.sourceBundleId)
+            let inserted = try store.insert(item: captured.item, sourceBundleId: captured.sourceBundleId, isSensitive: captured.isSensitive)
             let n = try store.count()
             if let inserted {
-                print("[Recall] Stored \(inserted.kind) \(inserted.id); history count: \(n)")
+                print("[Recall] Stored \(inserted.kind) \(inserted.id) sensitive=\(inserted.isSensitive); history count: \(n)")
             }
             overlayState.items = (try? store.fetchAll()) ?? []
         } catch {
             print("[Recall] Store error: \(error)")
         }
+    }
+
+    private func startSensitiveItemSweep() {
+        let queue = DispatchQueue(label: "com.recall.sensitive-sweep", qos: .utility)
+        let t = DispatchSource.makeTimerSource(queue: queue)
+        t.schedule(deadline: .now() + 300, repeating: 300, leeway: .seconds(30))
+        t.setEventHandler { [weak self] in
+            guard let self, let store = self.historyStore else { return }
+            do {
+                try store.sweepExpiredSensitive()
+                DispatchQueue.main.async {
+                    self.overlayState.items = (try? store.fetchAll()) ?? self.overlayState.items
+                }
+            } catch {
+                print("[Recall] Sweep error: \(error)")
+            }
+        }
+        t.resume()
+        sensitiveItemSweepTimer = t
     }
 
     func showOverlay() {

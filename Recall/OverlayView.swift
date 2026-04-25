@@ -67,7 +67,9 @@ struct ClipboardItemCard: View {
                         radius: isSelected ? 10 : 4,
                         y: isSelected ? 4 : 2)
 
-            if item.kind == .image, let path = item.imagePath {
+            if item.isSensitive {
+                sensitiveCardContent
+            } else if item.kind == .image, let path = item.imagePath {
                 imageCardContent(path: path)
             } else {
                 textCardContent
@@ -79,6 +81,28 @@ struct ClipboardItemCard: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(isSelected ? Color.accentColor.opacity(0.7) : Color.clear, lineWidth: 1.5)
         )
+    }
+
+    private var sensitiveCardContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 5)
+
+            Text("••••••••")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+            Text(relativeTimestamp(item.createdAt))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 4)
+        }
+        .padding(10)
     }
 
     private var textCardContent: some View {
