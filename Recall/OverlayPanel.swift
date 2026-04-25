@@ -1,7 +1,7 @@
 import AppKit
 
 final class OverlayPanel: NSPanel {
-    static let panelHeight: CGFloat = 200
+    static let panelHeight: CGFloat = 210
     var onDismiss: (() -> Void)?
     var onPaste: (() -> Void)?
     var onDelete: (() -> Void)?

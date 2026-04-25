@@ -463,6 +463,7 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 - [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
 - [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
+- [ ] Polish the search header strip: icon placement, expand animation, field styling, collapsed/expanded states — make it feel as refined as Paste's
 - [ ] Implement the agreed variant; no unexplained magic numbers
 
 ---
