@@ -342,10 +342,120 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 ---
 
+## Phase 3 — Pre-Release Quality and Features
+
+**Goal:** Fix reliability issues, ship the last few high-value features, and iterate the UI collaboratively before going public.
+
+---
+
+### Milestone 3.1 — Test Isolation Fix
+
+**Branch:** `feature/test-isolation`
+
+**Problem:** Tests currently share the production SQLite database and read live `UserDefaults` (e.g. history limit). Changing the history limit in Settings to 200 causes tests written against 500 to fail, and running the test suite leaves "unit-test" entries visible in the live app.
+
+- [ ] Audit every test that touches `HistoryStore` or `ClipboardMonitor` — identify all places the production DB path or `UserDefaults` is used
+- [ ] Refactor `HistoryStore` to accept an injectable database path (default: production path; tests pass a temp directory path)
+- [ ] Inject a fresh `UserDefaults` suite (not `.standard`) into tests that touch settings-dependent logic
+- [ ] Ensure every test cleans up its temp database on teardown
+- [ ] Confirm: suite passes with production history limit set to 200; no test-originated items appear in the live app after running tests
+
+---
+
+### Milestone 3.2 — System-Level Fixes (App Icon + Open at Login)
+
+**Branch:** `feature/system-fixes`
+
+**Goal:** Two small system-level issues fixed in one session.
+
+**App icon missing in System Settings (Accessibility list):**
+The app shows a generic grid icon instead of the Recall icon in Privacy & Security → Accessibility. This is typically caused by a missing or incorrectly named icon in `AppIcon.appiconset`, a missing `CFBundleIconName` in `Info.plist`, or the icon not being included in the built app bundle.
+
+- [ ] Inspect the built `.app` bundle (`Contents/Resources/`) to confirm whether `AppIcon.icns` is present
+- [ ] Verify `CFBundleIconName` is set correctly in `Info.plist` (should be `AppIcon`)
+- [ ] Confirm `AppIcon.appiconset` contains at least a 512×512 and 1024×1024 representation (the sizes macOS pulls for system UI)
+- [ ] Rebuild and confirm the correct icon appears in the Accessibility list
+
+**Open at Login:**
+
+- [ ] Add an "Open at Login" toggle to the Settings panel (below the existing controls)
+- [ ] Implement using `SMAppService.mainApp` (macOS 13+ API) — `register()` on enable, `unregister()` on disable
+- [ ] Persist the user's choice in `UserDefaults`; reflect the current `SMAppService` status on Settings open
+- [ ] Handle edge case where the service is already registered from a previous install
+
+**Notes:** `SMAppService` is the modern replacement for `SMLoginItemSetEnabled` / Launch Agents. No entitlement change required for a non-sandboxed app.
+
+**Acceptance criteria:** Recall icon appears correctly in the Accessibility list. Toggling "Open at Login" on → app launches on next login. Toggling off → it does not.
+
+---
+
+### Milestone 3.3 — UI Iteration: Selection State
+
+**Branch:** `feature/ui-selection-state`
+
+**Session protocol (collaborative):** Claude implements and presents three distinct selection treatments as swappable variants, user compares them live, and picks one.
+
+- [ ] Implement three variants: (1) current — border only; (2) subtle zoom — `scaleEffect(1.05)` with spring + border; (3) elevated glow — stronger shadow + lighter card background, no scale
+- [ ] Build and present each for live comparison; adopt the chosen variant
+- [ ] Remove the rejected variants; no dead code remains
+
+---
+
+### Milestone 3.4 — UI Iteration: Panel Layout
+
+**Branch:** `feature/ui-panel-layout`
+
+**Session protocol (collaborative):** User provides reference screenshots at session start; Claude proposes 2–3 concrete layout variants with specific measurements; user picks one; Claude implements.
+
+- [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
+- [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
+- [ ] Implement the agreed variant; no unexplained magic numbers
+
+---
+
+### Milestone 3.5 — Click to Paste
+
+**Branch:** `feature/click-to-paste`
+
+**Goal:** Clicking a card pastes it, matching pointer-interaction expectations.
+
+- [ ] Add `.onTapGesture` to `ClipboardItemRow` that sets selection briefly then pastes (same action as Enter)
+- [ ] Confirm `NSPanel` focus handling is correct so `⌘V` posts successfully after a mouse click
+- [ ] Existing keyboard flow unaffected
+
+**Acceptance criteria:** Single click on any card pastes it and dismisses the panel, identically to pressing Enter.
+
+---
+
+### Milestone 3.6 — Basic Text Search
+
+**Branch:** `feature/text-search`
+
+**Goal:** User can type in the overlay to filter clipboard history by content. No OCR, no image filtering.
+
+- [ ] Add a search field to the panel (position decided during implementation based on layout fit)
+- [ ] Filter client-side: case-insensitive substring match on `content`; image items hidden during active query
+- [ ] Overlay opens with search field focused; Escape clears query; second Escape dismisses
+- [ ] Arrow keys navigate among filtered results; search clears on dismiss
+
+**Acceptance criteria:** Typing filters cards in real time. Images hidden during search. Escape clears before dismissing. Keyboard navigation works on filtered results.
+
+---
+
+### Phase 3 complete when:
+- [ ] Tests are isolated from production state and pass regardless of user settings
+- [ ] Open at Login setting works and persists
+- [ ] Selection state, panel layout, and click-to-paste are polished and user-confirmed
+- [ ] Basic text search works for text items
+
+---
+
 ## Phase 4 — Open Source and Distribution
 
 _Pursue when the app is stable enough to share publicly._
 
+- [ ] **Repo history review** — before making the repo public, review git history for references to third-party apps (e.g. Paste), internal notes, or anything unsuitable for a public audience; decide whether to scrub (via `git filter-repo`) or leave it and document the decision
+- [ ] **CI: test check on PRs** — add a GitHub Actions workflow (`.github/workflows/test.yml`) that runs `xcodebuild test` on every PR; required status check before merge
 - [ ] **Open source the repo** — make `jtreanor/recall` public on GitHub; add `LICENSE` (MIT) and a proper `README.md` with screenshots, install instructions, and feature overview
 - [ ] **Automated binary releases** — GitHub Actions workflow triggered on version tags: builds a universal Release binary, runs `scripts/distribute.sh`, uploads `Recall-{version}.dmg` as a GitHub Release asset
 - [ ] **Homebrew tap** — create `jtreanor/homebrew-recall`; write a cask (`recall.rb`) that points at the GitHub Release DMG and uses a `postflight` block to remove the quarantine xattr so users get zero Gatekeeper friction: `brew install --cask jtreanor/recall/recall`
@@ -353,11 +463,10 @@ _Pursue when the app is stable enough to share publicly._
 
 ---
 
-## Phase 3 — Extended (If Needed)
+## Phase 5 — Extended (If Needed)
 
 _Only pursue if daily use reveals a genuine gap._
 
-- [ ] Search / filter bar (type to filter history)
 - [ ] Quick-select: `⌘1`–`⌘9` for top 9 items
 - [ ] Per-app history source filtering
 - [ ] Pinned items (favorites that persist beyond history cap)
@@ -378,9 +487,9 @@ _Only pursue if daily use reveals a genuine gap._
 
 ## Current Status
 
-**Phase:** Phase 2 — Polish  
-**Milestone:** 2.11 complete (ad-hoc distribution; notarization deferred pending Developer ID cert).  
-**Next task:** Phase 2 complete — Phase 3 extended features if needed.
+**Phase:** Phase 3 — Pre-Release Quality and Features  
+**Milestone:** Starting 3.1 (test isolation fix).  
+**Next task:** M3.1 — fix test isolation so tests don't share the production DB or UserDefaults.
 
 ---
 
