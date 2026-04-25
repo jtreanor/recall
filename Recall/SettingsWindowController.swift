@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import ServiceManagement
 import SwiftUI
 
 // MARK: - SettingsManager
@@ -44,6 +45,21 @@ struct SettingsManager {
         nonmutating set { defaults.set(newValue, forKey: "itemMaxAgeSecs") }
     }
 
+    var openAtLogin: Bool {
+        get { SMAppService.mainApp.status == .enabled }
+        nonmutating set {
+            do {
+                if newValue {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                // Registration can fail if the user denies or the service is in a bad state; ignore silently
+            }
+        }
+    }
+
     func setHotkey(keyCode: UInt32, modifiers: UInt32) {
         self.hotkeyKeyCode = keyCode
         self.hotkeyModifiers = modifiers
@@ -58,7 +74,7 @@ final class SettingsWindowController: NSWindowController {
 
     convenience init() {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 340, height: 265),
+            contentRect: NSRect(x: 0, y: 0, width: 340, height: 305),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -92,6 +108,7 @@ struct SettingsView: View {
     @State private var modifiers: UInt32 = SettingsManager.shared.hotkeyModifiers
     @State private var historyLimit: Int = SettingsManager.shared.historyLimit
     @State private var maxAgeSecs: Int = SettingsManager.shared.itemMaxAgeSecs
+    @State private var openAtLogin: Bool = SettingsManager.shared.openAtLogin
     @State private var showClearConfirm = false
 
     var body: some View {
@@ -135,6 +152,19 @@ struct SettingsView: View {
                 .onChange(of: maxAgeSecs) { newValue in
                     SettingsManager.shared.itemMaxAgeSecs = newValue
                 }
+            }
+
+            // Open at Login row
+            HStack {
+                Text("Open at Login")
+                    .frame(width: 130, alignment: .leading)
+                Toggle("", isOn: $openAtLogin)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .onChange(of: openAtLogin) { newValue in
+                        SettingsManager.shared.openAtLogin = newValue
+                    }
+                Spacer()
             }
 
             Divider()
