@@ -434,12 +434,12 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 **Goal:** User can type in the overlay to filter clipboard history by content. No OCR, no image filtering.
 
-- [x] Add a search field to the panel (top of overlay, full width with magnifying glass icon; panel height 172 → 216pt)
+- [x] Add a search field to the panel (Paste-style: compact magnifying glass icon in a 32pt header strip; expands inline to text field on click; panel height 172 → 210pt)
 - [x] Filter client-side: case-insensitive substring match on `content`; image items hidden during active query
-- [x] Overlay opens with search field focused; Escape clears query; second Escape dismisses
-- [x] Arrow keys navigate among filtered results; search clears on dismiss
+- [x] Escape clears query → collapses field → dismisses overlay (three steps); search clears on dismiss
+- [x] Arrow keys navigate among filtered results
 
-**Acceptance criteria:** Typing filters cards in real time. Images hidden during search. Escape clears before dismissing. Keyboard navigation works on filtered results.
+**Known issue (unresolved — carry into M3.7):** Cards are still cropped at the top of the panel despite the height increase. Root cause not yet diagnosed — likely the 32pt header + divider is eating into the card area in a way that bumping `panelHeight` alone doesn't fix. Investigate layout constraints / `NSHostingView` sizing in M3.7.
 
 ---
 
@@ -463,6 +463,7 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 - [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
 - [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
+- [ ] Fix card cropping introduced by M3.5 header: diagnose why cards are clipped at the top (check `NSHostingView` sizing, `autoresizingMask`, and whether the hosting view frame is updated after panel height change)
 - [ ] Polish the search header strip: icon placement, expand animation, field styling, collapsed/expanded states — make it feel as refined as Paste's
 - [ ] Implement the agreed variant; no unexplained magic numbers
 
