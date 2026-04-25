@@ -2,14 +2,58 @@ import SwiftUI
 import AppKit
 
 struct OverlayView: View {
-    let items: [HistoryItem]
+    let items: [HistoryItem]        // pre-filtered items to display
+    let totalItemCount: Int         // total unfiltered count, for empty state
     @Binding var selectedIndex: Int
+    @Binding var searchQuery: String
+    let showCount: Int              // incremented on each overlay show; triggers search focus
     var onPaste: (() -> Void)?
 
+    @FocusState private var searchFocused: Bool
+
     var body: some View {
-        if items.isEmpty {
+        VStack(spacing: 0) {
+            searchBar
+            content
+        }
+        .onChange(of: showCount) { _ in
+            searchFocused = true
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 13))
+                .foregroundStyle(.tertiary)
+            TextField("Search history…", text: $searchQuery)
+                .textFieldStyle(.plain)
+                .font(.system(size: 13))
+                .focused($searchFocused)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 14)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if totalItemCount == 0 {
             EmptyStateView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if items.isEmpty {
+            VStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundStyle(.tertiary)
+                Text("No results")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal) {
@@ -25,7 +69,7 @@ struct OverlayView: View {
                     }
                     .padding(.horizontal, 14)
                     .padding(.bottom, 12)
-                    .padding(.top, 6)
+                    .padding(.top, 4)
                 }
                 .scrollIndicators(.hidden)
                 .onChange(of: selectedIndex) { newIndex in

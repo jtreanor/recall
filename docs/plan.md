@@ -428,16 +428,16 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 ---
 
-### Milestone 3.5 — Basic Text Search
+### Milestone 3.5 — Basic Text Search ✅
 
 **Branch:** `feature/text-search`
 
 **Goal:** User can type in the overlay to filter clipboard history by content. No OCR, no image filtering.
 
-- [ ] Add a search field to the panel (position decided during implementation based on layout fit)
-- [ ] Filter client-side: case-insensitive substring match on `content`; image items hidden during active query
-- [ ] Overlay opens with search field focused; Escape clears query; second Escape dismisses
-- [ ] Arrow keys navigate among filtered results; search clears on dismiss
+- [x] Add a search field to the panel (top of overlay, full width with magnifying glass icon; panel height 172 → 216pt)
+- [x] Filter client-side: case-insensitive substring match on `content`; image items hidden during active query
+- [x] Overlay opens with search field focused; Escape clears query; second Escape dismisses
+- [x] Arrow keys navigate among filtered results; search clears on dismiss
 
 **Acceptance criteria:** Typing filters cards in real time. Images hidden during search. Escape clears before dismissing. Keyboard navigation works on filtered results.
 
@@ -543,8 +543,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** 3.3 and 3.4 complete. Starting 3.5 (basic text search).  
-**Next task:** M3.5 — add search field to overlay, filter cards by case-insensitive substring match, hide image items during active query.
+**Milestone:** 3.5 complete. Starting 3.6 (UI iteration: selection state).  
+**Next task:** M3.6 — implement three selection state variants for live comparison.
 
 ---
 

@@ -1,7 +1,7 @@
 import AppKit
 
 final class OverlayPanel: NSPanel {
-    static let panelHeight: CGFloat = 172
+    static let panelHeight: CGFloat = 216
     var onDismiss: (() -> Void)?
     var onPaste: (() -> Void)?
     var onDelete: (() -> Void)?
@@ -73,7 +73,11 @@ final class OverlayPanel: NSPanel {
             guard let self else { return event }
             switch event.keyCode {
             case 53: // Escape
-                self.hide()
+                if let state = self.overlayState, !state.searchQuery.isEmpty {
+                    state.searchQuery = ""
+                } else {
+                    self.hide()
+                }
                 return nil
             case 124: // Right arrow
                 self.overlayState?.moveSelection(by: 1)
@@ -85,6 +89,9 @@ final class OverlayPanel: NSPanel {
                 self.onPaste?()
                 return nil
             case 51: // Backspace/Delete
+                if let state = self.overlayState, !state.searchQuery.isEmpty {
+                    return event  // let TextField handle backspace within the query
+                }
                 self.onDelete?()
                 return nil
             default:
