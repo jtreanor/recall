@@ -16,14 +16,14 @@ struct HistoryItem {
 }
 
 final class HistoryStore {
-    static var historyLimit: Int { SettingsManager.shared.historyLimit }
-
     private let db: Database
     private let imagesDir: URL
+    private let settings: SettingsManager
 
-    init(db: Database, imagesDir: URL) {
+    init(db: Database, imagesDir: URL, settings: SettingsManager = .shared) {
         self.db = db
         self.imagesDir = imagesDir
+        self.settings = settings
     }
 
     convenience init() throws {
@@ -117,8 +117,8 @@ final class HistoryStore {
             .int64(now), .int64(now), .text("text"), .text(text), .text(hash), bundleParam
         )
         let id = db.lastInsertRowid
-        try pruneToLimit(Self.historyLimit)
-        try pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
+        try pruneToLimit(settings.historyLimit)
+        try pruneExpired(settings.itemMaxAgeSecs)
         return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, contentHash: hash,
                            sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000))
@@ -139,8 +139,8 @@ final class HistoryStore {
             .int64(now), .int64(now), .text("image"), .text(filePath), .text(hash), bundleParam
         )
         let id = db.lastInsertRowid
-        try pruneToLimit(Self.historyLimit)
-        try pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
+        try pruneToLimit(settings.historyLimit)
+        try pruneExpired(settings.itemMaxAgeSecs)
         return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, contentHash: hash,
                            sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000))

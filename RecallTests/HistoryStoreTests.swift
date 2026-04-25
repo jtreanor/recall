@@ -5,6 +5,7 @@ import AppKit
 final class HistoryStoreTests: XCTestCase {
     var store: HistoryStore!
     var tempDir: URL!
+    var defaultsSuiteName: String!
 
     override func setUp() {
         super.setUp()
@@ -12,12 +13,17 @@ final class HistoryStoreTests: XCTestCase {
         let imagesDir = tempDir.appendingPathComponent("images")
         try! FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
         let db = try! Database(path: tempDir.appendingPathComponent("test.db").path)
-        store = HistoryStore(db: db, imagesDir: imagesDir)
+        defaultsSuiteName = "RecallTests.\(UUID().uuidString)"
+        let testDefaults = UserDefaults(suiteName: defaultsSuiteName)!
+        testDefaults.set(500, forKey: "historyLimit")
+        let settings = SettingsManager(defaults: testDefaults)
+        store = HistoryStore(db: db, imagesDir: imagesDir, settings: settings)
     }
 
     override func tearDown() {
         store = nil
         try? FileManager.default.removeItem(at: tempDir)
+        UserDefaults.standard.removePersistentDomain(forName: defaultsSuiteName)
         super.tearDown()
     }
 

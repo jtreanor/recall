@@ -348,17 +348,17 @@ Build the app and walk through a manual checklist interactively. Each step below
 
 ---
 
-### Milestone 3.1 — Test Isolation Fix
+### Milestone 3.1 — Test Isolation Fix ✅
 
 **Branch:** `feature/test-isolation`
 
 **Problem:** Tests currently share the production SQLite database and read live `UserDefaults` (e.g. history limit). Changing the history limit in Settings to 200 causes tests written against 500 to fail, and running the test suite leaves "unit-test" entries visible in the live app.
 
-- [ ] Audit every test that touches `HistoryStore` or `ClipboardMonitor` — identify all places the production DB path or `UserDefaults` is used
-- [ ] Refactor `HistoryStore` to accept an injectable database path (default: production path; tests pass a temp directory path)
-- [ ] Inject a fresh `UserDefaults` suite (not `.standard`) into tests that touch settings-dependent logic
-- [ ] Ensure every test cleans up its temp database on teardown
-- [ ] Confirm: suite passes with production history limit set to 200; no test-originated items appear in the live app after running tests
+- [x] Audit every test that touches `HistoryStore` or `ClipboardMonitor` — identify all places the production DB path or `UserDefaults` is used
+- [x] Refactor `HistoryStore` to accept an injectable database path (default: production path; tests pass a temp directory path)
+- [x] Inject a fresh `UserDefaults` suite (not `.standard`) into tests that touch settings-dependent logic
+- [x] Ensure every test cleans up its temp database on teardown
+- [x] Confirm: suite passes with production history limit set to 200; no test-originated items appear in the live app after running tests
 
 ---
 
@@ -488,8 +488,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** Starting 3.1 (test isolation fix).  
-**Next task:** M3.1 — fix test isolation so tests don't share the production DB or UserDefaults.
+**Milestone:** 3.1 complete. Starting 3.2 (app icon + open at login).  
+**Next task:** M3.2 — fix app icon in Accessibility list; add Open at Login toggle.
 
 ---
 
