@@ -67,6 +67,16 @@ struct SettingsManager {
         nonmutating set { try? loginItemService.setEnabled(newValue) }
     }
 
+    // When false, sensitive items (passwords etc.) are never written to the database.
+    var storeSensitiveItems: Bool {
+        get {
+            defaults.object(forKey: "storeSensitiveItems") != nil
+                ? defaults.bool(forKey: "storeSensitiveItems")
+                : true
+        }
+        nonmutating set { defaults.set(newValue, forKey: "storeSensitiveItems") }
+    }
+
     func setHotkey(keyCode: UInt32, modifiers: UInt32) {
         self.hotkeyKeyCode = keyCode
         self.hotkeyModifiers = modifiers
@@ -81,7 +91,7 @@ final class SettingsWindowController: NSWindowController {
 
     convenience init() {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 340, height: 305),
+            contentRect: NSRect(x: 0, y: 0, width: 340, height: 345),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -116,6 +126,7 @@ struct SettingsView: View {
     @State private var historyLimit: Int = SettingsManager.shared.historyLimit
     @State private var maxAgeSecs: Int = SettingsManager.shared.itemMaxAgeSecs
     @State private var openAtLogin: Bool = SettingsManager.shared.openAtLogin
+    @State private var storeSensitiveItems: Bool = SettingsManager.shared.storeSensitiveItems
     @State private var showClearConfirm = false
 
     var body: some View {
@@ -170,6 +181,19 @@ struct SettingsView: View {
                     .labelsHidden()
                     .onChange(of: openAtLogin) { newValue in
                         SettingsManager.shared.openAtLogin = newValue
+                    }
+                Spacer()
+            }
+
+            // Store sensitive items row
+            HStack {
+                Text("Store Passwords")
+                    .frame(width: 130, alignment: .leading)
+                Toggle("", isOn: $storeSensitiveItems)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .onChange(of: storeSensitiveItems) { newValue in
+                        SettingsManager.shared.storeSensitiveItems = newValue
                     }
                 Spacer()
             }

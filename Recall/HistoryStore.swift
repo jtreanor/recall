@@ -9,6 +9,8 @@ struct HistoryItem {
     let contentHash: String
     let sourceBundleId: String?
     let createdAt: Date
+    var isSensitive: Bool = false
+    var expiresAt: Date? = nil
 
     enum Kind: String {
         case text, image
@@ -37,17 +39,42 @@ final class HistoryStore {
     }
 
     @discardableResult
-    func insert(item: ClipboardItem, sourceBundleId: String? = nil) throws -> HistoryItem? {
+    func insert(item: ClipboardItem, sourceBundleId: String? = nil, isSensitive: Bool = false) throws -> HistoryItem? {
+        if isSensitive && !settings.storeSensitiveItems { return nil }
         switch item {
-        case .text(let s):       return try insertText(s, sourceBundleId: sourceBundleId)
-        case .image(let png, _): return try insertImage(png: png, sourceBundleId: sourceBundleId)
+        case .text(let s):       return try insertText(s, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
+        case .image(let png, _): return try insertImage(png: png, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
         }
     }
 
     func fetchAll() throws -> [HistoryItem] {
-        try db.query(
-            "SELECT id, created_at, type, text_content, image_path, content_hash, source_bundle_id FROM items ORDER BY updated_at DESC, id DESC"
+        let nowMicros = Int64(Date().timeIntervalSince1970 * 1_000_000)
+        return try db.query(
+            """
+            SELECT id, created_at, type, text_content, image_path, content_hash,
+                   source_bundle_id, is_sensitive, expires_at
+            FROM items
+            WHERE NOT (is_sensitive = 1 AND expires_at IS NOT NULL AND expires_at < ?)
+            ORDER BY updated_at DESC, id DESC
+            """,
+            .int64(nowMicros)
         ).compactMap(row(from:))
+    }
+
+    func sweepExpiredSensitive() throws {
+        let nowMicros = Int64(Date().timeIntervalSince1970 * 1_000_000)
+        let rows = try db.query(
+            "SELECT id, image_path FROM items WHERE is_sensitive = 1 AND expires_at IS NOT NULL AND expires_at < ?",
+            .int64(nowMicros)
+        )
+        for r in rows {
+            if let path = r["image_path"]?.stringValue {
+                try? FileManager.default.removeItem(atPath: path)
+            }
+            if let id = r["id"]?.int64Value {
+                try db.run("DELETE FROM items WHERE id = ?", .int64(id))
+            }
+        }
     }
 
     func delete(id: Int64) throws {
@@ -103,7 +130,7 @@ final class HistoryStore {
 
     // MARK: - Private
 
-    private func insertText(_ text: String, sourceBundleId: String?) throws -> HistoryItem? {
+    private func insertText(_ text: String, sourceBundleId: String?, isSensitive: Bool) throws -> HistoryItem? {
         guard let data = text.data(using: .utf8) else { return nil }
         let hash = sha256(data)
         let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
@@ -112,19 +139,24 @@ final class HistoryStore {
             return existing
         }
         let bundleParam: DBParam = sourceBundleId.map { .text($0) } ?? .null
+        let expiresAt: Int64? = isSensitive ? now + Int64(15 * 60 * 1_000_000) : nil
+        let expiresParam: DBParam = expiresAt.map { .int64($0) } ?? .null
         try db.run(
-            "INSERT INTO items (created_at, updated_at, type, text_content, content_hash, source_bundle_id) VALUES (?,?,?,?,?,?)",
-            .int64(now), .int64(now), .text("text"), .text(text), .text(hash), bundleParam
+            "INSERT INTO items (created_at, updated_at, type, text_content, content_hash, source_bundle_id, is_sensitive, expires_at) VALUES (?,?,?,?,?,?,?,?)",
+            .int64(now), .int64(now), .text("text"), .text(text), .text(hash), bundleParam,
+            .int64(isSensitive ? 1 : 0), expiresParam
         )
         let id = db.lastInsertRowid
         try pruneToLimit(settings.historyLimit)
         try pruneExpired(settings.itemMaxAgeSecs)
+        let expiresDate = expiresAt.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
         return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, contentHash: hash,
                            sourceBundleId: sourceBundleId,
-                           createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000))
+                           createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000),
+                           isSensitive: isSensitive, expiresAt: expiresDate)
     }
 
-    private func insertImage(png: Data, sourceBundleId: String?) throws -> HistoryItem? {
+    private func insertImage(png: Data, sourceBundleId: String?, isSensitive: Bool) throws -> HistoryItem? {
         let hash = sha256(png)
         let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
         if let existing = try itemForHash(hash) {
@@ -134,21 +166,26 @@ final class HistoryStore {
         let filePath = imagesDir.appendingPathComponent("\(hash).png").path
         try png.write(to: URL(fileURLWithPath: filePath))
         let bundleParam: DBParam = sourceBundleId.map { .text($0) } ?? .null
+        let expiresAt: Int64? = isSensitive ? now + Int64(15 * 60 * 1_000_000) : nil
+        let expiresParam: DBParam = expiresAt.map { .int64($0) } ?? .null
         try db.run(
-            "INSERT INTO items (created_at, updated_at, type, image_path, content_hash, source_bundle_id) VALUES (?,?,?,?,?,?)",
-            .int64(now), .int64(now), .text("image"), .text(filePath), .text(hash), bundleParam
+            "INSERT INTO items (created_at, updated_at, type, image_path, content_hash, source_bundle_id, is_sensitive, expires_at) VALUES (?,?,?,?,?,?,?,?)",
+            .int64(now), .int64(now), .text("image"), .text(filePath), .text(hash), bundleParam,
+            .int64(isSensitive ? 1 : 0), expiresParam
         )
         let id = db.lastInsertRowid
         try pruneToLimit(settings.historyLimit)
         try pruneExpired(settings.itemMaxAgeSecs)
+        let expiresDate = expiresAt.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
         return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, contentHash: hash,
                            sourceBundleId: sourceBundleId,
-                           createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000))
+                           createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000),
+                           isSensitive: isSensitive, expiresAt: expiresDate)
     }
 
     private func itemForHash(_ hash: String) throws -> HistoryItem? {
         let rows = try db.query(
-            "SELECT id, created_at, type, text_content, image_path, content_hash, source_bundle_id FROM items WHERE content_hash = ? LIMIT 1",
+            "SELECT id, created_at, type, text_content, image_path, content_hash, source_bundle_id, is_sensitive, expires_at FROM items WHERE content_hash = ? LIMIT 1",
             .text(hash)
         )
         return rows.first.flatMap(row(from:))
@@ -165,13 +202,17 @@ final class HistoryStore {
               let kind = HistoryItem.Kind(rawValue: typeStr),
               let hash = r["content_hash"]?.stringValue,
               let ts = r["created_at"]?.int64Value else { return nil }
+        let isSensitive = r["is_sensitive"].flatMap { $0.int64Value }.map { $0 != 0 } ?? false
+        let expiresAt = r["expires_at"]?.int64Value.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
         return HistoryItem(
             id: id, kind: kind,
             text: r["text_content"]?.stringValue,
             imagePath: r["image_path"]?.stringValue,
             contentHash: hash,
             sourceBundleId: r["source_bundle_id"]?.stringValue,
-            createdAt: Date(timeIntervalSince1970: TimeInterval(ts) / 1_000_000)
+            createdAt: Date(timeIntervalSince1970: TimeInterval(ts) / 1_000_000),
+            isSensitive: isSensitive,
+            expiresAt: expiresAt
         )
     }
 
@@ -179,6 +220,14 @@ final class HistoryStore {
     func backdateAll(to timestamp: Int64) throws {
         try db.run("UPDATE items SET updated_at = ?", .int64(timestamp))
     }
+
+    // Overrides expires_at on all sensitive rows — used in tests to simulate expiry.
+    func overrideExpiresAt(_ timestamp: Int64) throws {
+        try db.run("UPDATE items SET expires_at = ? WHERE is_sensitive = 1", .int64(timestamp))
+    }
+
+    // Exposes the underlying Database for sharing across HistoryStore instances in tests.
+    var testDB: Database { db }
 
     private func sha256(_ data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
