@@ -48,7 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.overlayState = overlayState
         panel.onDismiss = { [weak self] in
             self?.isOverlayVisible = false
-            self?.overlayState.searchQuery = ""
+            self?.overlayState.isSearchExpanded = false  // clears searchQuery via didSet
         }
         panel.onPaste = { [weak self] in self?.pasteSelectedItem() }
         panel.onDelete = { [weak self] in self?.deleteSelectedItem() }
@@ -103,7 +103,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         try? historyStore?.pruneExpired(SettingsManager.shared.itemMaxAgeSecs)
         overlayState.items = (try? historyStore?.fetchAll()) ?? overlayState.items
         overlayPanel?.show()
-        overlayState.showCount += 1
     }
 
     func hideOverlay() {
@@ -249,9 +248,11 @@ extension AppDelegate: NSMenuDelegate {
 final class OverlayState: ObservableObject {
     @Published var items: [HistoryItem] = []
     @Published var selectedIndex: Int = 0
-    @Published var showCount: Int = 0
     @Published var searchQuery: String = "" {
         didSet { selectedIndex = 0 }
+    }
+    @Published var isSearchExpanded: Bool = false {
+        didSet { if !isSearchExpanded { searchQuery = "" } }
     }
 
     var filteredItems: [HistoryItem] {
@@ -280,7 +281,7 @@ private struct OverlayRootView: View {
             totalItemCount: state.items.count,
             selectedIndex: $state.selectedIndex,
             searchQuery: $state.searchQuery,
-            showCount: state.showCount,
+            isSearchExpanded: $state.isSearchExpanded,
             onPaste: onPaste
         )
     }

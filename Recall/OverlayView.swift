@@ -2,41 +2,59 @@ import SwiftUI
 import AppKit
 
 struct OverlayView: View {
-    let items: [HistoryItem]        // pre-filtered items to display
-    let totalItemCount: Int         // total unfiltered count, for empty state
+    let items: [HistoryItem]
+    let totalItemCount: Int
     @Binding var selectedIndex: Int
     @Binding var searchQuery: String
-    let showCount: Int              // incremented on each overlay show; triggers search focus
+    @Binding var isSearchExpanded: Bool
     var onPaste: (() -> Void)?
 
     @FocusState private var searchFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
-            searchBar
+            header
+            Divider().opacity(0.25)
             content
         }
-        .onChange(of: showCount) { _ in
-            searchFocused = true
+        .onChange(of: isSearchExpanded) { expanded in
+            if expanded {
+                DispatchQueue.main.async { searchFocused = true }
+            }
         }
     }
 
-    private var searchBar: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 13))
-                .foregroundStyle(.tertiary)
-            TextField("Search history…", text: $searchQuery)
-                .textFieldStyle(.plain)
-                .font(.system(size: 13))
-                .focused($searchFocused)
+    private var header: some View {
+        HStack(spacing: 0) {
+            if isSearchExpanded {
+                HStack(spacing: 6) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    TextField("Search…", text: $searchQuery)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 13))
+                        .focused($searchFocused)
+                }
+                .padding(.horizontal, 14)
+                .transition(.opacity)
+            } else {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) { isSearchExpanded = true }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.tertiary)
+                        .contentShape(Rectangle())
+                        .padding(6)
+                }
+                .buttonStyle(.plain)
+                .padding(.leading, 8)
+                .transition(.opacity)
+                Spacer()
+            }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .padding(.horizontal, 14)
-        .padding(.top, 8)
-        .padding(.bottom, 4)
+        .frame(height: 32)
     }
 
     @ViewBuilder

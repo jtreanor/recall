@@ -5,7 +5,12 @@ import AppKit
 
 final class OverlayViewTests: XCTestCase {
 
-    private func makeSearchQuery(_ value: String = "") -> Binding<String> {
+    private func makeStringBinding(_ value: String = "") -> Binding<String> {
+        var v = value
+        return Binding(get: { v }, set: { v = $0 })
+    }
+
+    private func makeBoolBinding(_ value: Bool = false) -> Binding<Bool> {
         var v = value
         return Binding(get: { v }, set: { v = $0 })
     }
@@ -35,9 +40,11 @@ final class OverlayViewTests: XCTestCase {
         var selectedIndex = 0
         let binding = Binding(get: { selectedIndex }, set: { selectedIndex = $0 })
         let view = OverlayView(items: [], totalItemCount: 0,
-                               selectedIndex: binding, searchQuery: makeSearchQuery(), showCount: 0)
+                               selectedIndex: binding,
+                               searchQuery: makeStringBinding(),
+                               isSearchExpanded: makeBoolBinding())
         let hosting = NSHostingView(rootView: view)
-        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 180)
+        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 200)
         XCTAssertNotNil(hosting)
     }
 
@@ -49,9 +56,11 @@ final class OverlayViewTests: XCTestCase {
                         contentHash: "hash1", sourceBundleId: nil, createdAt: Date())
         ]
         let view = OverlayView(items: items, totalItemCount: items.count,
-                               selectedIndex: binding, searchQuery: makeSearchQuery(), showCount: 0)
+                               selectedIndex: binding,
+                               searchQuery: makeStringBinding(),
+                               isSearchExpanded: makeBoolBinding())
         let hosting = NSHostingView(rootView: view)
-        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 180)
+        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 200)
         XCTAssertNotNil(hosting)
     }
 
@@ -60,10 +69,12 @@ final class OverlayViewTests: XCTestCase {
         let binding = Binding(get: { selectedIndex }, set: { selectedIndex = $0 })
         var pasteCalled = false
         let view = OverlayView(items: [], totalItemCount: 0,
-                               selectedIndex: binding, searchQuery: makeSearchQuery(), showCount: 0,
+                               selectedIndex: binding,
+                               searchQuery: makeStringBinding(),
+                               isSearchExpanded: makeBoolBinding(),
                                onPaste: { pasteCalled = true })
         let hosting = NSHostingView(rootView: view)
-        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 180)
+        hosting.frame = CGRect(x: 0, y: 0, width: 400, height: 200)
         XCTAssertNotNil(hosting)
         view.onPaste?()
         XCTAssertTrue(pasteCalled)
@@ -152,5 +163,13 @@ final class OverlayViewTests: XCTestCase {
         state.selectedIndex = 1
         state.searchQuery = "hello"
         XCTAssertEqual(state.selectedIndex, 0)
+    }
+
+    func testCollapsingSearchClearsQuery() {
+        let state = OverlayState()
+        state.isSearchExpanded = true
+        state.searchQuery = "test"
+        state.isSearchExpanded = false
+        XCTAssertEqual(state.searchQuery, "")
     }
 }
