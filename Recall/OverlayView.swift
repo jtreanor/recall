@@ -4,6 +4,7 @@ import AppKit
 struct OverlayView: View {
     let items: [HistoryItem]
     @Binding var selectedIndex: Int
+    var onPaste: (() -> Void)?
 
     var body: some View {
         if items.isEmpty {
@@ -16,7 +17,10 @@ struct OverlayView: View {
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                             ClipboardItemCard(item: item, isSelected: index == selectedIndex)
                                 .id(item.id)
-                                .onTapGesture { selectedIndex = index }
+                                .onTapGesture {
+                                    selectedIndex = index
+                                    onPaste?()
+                                }
                         }
                     }
                     .padding(.horizontal, 14)

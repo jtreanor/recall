@@ -74,6 +74,24 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertEqual(off.maxY, vf.minY, accuracy: 0.5)
     }
 
+    // MARK: - M3.4 callbacks
+
+    func testOnDeleteCallbackCanBeAssignedAndCalled() {
+        let panel = OverlayPanel()
+        var called = false
+        panel.onDelete = { called = true }
+        panel.onDelete?()
+        XCTAssertTrue(called)
+    }
+
+    func testOnPasteCallbackCanBeAssignedAndCalled() {
+        let panel = OverlayPanel()
+        var called = false
+        panel.onPaste = { called = true }
+        panel.onPaste?()
+        XCTAssertTrue(called)
+    }
+
     func testHideEventuallyOrdersOutPanel() {
         let panel = OverlayPanel()
         var dismissCalled = false

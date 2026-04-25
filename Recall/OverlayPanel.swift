@@ -4,6 +4,7 @@ final class OverlayPanel: NSPanel {
     static let panelHeight: CGFloat = 172
     var onDismiss: (() -> Void)?
     var onPaste: (() -> Void)?
+    var onDelete: (() -> Void)?
     weak var overlayState: OverlayState?
     private var localEventMonitor: Any?
     private var globalEventMonitor: Any?
@@ -82,6 +83,9 @@ final class OverlayPanel: NSPanel {
                 return nil
             case 36, 76: // Return, Enter (numpad)
                 self.onPaste?()
+                return nil
+            case 51: // Backspace/Delete
+                self.onDelete?()
                 return nil
             default:
                 return event

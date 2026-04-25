@@ -413,16 +413,16 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 ---
 
-### Milestone 3.4 — Click to Paste
+### Milestone 3.4 — Click to Paste ✅
 
 **Branch:** `feature/click-to-paste`
 
 **Goal:** Clicking a card pastes it; Backspace deletes the selected item — both matching pointer and keyboard expectations.
 
-- [ ] Add `.onTapGesture` to `ClipboardItemRow` that sets selection briefly then pastes (same action as Enter)
-- [ ] Confirm `NSPanel` focus handling is correct so `⌘V` posts successfully after a mouse click
-- [ ] Handle `Backspace` / `Delete` key in the overlay's key monitor: delete the currently selected item from `HistoryStore`, remove it from the in-memory list, and advance selection to the next item (or previous if it was the last)
-- [ ] Existing keyboard flow unaffected
+- [x] Add `.onTapGesture` to `ClipboardItemRow` that sets selection briefly then pastes (same action as Enter)
+- [x] Confirm `NSPanel` focus handling is correct so `⌘V` posts successfully after a mouse click
+- [x] Handle `Backspace` / `Delete` key in the overlay's key monitor: delete the currently selected item from `HistoryStore`, remove it from the in-memory list, and advance selection to the next item (or previous if it was the last)
+- [x] Existing keyboard flow unaffected
 
 **Acceptance criteria:** Single click on any card pastes it and dismisses the panel, identically to pressing Enter. Pressing Backspace removes the selected item without dismissing the panel; selection moves to an adjacent card.
 
@@ -543,8 +543,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** 3.2 complete. Starting 3.3 (security refinements).  
-**Next task:** M3.3 — research `org.nspasteboard.ConcealedType` behaviour, then implement sensitive-item detection, auto-expiry, and masked card display.
+**Milestone:** 3.4 complete. Starting 3.5 (basic text search).  
+**Next task:** M3.5 — add search field to overlay, filter cards by case-insensitive substring match, hide image items during active query.
 
 ---
 

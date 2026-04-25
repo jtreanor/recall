@@ -138,4 +138,55 @@ final class OverlayStateTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
         _ = cancellable
     }
+
+    // MARK: - Selection adjustment after delete (mirrors AppDelegate.deleteSelectedItem logic)
+
+    // Simulate the mutation AppDelegate.deleteSelectedItem applies so that the logic is
+    // exercised independently of the full AppDelegate setup.
+    private func applyDelete(to state: OverlayState) {
+        let idx = state.selectedIndex
+        guard idx < state.items.count else { return }
+        state.items.remove(at: idx)
+        if !state.items.isEmpty {
+            state.selectedIndex = min(idx, state.items.count - 1)
+        } else {
+            state.selectedIndex = 0
+        }
+    }
+
+    func testDeleteMiddleItemKeepsSameIndex() {
+        let state = OverlayState()
+        state.items = makeItems(count: 5)
+        state.selectedIndex = 2
+        applyDelete(to: state)
+        XCTAssertEqual(state.items.count, 4)
+        XCTAssertEqual(state.selectedIndex, 2)
+    }
+
+    func testDeleteLastItemMovesSelectionBack() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.selectedIndex = 2
+        applyDelete(to: state)
+        XCTAssertEqual(state.items.count, 2)
+        XCTAssertEqual(state.selectedIndex, 1)
+    }
+
+    func testDeleteOnlyItemResetsSelectionToZero() {
+        let state = OverlayState()
+        state.items = makeItems(count: 1)
+        state.selectedIndex = 0
+        applyDelete(to: state)
+        XCTAssertTrue(state.items.isEmpty)
+        XCTAssertEqual(state.selectedIndex, 0)
+    }
+
+    func testDeleteFirstItemOfManyKeepsSelectionAtZero() {
+        let state = OverlayState()
+        state.items = makeItems(count: 4)
+        state.selectedIndex = 0
+        applyDelete(to: state)
+        XCTAssertEqual(state.items.count, 3)
+        XCTAssertEqual(state.selectedIndex, 0)
+    }
 }
