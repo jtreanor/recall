@@ -2,6 +2,22 @@ import XCTest
 import Carbon
 @testable import Recall
 
+// MARK: - MockLoginItemService
+
+final class MockLoginItemService: LoginItemService {
+    var isEnabled: Bool = false
+    var setEnabledCallCount = 0
+    var lastSetEnabledValue: Bool?
+    var shouldThrow = false
+
+    func setEnabled(_ enabled: Bool) throws {
+        if shouldThrow { throw NSError(domain: "com.recall.tests", code: 1) }
+        setEnabledCallCount += 1
+        lastSetEnabledValue = enabled
+        isEnabled = enabled
+    }
+}
+
 final class SettingsManagerTests: XCTestCase {
     private var defaults: UserDefaults!
     private let suiteName = "com.recall.tests.settings"
@@ -75,10 +91,50 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(manager.hotkeyModifiers, UInt32(cmdKey))
     }
 
+    func testOpenAtLoginDefaultsToFalse() {
+        let mock = MockLoginItemService()
+        let manager = makeManager(loginItemService: mock)
+        XCTAssertFalse(manager.openAtLogin)
+    }
+
+    func testOpenAtLoginReflectsServiceState() {
+        let mock = MockLoginItemService()
+        mock.isEnabled = true
+        let manager = makeManager(loginItemService: mock)
+        XCTAssertTrue(manager.openAtLogin)
+    }
+
+    func testOpenAtLoginEnableCallsSetEnabled() {
+        let mock = MockLoginItemService()
+        let manager = makeManager(loginItemService: mock)
+        manager.openAtLogin = true
+        XCTAssertEqual(mock.setEnabledCallCount, 1)
+        XCTAssertEqual(mock.lastSetEnabledValue, true)
+        XCTAssertTrue(mock.isEnabled)
+    }
+
+    func testOpenAtLoginDisableCallsSetEnabled() {
+        let mock = MockLoginItemService()
+        mock.isEnabled = true
+        let manager = makeManager(loginItemService: mock)
+        manager.openAtLogin = false
+        XCTAssertEqual(mock.setEnabledCallCount, 1)
+        XCTAssertEqual(mock.lastSetEnabledValue, false)
+        XCTAssertFalse(mock.isEnabled)
+    }
+
+    func testOpenAtLoginThrowingServiceDoesNotCrash() {
+        let mock = MockLoginItemService()
+        mock.shouldThrow = true
+        let manager = makeManager(loginItemService: mock)
+        XCTAssertNoThrow(manager.openAtLogin = true)
+        XCTAssertFalse(mock.isEnabled)
+    }
+
     // MARK: - Helpers
 
-    private func makeManager() -> SettingsManager {
-        SettingsManager(defaults: defaults)
+    private func makeManager(loginItemService: LoginItemService = MockLoginItemService()) -> SettingsManager {
+        SettingsManager(defaults: defaults, loginItemService: loginItemService)
     }
 }
 

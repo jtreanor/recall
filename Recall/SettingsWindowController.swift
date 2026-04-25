@@ -3,14 +3,31 @@ import Carbon
 import ServiceManagement
 import SwiftUI
 
+// MARK: - LoginItemService
+
+protocol LoginItemService {
+    var isEnabled: Bool { get }
+    func setEnabled(_ enabled: Bool) throws
+}
+
+struct SMLoginItemService: LoginItemService {
+    var isEnabled: Bool { SMAppService.mainApp.status == .enabled }
+    func setEnabled(_ enabled: Bool) throws {
+        if enabled { try SMAppService.mainApp.register() }
+        else { try SMAppService.mainApp.unregister() }
+    }
+}
+
 // MARK: - SettingsManager
 
 struct SettingsManager {
     static let shared = SettingsManager()
     private let defaults: UserDefaults
+    private let loginItemService: LoginItemService
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, loginItemService: LoginItemService = SMLoginItemService()) {
         self.defaults = defaults
+        self.loginItemService = loginItemService
     }
 
     var hotkeyKeyCode: UInt32 {
@@ -46,18 +63,8 @@ struct SettingsManager {
     }
 
     var openAtLogin: Bool {
-        get { SMAppService.mainApp.status == .enabled }
-        nonmutating set {
-            do {
-                if newValue {
-                    try SMAppService.mainApp.register()
-                } else {
-                    try SMAppService.mainApp.unregister()
-                }
-            } catch {
-                // Registration can fail if the user denies or the service is in a bad state; ignore silently
-            }
-        }
+        get { loginItemService.isEnabled }
+        nonmutating set { try? loginItemService.setEnabled(newValue) }
     }
 
     func setHotkey(keyCode: UInt32, modifiers: UInt32) {
