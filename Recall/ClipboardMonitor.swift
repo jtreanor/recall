@@ -111,8 +111,12 @@ final class ClipboardMonitor {
 
         let bundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
         let hasConcealed = pb.types?.contains(Self.concealedType) == true
+        let chromiumSourceURL = pb.data(forType: NSPasteboard.PasteboardType("org.chromium.source-url"))
+            .flatMap { String(data: $0, encoding: .utf8) }
+        let fromBrowserExtension = chromiumSourceURL?.hasPrefix("chrome-extension://") == true
         let isSensitive = hasConcealed
             || bundleId.map { Self.passwordManagerBundleIds.contains($0) } == true
+            || fromBrowserExtension
 
         if let text = pb.string(forType: .string), !text.isEmpty {
             itemPublisher.send(CapturedItem(item: .text(text), sourceBundleId: bundleId, isSensitive: isSensitive))
