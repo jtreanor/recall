@@ -91,6 +91,50 @@ final class ClipboardMonitorSensitiveTests: XCTestCase {
         XCTAssertFalse(url.hasPrefix("chrome-extension://"))
     }
 
+    func testPasswordManagerBundleIdMarksItemAsSensitive() {
+        var received: CapturedItem?
+        let exp = expectation(description: "item received")
+        monitor.itemPublisher.sink { received = $0; exp.fulfill() }.store(in: &cancellables)
+
+        monitor.bundleIdProvider = { "com.1password.1password" }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("secret", forType: .string)
+        monitor.poll()
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(received?.isSensitive, true)
+    }
+
+    func testBrowserWithConcealedTypeMarksItemAsSensitive() {
+        var received: CapturedItem?
+        let exp = expectation(description: "item received")
+        monitor.itemPublisher.sink { received = $0; exp.fulfill() }.store(in: &cancellables)
+
+        monitor.bundleIdProvider = { "com.google.Chrome" }
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.declareTypes([.string, NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")], owner: nil)
+        pb.setString("browser-password", forType: .string)
+        monitor.poll()
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(received?.isSensitive, true)
+    }
+
+    func testNormalAppWithoutConcealedTypeNotSensitive() {
+        var received: CapturedItem?
+        let exp = expectation(description: "item received")
+        monitor.itemPublisher.sink { received = $0; exp.fulfill() }.store(in: &cancellables)
+
+        monitor.bundleIdProvider = { "com.apple.Notes" }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("ordinary note", forType: .string)
+        monitor.poll()
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(received?.isSensitive, false)
+    }
+
     func testKnownPasswordManagerBundleIdsAreExposed() {
         // Verify the set is non-empty and contains expected entries (white-box check).
         let ids = ClipboardMonitor.passwordManagerBundleIds
