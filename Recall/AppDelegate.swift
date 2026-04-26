@@ -46,7 +46,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         (panel.contentView as? NSVisualEffectView)?.addSubview(hostingView)
         hostingView.frame = panel.contentView?.bounds ?? .zero
         panel.overlayState = overlayState
-        panel.onDismiss = { [weak self] in self?.isOverlayVisible = false }
+        panel.onDismiss = { [weak self] in
+            self?.isOverlayVisible = false
+            self?.overlayState.isSearchExpanded = false  // clears searchQuery via didSet
+        }
         panel.onPaste = { [weak self] in self?.pasteSelectedItem() }
         panel.onDelete = { [weak self] in self?.deleteSelectedItem() }
         overlayPanel = panel
@@ -109,8 +112,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func pasteSelectedItem() {
         let idx = overlayState.selectedIndex
-        guard idx < overlayState.items.count else { return }
-        let item = overlayState.items[idx]
+        let displayed = overlayState.filteredItems
+        guard idx < displayed.count else { return }
+        let item = displayed[idx]
         writeToPasteboard(item)
 
         guard AccessibilityManager.isAccessibilityTrusted() else {
@@ -131,15 +135,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func deleteSelectedItem() {
         let idx = overlayState.selectedIndex
-        guard idx < overlayState.items.count else { return }
-        let item = overlayState.items[idx]
+        let displayed = overlayState.filteredItems
+        guard idx < displayed.count else { return }
+        let item = displayed[idx]
         try? historyStore?.delete(id: item.id)
-        overlayState.items.remove(at: idx)
-        if !overlayState.items.isEmpty {
-            overlayState.selectedIndex = min(idx, overlayState.items.count - 1)
-        } else {
-            overlayState.selectedIndex = 0
-        }
+        overlayState.items.removeAll { $0.id == item.id }
+        let newCount = overlayState.filteredItems.count
+        overlayState.selectedIndex = newCount > 0 ? min(idx, newCount - 1) : 0
     }
 
     func writeToPasteboard(_ item: HistoryItem) {
@@ -246,10 +248,26 @@ extension AppDelegate: NSMenuDelegate {
 final class OverlayState: ObservableObject {
     @Published var items: [HistoryItem] = []
     @Published var selectedIndex: Int = 0
+    @Published var searchQuery: String = "" {
+        didSet { selectedIndex = 0 }
+    }
+    @Published var isSearchExpanded: Bool = false {
+        didSet { if !isSearchExpanded { searchQuery = "" } }
+    }
+
+    var filteredItems: [HistoryItem] {
+        guard !searchQuery.isEmpty else { return items }
+        let q = searchQuery.lowercased()
+        return items.filter { item in
+            guard item.kind == .text, let text = item.text else { return false }
+            return text.lowercased().contains(q)
+        }
+    }
 
     func moveSelection(by delta: Int) {
-        guard !items.isEmpty else { return }
-        selectedIndex = max(0, min(items.count - 1, selectedIndex + delta))
+        let count = filteredItems.count
+        guard count > 0 else { return }
+        selectedIndex = max(0, min(count - 1, selectedIndex + delta))
     }
 }
 
@@ -258,6 +276,13 @@ private struct OverlayRootView: View {
     var onPaste: (() -> Void)?
 
     var body: some View {
-        OverlayView(items: state.items, selectedIndex: $state.selectedIndex, onPaste: onPaste)
+        OverlayView(
+            items: state.filteredItems,
+            totalItemCount: state.items.count,
+            selectedIndex: $state.selectedIndex,
+            searchQuery: $state.searchQuery,
+            isSearchExpanded: $state.isSearchExpanded,
+            onPaste: onPaste
+        )
     }
 }

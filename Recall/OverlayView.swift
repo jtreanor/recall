@@ -3,13 +3,75 @@ import AppKit
 
 struct OverlayView: View {
     let items: [HistoryItem]
+    let totalItemCount: Int
     @Binding var selectedIndex: Int
+    @Binding var searchQuery: String
+    @Binding var isSearchExpanded: Bool
     var onPaste: (() -> Void)?
 
+    @FocusState private var searchFocused: Bool
+
     var body: some View {
-        if items.isEmpty {
+        VStack(spacing: 0) {
+            header
+            Divider().opacity(0.25)
+            content
+        }
+        .onChange(of: isSearchExpanded) { expanded in
+            if expanded {
+                DispatchQueue.main.async { searchFocused = true }
+            }
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+
+                TextField("Search…", text: $searchQuery)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 13))
+                    .focused($searchFocused)
+                    .opacity(isSearchExpanded ? 1 : 0)
+            }
+            .padding(.horizontal, 7)
+            .frame(width: isSearchExpanded ? 210 : 25, height: 22, alignment: .leading)
+            .clipped()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.primary.opacity(isSearchExpanded ? 0.07 : 0))
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.82)) {
+                    isSearchExpanded = true
+                }
+            }
+            .padding(.leading, 10)
+
+            Spacer()
+        }
+        .frame(height: 32)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if totalItemCount == 0 {
             EmptyStateView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if items.isEmpty {
+            VStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundStyle(.tertiary)
+                Text("No results")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal) {
@@ -25,7 +87,7 @@ struct OverlayView: View {
                     }
                     .padding(.horizontal, 14)
                     .padding(.bottom, 12)
-                    .padding(.top, 6)
+                    .padding(.top, 4)
                 }
                 .scrollIndicators(.hidden)
                 .onChange(of: selectedIndex) { newIndex in
