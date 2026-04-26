@@ -7,6 +7,7 @@ struct OverlayView: View {
     @Binding var selectedIndex: Int
     @Binding var searchQuery: String
     @Binding var isSearchExpanded: Bool
+    var selectionStyle: SelectionStyle = .borderOnly
     var onPaste: (() -> Void)?
 
     @FocusState private var searchFocused: Bool
@@ -53,6 +54,14 @@ struct OverlayView: View {
             .padding(.leading, 10)
 
             Spacer()
+
+            if !isSearchExpanded {
+                Text(selectionStyle.label)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.tertiary)
+                    .padding(.trailing, 12)
+                    .transition(.opacity)
+            }
         }
         .frame(height: 32)
     }
@@ -77,7 +86,7 @@ struct OverlayView: View {
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: 10) {
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                            ClipboardItemCard(item: item, isSelected: index == selectedIndex)
+                            ClipboardItemCard(item: item, isSelected: index == selectedIndex, selectionStyle: selectionStyle)
                                 .id(item.id)
                                 .onTapGesture {
                                     selectedIndex = index
@@ -117,17 +126,30 @@ struct EmptyStateView: View {
 struct ClipboardItemCard: View {
     let item: HistoryItem
     let isSelected: Bool
+    var selectionStyle: SelectionStyle = .borderOnly
 
     private static let cardWidth: CGFloat = 150
     private static let cardHeight: CGFloat = 150
 
     var body: some View {
+        cardBody
+            .frame(width: Self.cardWidth, height: Self.cardHeight)
+            .scaleEffect(scaleForStyle, anchor: .bottom)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isSelected)
+    }
+
+    private var scaleForStyle: CGFloat {
+        switch selectionStyle {
+        case .subtleZoom: return isSelected ? 1.05 : 1.0
+        default:          return 1.0
+        }
+    }
+
+    private var cardBody: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .fill(.thinMaterial)
-                .shadow(color: isSelected ? .black.opacity(0.35) : .black.opacity(0.12),
-                        radius: isSelected ? 10 : 4,
-                        y: isSelected ? 4 : 2)
+                .fill(cardFill)
+                .shadow(color: shadowColor, radius: shadowRadius, y: shadowY)
 
             if item.isSensitive {
                 sensitiveCardContent
@@ -137,13 +159,59 @@ struct ClipboardItemCard: View {
                 textCardContent
             }
         }
-        .frame(width: Self.cardWidth, height: Self.cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(isSelected ? Color.accentColor.opacity(0.7) : Color.clear, lineWidth: 1.5)
+                .stroke(borderColor, lineWidth: borderWidth)
         )
     }
+
+    // MARK: – Style helpers
+
+    private var cardFill: AnyShapeStyle {
+        switch selectionStyle {
+        case .elevatedGlow where isSelected:
+            return AnyShapeStyle(.ultraThinMaterial)
+        default:
+            return AnyShapeStyle(.thinMaterial)
+        }
+    }
+
+    private var shadowColor: Color {
+        switch selectionStyle {
+        case .borderOnly:
+            return .black.opacity(isSelected ? 0.35 : 0.12)
+        case .subtleZoom:
+            return .black.opacity(isSelected ? 0.30 : 0.12)
+        case .elevatedGlow:
+            return isSelected ? Color.accentColor.opacity(0.45) : .black.opacity(0.12)
+        }
+    }
+
+    private var shadowRadius: CGFloat {
+        switch selectionStyle {
+        case .elevatedGlow: return isSelected ? 18 : 4
+        default:            return isSelected ? 10 : 4
+        }
+    }
+
+    private var shadowY: CGFloat {
+        switch selectionStyle {
+        case .elevatedGlow: return isSelected ? 6 : 2
+        default:            return isSelected ? 4 : 2
+        }
+    }
+
+    private var borderColor: Color {
+        switch selectionStyle {
+        case .borderOnly, .subtleZoom:
+            return isSelected ? Color.accentColor.opacity(0.7) : .clear
+        case .elevatedGlow:
+            return .clear
+        }
+    }
+
+    private var borderWidth: CGFloat { 1.5 }
 
     private var sensitiveCardContent: some View {
         VStack(alignment: .leading, spacing: 0) {

@@ -92,6 +92,11 @@ final class OverlayPanel: NSPanel {
             case 36, 76: // Return, Enter (numpad)
                 self.onPaste?()
                 return nil
+            case 30: // ] — cycle selection style variant
+                if let state = self.overlayState {
+                    state.selectionStyle = state.selectionStyle.next
+                }
+                return nil
             case 51: // Backspace/Delete
                 if let state = self.overlayState, state.isSearchExpanded {
                     return event  // let TextField handle backspace when search is open
