@@ -445,15 +445,17 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 ---
 
-### Milestone 3.6 — UI Iteration: Selection State
+### Milestone 3.6 — UI Iteration: Selection State ✅
 
 **Branch:** `feature/ui-selection-state`
 
 **Session protocol (collaborative):** Claude implements and presents three distinct selection treatments as swappable variants, user compares them live, and picks one.
 
-- [ ] Implement three variants: (1) current — border only; (2) subtle zoom — `scaleEffect(1.05)` with spring + border; (3) elevated glow — stronger shadow + lighter card background, no scale
-- [ ] Build and present each for live comparison; adopt the chosen variant
-- [ ] Remove the rejected variants; no dead code remains
+- [x] Implement three variants: (1) current — border only; (2) subtle zoom — `scaleEffect(1.05)` with spring + border; (3) elevated glow — stronger shadow + lighter card background, no scale
+- [x] Build and present each for live comparison; adopt the chosen variant
+- [x] Remove the rejected variants; no dead code remains
+
+**Outcome:** Border-only selected. Fine-tuned to opacity 0.85 / lineWidth 1.75 (up from 0.7 / 1.5). Net diff from main: one line.
 
 ---
 
@@ -547,8 +549,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** M3.5 complete. Ready for M3.6 — UI Iteration: Selection State.  
-**Next task:** M3.6 — implement three selection treatment variants for live comparison.
+**Milestone:** M3.6 complete. Ready for M3.7 — UI Iteration: Panel Layout.  
+**Next task:** M3.7 — user shares reference screenshots; propose 2–3 layout variants.
 
 ---
 
