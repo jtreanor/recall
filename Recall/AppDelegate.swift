@@ -246,15 +246,13 @@ extension AppDelegate: NSMenuDelegate {
 }
 
 enum SelectionStyle: CaseIterable {
-    case borderOnly
-    case subtleZoom
-    case elevatedGlow
+    case borderNormal
+    case borderStrong
 
     var label: String {
         switch self {
-        case .borderOnly:  return "Style 1 · Border"
-        case .subtleZoom:  return "Style 2 · Zoom"
-        case .elevatedGlow: return "Style 3 · Glow"
+        case .borderNormal: return "Style 1 · Border (current)"
+        case .borderStrong: return "Style 2 · Border (stronger)"
         }
     }
 
@@ -273,7 +271,7 @@ final class OverlayState: ObservableObject {
     @Published var isSearchExpanded: Bool = false {
         didSet { if !isSearchExpanded { searchQuery = "" } }
     }
-    @Published var selectionStyle: SelectionStyle = .borderOnly
+    @Published var selectionStyle: SelectionStyle = .borderNormal
 
     var filteredItems: [HistoryItem] {
         guard !searchQuery.isEmpty else { return items }
