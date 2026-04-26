@@ -459,17 +459,20 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 ---
 
-### Milestone 3.7 — UI Iteration: Panel Layout
+### Milestone 3.7 — UI Iteration: Panel Layout ✅
 
 **Branch:** `feature/ui-panel-layout`
 
-**Session protocol (collaborative):** User provides reference screenshots at session start; Claude proposes 2–3 concrete layout variants with specific measurements; user picks one; Claude implements.
+- [x] Panel height increased from 210pt → 260pt to give cards more breathing room
+- [x] Cards enlarged from 150×150 to 180×200 for better readability and more content preview
+- [x] Card spacing tightened (12pt) and padding tuned for a denser, cleaner tray
+- [x] Open animation duration matched to close (both 0.15s) for snappier feel
+- [x] App-derived colour tint applied to card backgrounds (dominant icon colour, desaturated + lightened)
+- [x] Code items rendered on a dark background with monospace font; detected via keyword heuristic
+- [x] Image cards: thumbnail fills card with `.fill`, app icon + timestamp in a floating pill overlay (`.ultraThinMaterial` capsule)
+- [x] Sensitive cards: lock icon in header; masked content
 
-- [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
-- [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
-- [ ] Implement the agreed variant; no unexplained magic numbers
-
-**Note:** M3.5 search polish issues (card cropping, expand animation, backspace scoping) must be resolved in M3.5 before M3.7 begins. If they are not resolved, search UI is cut and M3.7 focuses purely on panel layout without the search header.
+**Outcome:** Taller panel, bigger cards, tinted backgrounds, faster open animation. All user-confirmed.
 
 ---
 
@@ -506,7 +509,7 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 - [ ] Sensitive items handled securely with auto-expiry and visual masking
 - [ ] Click to paste works; Backspace deletes items
 - [ ] Basic text search works for text items
-- [ ] Selection state, panel layout polished and user-confirmed
+- [x] Selection state, panel layout polished and user-confirmed
 - [ ] Test coverage reviewed and gaps closed
 
 ---
@@ -549,8 +552,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** M3.6 complete. Ready for M3.7 — UI Iteration: Panel Layout.  
-**Next task:** M3.7 — user shares reference screenshots; propose 2–3 layout variants.
+**Milestone:** M3.7 complete. Ready for M3.8 — Test Coverage Review.  
+**Next task:** M3.8 — audit and close test suite gaps (sensitive-item detection, expiry, delete, search filtering).
 
 ---
 

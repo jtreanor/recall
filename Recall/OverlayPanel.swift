@@ -1,7 +1,7 @@
 import AppKit
 
 final class OverlayPanel: NSPanel {
-    static let panelHeight: CGFloat = 210
+    static let panelHeight: CGFloat = 260
     var onDismiss: (() -> Void)?
     var onPaste: (() -> Void)?
     var onDelete: (() -> Void)?
@@ -114,7 +114,7 @@ final class OverlayPanel: NSPanel {
         }
 
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.28
+            context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             self.animator().setFrame(target, display: true)
         }
