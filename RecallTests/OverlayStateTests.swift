@@ -189,4 +189,70 @@ final class OverlayStateTests: XCTestCase {
         XCTAssertEqual(state.items.count, 3)
         XCTAssertEqual(state.selectedIndex, 0)
     }
+
+    // MARK: - Search filtering tests
+
+    func testFilteredItemsWithEmptyQueryReturnsAll() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.searchQuery = ""
+        XCTAssertEqual(state.filteredItems.count, 3)
+    }
+
+    func testFilteredItemsExactMatch() {
+        let state = OverlayState()
+        state.items = [
+            HistoryItem(id: 1, kind: .text, text: "Apple", imagePath: nil, contentHash: "a", sourceBundleId: nil, createdAt: Date()),
+            HistoryItem(id: 2, kind: .text, text: "Banana", imagePath: nil, contentHash: "b", sourceBundleId: nil, createdAt: Date())
+        ]
+        state.searchQuery = "Apple"
+        XCTAssertEqual(state.filteredItems.count, 1)
+        XCTAssertEqual(state.filteredItems[0].text, "Apple")
+    }
+
+    func testFilteredItemsPartialMatchIsCaseInsensitive() {
+        let state = OverlayState()
+        state.items = [
+            HistoryItem(id: 1, kind: .text, text: "Hello World", imagePath: nil, contentHash: "a", sourceBundleId: nil, createdAt: Date()),
+            HistoryItem(id: 2, kind: .text, text: "HELLO AGAIN", imagePath: nil, contentHash: "b", sourceBundleId: nil, createdAt: Date()),
+            HistoryItem(id: 3, kind: .text, text: "Goodbye", imagePath: nil, contentHash: "c", sourceBundleId: nil, createdAt: Date())
+        ]
+        state.searchQuery = "hello"
+        XCTAssertEqual(state.filteredItems.count, 2)
+    }
+
+    func testFilteredItemsNoMatchReturnsEmpty() {
+        let state = OverlayState()
+        state.items = makeItems(count: 3)
+        state.searchQuery = "xyz123"
+        XCTAssertTrue(state.filteredItems.isEmpty)
+    }
+
+    func testFilteredItemsExcludesImages() {
+        let state = OverlayState()
+        state.items = [
+            HistoryItem(id: 1, kind: .text, text: "Note", imagePath: nil, contentHash: "a", sourceBundleId: nil, createdAt: Date()),
+            HistoryItem(id: 2, kind: .image, text: nil, imagePath: "path", contentHash: "b", sourceBundleId: nil, createdAt: Date())
+        ]
+        state.searchQuery = "o"
+        // Even though "Note" matches and image has no text, images are excluded during search
+        XCTAssertEqual(state.filteredItems.count, 1)
+        XCTAssertEqual(state.filteredItems[0].text, "Note")
+    }
+
+    func testSearchQueryResetsSelectedIndex() {
+        let state = OverlayState()
+        state.items = makeItems(count: 10)
+        state.selectedIndex = 5
+        state.searchQuery = "item"
+        XCTAssertEqual(state.selectedIndex, 0)
+    }
+
+    func testDisablingSearchClearsQuery() {
+        let state = OverlayState()
+        state.isSearchExpanded = true
+        state.searchQuery = "finding"
+        state.isSearchExpanded = false
+        XCTAssertEqual(state.searchQuery, "")
+    }
 }

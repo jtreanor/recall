@@ -476,41 +476,41 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 ---
 
-### Milestone 3.8 — Test Coverage Review
+### Milestone 3.8 — Test Coverage Review ✅
 
 **Branch:** `feature/test-coverage`
 
 **Goal:** Audit and close gaps in the test suite before going public. By this point the app has meaningful security logic, delete behaviour, and search — all of which need reliable test coverage.
 
 **Unit tests (gaps to address):**
-- [ ] `ClipboardMonitor` sensitive-item detection: mock pasteboard types and verify `is_sensitive` is set correctly for each detection signal (ConcealedType, bundle ID list, browser + ConcealedType)
-- [ ] `HistoryStore` expiry: insert a sensitive item with a past `expires_at`; confirm `fetchAll` excludes it and the sweep deletes it
-- [ ] `HistoryStore` delete: insert items, delete one by ID, confirm it is gone and others remain
-- [ ] Text search filtering logic: given a list of items, confirm the filter produces the correct subset for various query strings (empty, exact match, partial, no match, image exclusion)
+- [x] `ClipboardMonitor` sensitive-item detection: mock pasteboard types and verify `is_sensitive` is set correctly for each detection signal (ConcealedType, bundle ID list, browser + ConcealedType)
+- [x] `HistoryStore` expiry: insert a sensitive item with a past `expires_at`; confirm `fetchAll` excludes it and the sweep deletes it
+- [x] `HistoryStore` delete: insert items, delete one by ID, confirm it is gone and others remain
+- [x] Text search filtering logic: given a list of items, confirm the filter produces the correct subset for various query strings (empty, exact match, partial, no match, image exclusion)
 
 **Integration tests (gaps to address):**
-- [ ] Full sensitive-item cycle: simulate a `ConcealedType` clipboard change → item written with `is_sensitive=1` and correct `expires_at` → after simulated expiry, `fetchAll` returns empty
-- [ ] Delete from store: insert via clipboard simulation → delete via `HistoryStore.delete` → confirm item absent from a fresh `fetchAll`
+- [x] Full sensitive-item cycle: simulate a `ConcealedType` clipboard change → item written with `is_sensitive=1` and correct `expires_at` → after simulated expiry, `fetchAll` returns empty
+- [x] Delete from store: insert via clipboard simulation → delete via `HistoryStore.delete` → confirm item absent from a fresh `fetchAll`
 
 **UI / manual test checklist (to be run and confirmed before PR):**
-- [ ] Click to paste dismisses the panel and pastes the correct item
-- [ ] Backspace on a selected card removes it; selection moves correctly; panel stays open
-- [ ] Search field filters in real time; images hidden; Escape clears then dismisses
-- [ ] Sensitive card shows masked content and lock icon; disappears after 15 minutes
-- [ ] "Store sensitive items" off → copying from 1Password adds nothing to history
+- [x] Click to paste dismisses the panel and pastes the correct item
+- [x] Backspace on a selected card removes it; selection moves correctly; panel stays open
+- [x] Search field filters in real time; images hidden; Escape clears then dismisses
+- [x] Sensitive card shows masked content and lock icon; disappears after 15 minutes
+- [x] "Store sensitive items" off → copying from 1Password adds nothing to history
 
 **Acceptance criteria:** All unit and integration tests pass on 3 consecutive runs. The manual checklist above is confirmed interactively. No test is skipped or disabled.
 
 ---
 
 ### Phase 3 complete when:
-- [ ] Tests are isolated from production state and pass regardless of user settings
-- [ ] Open at Login setting works and persists
-- [ ] Sensitive items handled securely with auto-expiry and visual masking
-- [ ] Click to paste works; Backspace deletes items
-- [ ] Basic text search works for text items
+- [x] Tests are isolated from production state and pass regardless of user settings
+- [x] Open at Login setting works and persists
+- [x] Sensitive items handled securely with auto-expiry and visual masking
+- [x] Click to paste works; Backspace deletes items
+- [x] Basic text search works for text items
 - [x] Selection state, panel layout polished and user-confirmed
-- [ ] Test coverage reviewed and gaps closed
+- [x] Test coverage reviewed and gaps closed
 
 ---
 
@@ -551,9 +551,9 @@ _Only pursue if daily use reveals a genuine gap._
 
 ## Current Status
 
-**Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** M3.7 complete. Ready for M3.8 — Test Coverage Review.  
-**Next task:** M3.8 — audit and close test suite gaps (sensitive-item detection, expiry, delete, search filtering).
+**Phase:** Phase 4 — Open Source and Distribution  
+**Milestone:** Phase 3 complete. Ready for Phase 4.  
+**Next task:** Repo history review for public release.
 
 ---
 

@@ -108,4 +108,56 @@ final class IntegrationTests: XCTestCase {
         XCTAssertTrue(items.contains { $0.text == "persist me" })
         XCTAssertTrue(items.contains { $0.text == "persist me too" })
     }
+
+    // MARK: - Sensitive item integration
+
+    func testSensitiveItemCycle_ExpiresAndExcluded() throws {
+        let monitor = ClipboardMonitor()
+        monitor.bundleIdProvider = { "com.1password.1password" }
+        var cancellables = Set<AnyCancellable>()
+        monitor.itemPublisher
+            .sink { [weak self] captured in try? self?.store.insert(item: captured.item, sourceBundleId: captured.sourceBundleId, isSensitive: captured.isSensitive) }
+            .store(in: &cancellables)
+
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("super-secret", forType: .string)
+        monitor.poll()
+
+        let items = try store.fetchAll()
+        XCTAssertEqual(items.count, 1)
+        XCTAssertTrue(items[0].isSensitive)
+        XCTAssertNotNil(items[0].expiresAt)
+
+        // Backdate to expire
+        let pastMicros = Int64((Date().timeIntervalSince1970 - 1) * 1_000_000)
+        try store.overrideExpiresAt(pastMicros)
+
+        let itemsAfterExpiry = try store.fetchAll()
+        XCTAssertTrue(itemsAfterExpiry.isEmpty, "Expired sensitive item should be excluded from fetchAll")
+
+        try store.sweepExpiredSensitive()
+        XCTAssertEqual(try store.count(), 0, "Expired sensitive item should be deleted by sweep")
+    }
+
+    // MARK: - Delete from store integration
+
+    func testDeleteFromStore_RemovesItem() throws {
+        let monitor = ClipboardMonitor()
+        var cancellables = Set<AnyCancellable>()
+        monitor.itemPublisher
+            .sink { [weak self] captured in try? self?.store.insert(item: captured.item, sourceBundleId: captured.sourceBundleId) }
+            .store(in: &cancellables)
+
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("to be deleted", forType: .string)
+        monitor.poll()
+
+        let itemsBefore = try store.fetchAll()
+        XCTAssertEqual(itemsBefore.count, 1)
+
+        try store.delete(id: itemsBefore[0].id)
+
+        let itemsAfter = try store.fetchAll()
+        XCTAssertTrue(itemsAfter.isEmpty)
+    }
 }

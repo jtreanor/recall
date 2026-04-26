@@ -103,13 +103,15 @@ final class ClipboardMonitor {
         "com.microsoft.edgemac"
     ]
 
+    var bundleIdProvider: () -> String? = { NSWorkspace.shared.frontmostApplication?.bundleIdentifier }
+
     func poll() {
         let pb = NSPasteboard.general
         let count = pb.changeCount
         guard count != lastChangeCount else { return }
         lastChangeCount = count
 
-        let bundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        let bundleId = bundleIdProvider()
         let hasConcealed = pb.types?.contains(Self.concealedType) == true
         let chromiumSourceURL = pb.data(forType: NSPasteboard.PasteboardType("org.chromium.source-url"))
             .flatMap { String(data: $0, encoding: .utf8) }
