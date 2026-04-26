@@ -7,7 +7,6 @@ struct OverlayView: View {
     @Binding var selectedIndex: Int
     @Binding var searchQuery: String
     @Binding var isSearchExpanded: Bool
-    var selectionStyle: SelectionStyle = .borderNormal
     var onPaste: (() -> Void)?
 
     @FocusState private var searchFocused: Bool
@@ -54,14 +53,6 @@ struct OverlayView: View {
             .padding(.leading, 10)
 
             Spacer()
-
-            if !isSearchExpanded {
-                Text(selectionStyle.label)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.tertiary)
-                    .padding(.trailing, 12)
-                    .transition(.opacity)
-            }
         }
         .frame(height: 32)
     }
@@ -86,7 +77,7 @@ struct OverlayView: View {
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: 10) {
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                            ClipboardItemCard(item: item, isSelected: index == selectedIndex, selectionStyle: selectionStyle)
+                            ClipboardItemCard(item: item, isSelected: index == selectedIndex)
                                 .id(item.id)
                                 .onTapGesture {
                                     selectedIndex = index
@@ -126,21 +117,15 @@ struct EmptyStateView: View {
 struct ClipboardItemCard: View {
     let item: HistoryItem
     let isSelected: Bool
-    var selectionStyle: SelectionStyle = .borderNormal
 
     private static let cardWidth: CGFloat = 150
     private static let cardHeight: CGFloat = 150
 
     var body: some View {
-        cardBody
-            .frame(width: Self.cardWidth, height: Self.cardHeight)
-    }
-
-    private var cardBody: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
                 .fill(.thinMaterial)
-                .shadow(color: .black.opacity(isSelected ? 0.35 : 0.12),
+                .shadow(color: isSelected ? .black.opacity(0.35) : .black.opacity(0.12),
                         radius: isSelected ? 10 : 4,
                         y: isSelected ? 4 : 2)
 
@@ -152,21 +137,12 @@ struct ClipboardItemCard: View {
                 textCardContent
             }
         }
+        .frame(width: Self.cardWidth, height: Self.cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(borderColor, lineWidth: borderWidth)
+                .stroke(isSelected ? Color.accentColor.opacity(0.85) : Color.clear, lineWidth: 1.75)
         )
-    }
-
-    // MARK: – Style helpers
-
-    private var borderColor: Color {
-        isSelected ? Color.accentColor.opacity(selectionStyle == .borderStrong ? 1.0 : 0.7) : .clear
-    }
-
-    private var borderWidth: CGFloat {
-        selectionStyle == .borderStrong ? 2.0 : 1.5
     }
 
     private var sensitiveCardContent: some View {

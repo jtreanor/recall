@@ -245,23 +245,6 @@ extension AppDelegate: NSMenuDelegate {
     }
 }
 
-enum SelectionStyle: CaseIterable {
-    case borderNormal
-    case borderStrong
-
-    var label: String {
-        switch self {
-        case .borderNormal: return "Style 1 · Border (current)"
-        case .borderStrong: return "Style 2 · Border (stronger)"
-        }
-    }
-
-    var next: SelectionStyle {
-        let all = SelectionStyle.allCases
-        return all[(all.firstIndex(of: self)! + 1) % all.count]
-    }
-}
-
 final class OverlayState: ObservableObject {
     @Published var items: [HistoryItem] = []
     @Published var selectedIndex: Int = 0
@@ -271,7 +254,6 @@ final class OverlayState: ObservableObject {
     @Published var isSearchExpanded: Bool = false {
         didSet { if !isSearchExpanded { searchQuery = "" } }
     }
-    @Published var selectionStyle: SelectionStyle = .borderNormal
 
     var filteredItems: [HistoryItem] {
         guard !searchQuery.isEmpty else { return items }
@@ -300,7 +282,6 @@ private struct OverlayRootView: View {
             selectedIndex: $state.selectedIndex,
             searchQuery: $state.searchQuery,
             isSearchExpanded: $state.isSearchExpanded,
-            selectionStyle: state.selectionStyle,
             onPaste: onPaste
         )
     }
