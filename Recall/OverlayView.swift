@@ -26,33 +26,33 @@ struct OverlayView: View {
 
     private var header: some View {
         HStack(spacing: 0) {
-            if isSearchExpanded {
-                HStack(spacing: 6) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(.secondary)
-                    TextField("Search…", text: $searchQuery)
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 13))
-                        .focused($searchFocused)
-                }
-                .padding(.horizontal, 14)
-                .transition(.opacity)
-            } else {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.15)) { isSearchExpanded = true }
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.tertiary)
-                        .contentShape(Rectangle())
-                        .padding(6)
-                }
-                .buttonStyle(.plain)
-                .padding(.leading, 8)
-                .transition(.opacity)
-                Spacer()
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+
+                TextField("Search…", text: $searchQuery)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 13))
+                    .focused($searchFocused)
+                    .opacity(isSearchExpanded ? 1 : 0)
             }
+            .padding(.horizontal, 7)
+            .frame(width: isSearchExpanded ? 210 : 25, height: 22, alignment: .leading)
+            .clipped()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.primary.opacity(isSearchExpanded ? 0.07 : 0))
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.82)) {
+                    isSearchExpanded = true
+                }
+            }
+            .padding(.leading, 10)
+
+            Spacer()
         }
         .frame(height: 32)
     }

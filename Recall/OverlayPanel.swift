@@ -12,15 +12,13 @@ final class OverlayPanel: NSPanel {
     init() {
         super.init(
             contentRect: .zero,
-            styleMask: [.titled, .fullSizeContentView, .nonactivatingPanel],
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: true
         )
         isMovableByWindowBackground = false
         isFloatingPanel = true
         level = .floating
-        titleVisibility = .hidden
-        titlebarAppearsTransparent = true
         backgroundColor = .clear
         hasShadow = false
         isOpaque = false
@@ -95,12 +93,22 @@ final class OverlayPanel: NSPanel {
                 self.onPaste?()
                 return nil
             case 51: // Backspace/Delete
-                if let state = self.overlayState, state.isSearchExpanded && !state.searchQuery.isEmpty {
-                    return event  // let TextField handle backspace within the query
+                if let state = self.overlayState, state.isSearchExpanded {
+                    return event  // let TextField handle backspace when search is open
                 }
                 self.onDelete?()
                 return nil
             default:
+                // Auto-engage search on printable input when field is collapsed
+                if let state = self.overlayState,
+                   !state.isSearchExpanded,
+                   event.modifierFlags.intersection([.command, .control, .option]).isEmpty,
+                   let chars = event.characters, !chars.isEmpty,
+                   chars.unicodeScalars.allSatisfy({ CharacterSet.alphanumerics.contains($0) }) {
+                    state.searchQuery = chars
+                    state.isSearchExpanded = true
+                    return nil
+                }
                 return event
             }
         }

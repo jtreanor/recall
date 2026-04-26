@@ -434,12 +434,14 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 **Goal:** User can type in the overlay to filter clipboard history by content. No OCR, no image filtering.
 
-- [x] Add a search field to the panel (Paste-style: compact magnifying glass icon in a 32pt header strip; expands inline to text field on click; panel height 172 → 210pt)
+- [x] Add a search field to the panel (compact magnifying glass pill in a 32pt header strip; expands inline to text field on click/keypress; panel height 210pt)
 - [x] Filter client-side: case-insensitive substring match on `content`; image items hidden during active query
 - [x] Escape clears query → collapses field → dismisses overlay (three steps); search clears on dismiss
 - [x] Arrow keys navigate among filtered results
-
-**Known issue (unresolved — carry into M3.7):** Cards are still cropped at the top of the panel despite the height increase. Root cause not yet diagnosed — likely the 32pt header + divider is eating into the card area in a way that bumping `panelHeight` alone doesn't fix. Investigate layout constraints / `NSHostingView` sizing in M3.7.
+- [x] **Card cropping fix:** Switched `NSPanel` style mask from `.titled + .fullSizeContentView` to `.borderless` — eliminated the hidden titlebar that was consuming ~28pt of usable panel height.
+- [x] **Expand animation:** Pill animates width from 25pt → 210pt with spring; text field fades in as it opens. Rounded pill background appears on expand.
+- [x] **Backspace scoping:** When search is expanded, `Backspace` is always forwarded to the text field — never fires delete-item.
+- [x] **Auto-engage:** Typing any alphanumeric key (without modifier) while search is collapsed expands the field and seeds the query.
 
 ---
 
@@ -463,9 +465,9 @@ The primary signal is the `org.nspasteboard.ConcealedType` pasteboard type, whic
 
 - [ ] User shares reference screenshots of similar apps (e.g. Paste, Clipboard Manager)
 - [ ] Claude proposes 2–3 variants covering: panel height, card size, top gap, internal padding, card spacing
-- [ ] Fix card cropping introduced by M3.5 header: diagnose why cards are clipped at the top (check `NSHostingView` sizing, `autoresizingMask`, and whether the hosting view frame is updated after panel height change)
-- [ ] Polish the search header strip: icon placement, expand animation, field styling, collapsed/expanded states — make it feel as refined as Paste's
 - [ ] Implement the agreed variant; no unexplained magic numbers
+
+**Note:** M3.5 search polish issues (card cropping, expand animation, backspace scoping) must be resolved in M3.5 before M3.7 begins. If they are not resolved, search UI is cut and M3.7 focuses purely on panel layout without the search header.
 
 ---
 
@@ -545,8 +547,8 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 3 — Pre-Release Quality and Features  
-**Milestone:** 3.5 complete. Starting 3.6 (UI iteration: selection state).  
-**Next task:** M3.6 — implement three selection state variants for live comparison.
+**Milestone:** M3.5 complete. Ready for M3.6 — UI Iteration: Selection State.  
+**Next task:** M3.6 — implement three selection treatment variants for live comparison.
 
 ---
 
