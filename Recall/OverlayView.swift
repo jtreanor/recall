@@ -141,7 +141,7 @@ struct ClipboardItemCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(isSelected ? Color.accentColor.opacity(0.7) : Color.clear, lineWidth: 1.5)
+                .stroke(isSelected ? Color.accentColor.opacity(0.85) : Color.clear, lineWidth: 1.75)
         )
     }
 
