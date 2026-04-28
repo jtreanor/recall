@@ -48,6 +48,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.overlayState = overlayState
         panel.onDismiss = { [weak self] in
             self?.isOverlayVisible = false
+        }
+        panel.onHidden = { [weak self] in
+            // Reset search/selection after the panel is off-screen so the scroll-to-zero
+            // animation doesn't run while the close animation is playing (diagonal motion).
             self?.overlayState.isSearchExpanded = false  // clears searchQuery via didSet
         }
         panel.onPaste = { [weak self] in self?.pasteSelectedItem() }

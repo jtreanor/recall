@@ -3,6 +3,7 @@ import AppKit
 final class OverlayPanel: NSPanel {
     static let panelHeight: CGFloat = 260
     var onDismiss: (() -> Void)?
+    var onHidden: (() -> Void)?
     var onPaste: (() -> Void)?
     var onDelete: (() -> Void)?
     weak var overlayState: OverlayState?
@@ -131,6 +132,7 @@ final class OverlayPanel: NSPanel {
             self.animator().setFrame(end, display: true)
         } completionHandler: {
             self.orderOut(nil)
+            self.onHidden?()
         }
     }
 
