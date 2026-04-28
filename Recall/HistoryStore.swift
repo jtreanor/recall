@@ -202,7 +202,7 @@ final class HistoryStore {
               let kind = HistoryItem.Kind(rawValue: typeStr),
               let hash = r["content_hash"]?.stringValue,
               let ts = r["created_at"]?.int64Value else { return nil }
-        let isSensitive = r["is_sensitive"].flatMap { $0.int64Value }.map { $0 != 0 } ?? false
+        let isSensitive = (r["is_sensitive"]?.int64Value ?? 0) != 0
         let expiresAt = r["expires_at"]?.int64Value.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
         return HistoryItem(
             id: id, kind: kind,

@@ -21,8 +21,8 @@ _Living document. Update when implementation diverges from plan._
 _Pursue when the app is stable enough to share publicly._
 
 - [x] **Repo history review** — reviewed all 95 commits and current working tree. Two commit subjects reference "Paste-style" (commits 5b3f33e, f9f90c3); decision: **leave history** (scrubbing rewrites all SHAs and destroys PR links — cost outweighs benefit for minor stylistic references). Renamed `docs/research.md` section "Paste UX Analysis" → "Clipboard Manager UX Analysis" since that file is publicly visible. No credentials, personal data, or sensitive content found anywhere.
-- [ ] **Open source the repo** — make `jtreanor/recall` public on GitHub; add `LICENSE` (MIT) and a proper `README.md` with screenshots, install instructions, and feature overview
-- [ ] **CI: test check on PRs** — add a GitHub Actions workflow (`.github/workflows/test.yml`) that runs `xcodebuild test` on every PR; required status check before merge (do after making public — public repos get unlimited Actions minutes)
+- [x] **Open source the repo** — made `jtreanor/recall` public on GitHub; added `LICENSE` (MIT) and `README.md` with screenshots, install instructions, and feature overview
+- [x] **CI: test check on PRs** — added `.github/workflows/test.yml`; runs `xcodebuild test` on every PR and push to `main`; set as required status check before merge
 - [ ] **Automated binary releases** — GitHub Actions workflow triggered on version tags: builds a universal Release binary, runs `scripts/distribute.sh`, uploads `Recall-{version}.dmg` as a GitHub Release asset
 - [ ] **Homebrew tap** — create `jtreanor/homebrew-recall`; write a cask (`recall.rb`) that points at the GitHub Release DMG and uses a `postflight` block to remove the quarantine xattr so users get zero Gatekeeper friction: `brew install --cask jtreanor/recall/recall`
 - [ ] **Notarization** (optional upgrade) — if Apple Developer Program membership ($99/yr) becomes worthwhile, wire up `scripts/distribute.sh --notarize` in CI and drop the `postflight` quarantine removal from the cask
@@ -54,6 +54,6 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 4 — Open Source and Distribution  
-**Milestone:** Phase 3 complete. Ready for Phase 4.  
-**Next task:** Open source — make repo public, add LICENSE and README.
+**Milestone:** Repo public, CI wired up.  
+**Next task:** Automated binary releases — GitHub Actions workflow on version tags, builds universal DMG, uploads as GitHub Release asset.
 
