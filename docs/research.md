@@ -1,6 +1,6 @@
 # Recall — Research & Architecture
 
-## Paste UX Analysis
+## Clipboard Manager UX Analysis
 
 ### Worth copying for v1
 - Keyboard-invoked overlay (global shortcut, summons from any app)
