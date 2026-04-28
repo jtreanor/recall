@@ -143,8 +143,8 @@ final class HistoryStoreTests: XCTestCase {
     }
 
     func testPruneDeletesImageFiles() throws {
-        for _ in 0..<3 {
-            let png = makePNG(seed: UInt8.random(in: 0...255))
+        for i: UInt8 in 1...3 {
+            let png = makePNG(seed: i)
             try store.insert(item: .image(png: png, thumbnail: NSImage()))
         }
         let pathsBefore = try store.fetchAll().compactMap(\.imagePath)
