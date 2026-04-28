@@ -74,6 +74,18 @@ final class HistoryStoreTests: XCTestCase {
         XCTAssertEqual(try store.fetchAll().count, 1)
     }
 
+    func testDeleteOneOfManyLeavesOthersIntact() throws {
+        try store.insert(item: .text("alpha"))
+        let target = try XCTUnwrap(store.insert(item: .text("beta")))
+        try store.insert(item: .text("gamma"))
+        try store.delete(id: target.id)
+        let remaining = try store.fetchAll()
+        XCTAssertEqual(remaining.count, 2)
+        XCTAssertFalse(remaining.contains { $0.text == "beta" })
+        XCTAssertTrue(remaining.contains { $0.text == "alpha" })
+        XCTAssertTrue(remaining.contains { $0.text == "gamma" })
+    }
+
     // MARK: - pruneToLimit
 
     func testPruneToLimitReducesCount() throws {

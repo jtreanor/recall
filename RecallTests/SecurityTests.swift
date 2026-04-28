@@ -41,15 +41,13 @@ final class ClipboardMonitorSensitiveTests: XCTestCase {
         let exp = expectation(description: "item received")
         monitor.itemPublisher.sink { received = $0; exp.fulfill() }.store(in: &cancellables)
 
+        monitor.bundleIdProvider = { "com.apple.XCTest" }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString("ordinary text", forType: .string)
         monitor.poll()
 
         wait(for: [exp], timeout: 1)
-        // This item comes from a non-password-manager app during tests;
-        // it should not be marked sensitive unless the frontmost app happens to be a password manager.
-        // We can only assert isSensitive is a Bool — concrete value depends on the test runner's frontmost app.
-        XCTAssertNotNil(received)
+        XCTAssertEqual(received?.isSensitive, false)
     }
 
     func testChromeExtensionSchemeMarksItemAsSensitive() {
@@ -74,6 +72,7 @@ final class ClipboardMonitorSensitiveTests: XCTestCase {
         let exp = expectation(description: "item received")
         monitor.itemPublisher.sink { received = $0; exp.fulfill() }.store(in: &cancellables)
 
+        monitor.bundleIdProvider = { "com.apple.XCTest" }
         let pb = NSPasteboard.general
         pb.clearContents()
         let sourceURL = "https://example.com/page"
@@ -83,12 +82,7 @@ final class ClipboardMonitorSensitiveTests: XCTestCase {
         monitor.poll()
 
         wait(for: [exp], timeout: 1)
-        // ConcealedType absent, source-url is https (not chrome-extension), so only bundle-ID
-        // check could mark it sensitive. We verify the chrome-extension signal itself is NOT
-        // responsible by confirming fromBrowserExtension would be false for this URL.
-        XCTAssertNotNil(received)
-        let url = "https://example.com/page"
-        XCTAssertFalse(url.hasPrefix("chrome-extension://"))
+        XCTAssertEqual(received?.isSensitive, false)
     }
 
     func testPasswordManagerBundleIdMarksItemAsSensitive() {
