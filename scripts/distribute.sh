@@ -13,7 +13,7 @@ set -euo pipefail
 # ── Config ────────────────────────────────────────────────────────────────────
 APP_NAME="Recall"
 BUNDLE_ID="com.recall.app"
-VERSION="0.1.0"
+VERSION="${VERSION:-0.1.0}"
 BUILD_DIR="$(cd "$(dirname "$0")/.." && pwd)/build/dist"
 APP_PATH="${BUILD_DIR}/app/${APP_NAME}.app"
 DMG_PATH="${BUILD_DIR}/${APP_NAME}-${VERSION}.dmg"

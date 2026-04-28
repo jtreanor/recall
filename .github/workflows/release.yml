@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -project Recall.xcodeproj \
+            -scheme Recall \
+            -destination 'platform=macOS'
+
+  release:
+    needs: test
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Build DMG
+        run: VERSION=$VERSION ./scripts/distribute.sh
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "Recall ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            "build/dist/Recall-${VERSION}.dmg#Recall-${VERSION}.dmg"
