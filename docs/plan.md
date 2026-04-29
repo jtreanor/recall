@@ -24,7 +24,7 @@ _Pursue when the app is stable enough to share publicly._
 - [x] **Open source the repo** — made `jtreanor/recall` public on GitHub; added `LICENSE` (MIT) and `README.md` with screenshots, install instructions, and feature overview
 - [x] **CI: test check on PRs** — added `.github/workflows/test.yml`; runs `xcodebuild test` on every PR and push to `main`; set as required status check before merge
 - [x] **Automated binary releases** — GitHub Actions workflow triggered on version tags: builds a universal Release binary, runs `scripts/distribute.sh`, uploads `Recall-{version}.dmg` as a GitHub Release asset
-- [ ] **Homebrew tap** — create `jtreanor/homebrew-recall`; write a cask (`recall.rb`) that points at the GitHub Release DMG and uses a `postflight` block to remove the quarantine xattr so users get zero Gatekeeper friction: `brew install --cask jtreanor/recall/recall`
+- [x] **Homebrew tap** — created `jtreanor/homebrew-recall`; cask (`Casks/recall.rb`) points at the GitHub Release DMG and uses a `postflight` block to strip `com.apple.quarantine` for zero Gatekeeper friction; release workflow auto-updates the cask on each new tag: `brew install --cask jtreanor/recall/recall`
 - [ ] **Notarization** (optional upgrade) — if Apple Developer Program membership ($99/yr) becomes worthwhile, wire up `scripts/distribute.sh --notarize` in CI and drop the `postflight` quarantine removal from the cask
 
 ---
@@ -54,6 +54,6 @@ _Only pursue if daily use reveals a genuine gap._
 ## Current Status
 
 **Phase:** Phase 4 — Open Source and Distribution  
-**Milestone:** Repo public, CI wired up, automated releases on version tags.  
-**Next task:** Homebrew tap — `jtreanor/homebrew-recall` with a cask pointing at the GitHub Release DMG.
+**Milestone:** All Phase 4 distribution tasks complete.  
+**Next task:** Phase 5 (extended features) or notarization upgrade if Apple Developer membership is obtained.
 
