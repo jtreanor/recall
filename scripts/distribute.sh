@@ -45,6 +45,7 @@ xcodebuild build \
   DEVELOPMENT_TEAM="${TEAM_ID:-}" \
   AD_HOC_CODE_SIGNING_ALLOWED=YES \
   ONLY_ACTIVE_ARCH=NO \
+  MARKETING_VERSION="${VERSION}" \
   2>&1 | grep -E "(error:|warning:|BUILD SUCCEEDED|BUILD FAILED)" || true
 
 if [[ ! -d "${APP_PATH}" ]]; then
