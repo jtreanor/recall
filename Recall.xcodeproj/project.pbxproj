@@ -440,7 +440,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = "0.0.0-dev";
 				PRODUCT_BUNDLE_IDENTIFIER = com.recall.app;
 				PRODUCT_NAME = Recall;
 				SDKROOT = macosx;
@@ -464,7 +464,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = "0.0.0-dev";
 				PRODUCT_BUNDLE_IDENTIFIER = com.recall.app;
 				PRODUCT_NAME = Recall;
 				SDKROOT = macosx;

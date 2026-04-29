@@ -215,6 +215,15 @@ struct SettingsView: View {
                 }
                 Spacer()
             }
+
+            // Version footer
+            HStack {
+                Spacer()
+                Text("Recall \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
         }
         .padding(24)
         .frame(width: 340)
