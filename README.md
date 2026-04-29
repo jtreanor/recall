@@ -24,10 +24,20 @@ Press **⌘⇧V** from any app to summon a floating tray of your recent clipboar
 
 ## Install
 
+### Homebrew (recommended)
+
+```sh
+brew install --cask jtreanor/recall/recall
+```
+
+The cask automatically removes the macOS quarantine attribute, so the app opens on first launch without any Gatekeeper prompt.
+
+### Manual
+
 Download the latest `Recall.dmg` from the [Releases](../../releases) page, open it, and drag Recall to Applications.
 
 > **Gatekeeper note:** Because the app is ad-hoc signed (no Apple Developer Program), macOS may block the first launch. Right-click → Open to bypass, or run:
-> ```
+> ```sh
 > xattr -d com.apple.quarantine /Applications/Recall.app
 > ```
 

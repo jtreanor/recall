@@ -41,3 +41,34 @@ jobs:
             --title "Recall ${GITHUB_REF_NAME}" \
             --generate-notes \
             "build/dist/Recall-${VERSION}.dmg#Recall-${VERSION}.dmg"
+
+  update-tap:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Download DMG and compute SHA256
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "${GITHUB_REF_NAME}" \
+            --repo jtreanor/recall \
+            --pattern "Recall-${VERSION}.dmg" \
+            --output "Recall-${VERSION}.dmg"
+          echo "SHA256=$(sha256sum "Recall-${VERSION}.dmg" | awk '{print $1}')" >> "$GITHUB_ENV"
+
+      - name: Push updated cask
+        env:
+          TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/jtreanor/homebrew-recall.git"
+          cd homebrew-recall
+          sed -i "s/version \".*\"/version \"${VERSION}\"/" Casks/recall.rb
+          sed -i "s/sha256 \".*\"/sha256 \"${SHA256}\"/" Casks/recall.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/recall.rb
+          git commit -m "chore: update cask to v${VERSION}"
+          git push
