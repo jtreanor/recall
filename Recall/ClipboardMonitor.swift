@@ -2,7 +2,7 @@ import AppKit
 import Combine
 
 enum ClipboardItem {
-    case text(String)
+    case text(String, rtf: Data?)
     case image(png: Data, thumbnail: NSImage)
 }
 
@@ -121,7 +121,8 @@ final class ClipboardMonitor {
             || fromBrowserExtension
 
         if let text = pb.string(forType: .string), !text.isEmpty {
-            itemPublisher.send(CapturedItem(item: .text(text), sourceBundleId: bundleId, isSensitive: isSensitive))
+            let rtf = pb.data(forType: .rtf)
+            itemPublisher.send(CapturedItem(item: .text(text, rtf: rtf), sourceBundleId: bundleId, isSensitive: isSensitive))
             return
         }
 

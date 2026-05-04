@@ -51,7 +51,7 @@ final class AppDelegateTests: XCTestCase {
         delegate.historyStore = store
         delegate.overlayState.items = []
 
-        try store.insert(item: .text("fresh item"))
+        try store.insert(item: .text("fresh item", rtf: nil))
         delegate.showOverlay()
 
         XCTAssertEqual(delegate.overlayState.items.count, 1)
@@ -60,11 +60,11 @@ final class AppDelegateTests: XCTestCase {
 
     func testShowOverlayReflectsLatestStoreState() throws {
         let store = makeTestStore()
-        try store.insert(item: .text("old item"))
+        try store.insert(item: .text("old item", rtf: nil))
         delegate.historyStore = store
         delegate.overlayState.items = (try? store.fetchAll()) ?? []
 
-        try store.insert(item: .text("new item"))
+        try store.insert(item: .text("new item", rtf: nil))
         delegate.showOverlay()
 
         XCTAssertEqual(delegate.overlayState.items.count, 2)
@@ -100,7 +100,7 @@ final class AppDelegateTests: XCTestCase {
 
     func testPasteSelectedItemWritesClipboardEvenWhenCalledWithItem() throws {
         let store = makeTestStore()
-        try store.insert(item: .text("ax-test content"))
+        try store.insert(item: .text("ax-test content", rtf: nil))
         delegate.historyStore = store
         delegate.showOverlay()
 

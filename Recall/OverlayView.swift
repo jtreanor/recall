@@ -134,7 +134,9 @@ struct ClipboardItemCard: View {
     private var typeLabel: String {
         if item.isSensitive { return "Password" }
         switch item.kind {
-        case .text: return isCodeItem ? "Code" : "Text"
+        case .text:
+            if isCodeItem { return "Code" }
+            return item.rtfData != nil ? "Rich Text" : "Text"
         case .image: return "Image"
         }
     }

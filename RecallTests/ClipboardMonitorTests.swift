@@ -22,8 +22,8 @@ final class ClipboardMonitorTests: XCTestCase {
     // MARK: - ClipboardItem model
 
     func testTextCaseStoresString() {
-        let item = ClipboardItem.text("hello")
-        guard case .text(let s) = item else { return XCTFail("expected .text") }
+        let item = ClipboardItem.text("hello", rtf: nil)
+        guard case .text(let s, _) = item else { return XCTFail("expected .text") }
         XCTAssertEqual(s, "hello")
     }
 
@@ -79,7 +79,7 @@ final class ClipboardMonitorTests: XCTestCase {
         monitor.poll()
 
         wait(for: [exp], timeout: 1)
-        guard case .text(let s) = received?.item else { return XCTFail("expected .text") }
+        guard case .text(let s, _) = received?.item else { return XCTFail("expected .text") }
         XCTAssertEqual(s, "unit-test")
     }
 

@@ -6,15 +6,18 @@ private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self
 enum DBValue {
     case int64(Int64)
     case text(String)
+    case blob(Data)
     case null
 
     var int64Value: Int64? { guard case .int64(let v) = self else { return nil }; return v }
     var stringValue: String? { guard case .text(let v) = self else { return nil }; return v }
+    var blobValue: Data? { guard case .blob(let v) = self else { return nil }; return v }
 }
 
 enum DBParam {
     case int64(Int64)
     case text(String)
+    case blob(Data)
     case null
 }
 
@@ -70,6 +73,13 @@ final class Database {
                     } else {
                         row[col] = .null
                     }
+                case SQLITE_BLOB:
+                    if let ptr = sqlite3_column_blob(stmt, i) {
+                        let count = Int(sqlite3_column_bytes(stmt, i))
+                        row[col] = .blob(Data(bytes: ptr, count: count))
+                    } else {
+                        row[col] = .null
+                    }
                 default:
                     row[col] = .null
                 }
@@ -96,6 +106,7 @@ final class Database {
         try? exec("ALTER TABLE items ADD COLUMN source_bundle_id TEXT")
         try? exec("ALTER TABLE items ADD COLUMN is_sensitive INTEGER NOT NULL DEFAULT 0")
         try? exec("ALTER TABLE items ADD COLUMN expires_at INTEGER")
+        try? exec("ALTER TABLE items ADD COLUMN rtf_data BLOB")
     }
 
     private func prepare(_ sql: String) throws -> OpaquePointer? {
@@ -112,6 +123,7 @@ final class Database {
             switch p {
             case .int64(let v): sqlite3_bind_int64(stmt, n, v)
             case .text(let v):  sqlite3_bind_text(stmt, n, v, -1, sqliteTransient)
+            case .blob(let v):  v.withUnsafeBytes { _ = sqlite3_bind_blob(stmt, n, $0.baseAddress, Int32(v.count), sqliteTransient) }
             case .null:         sqlite3_bind_null(stmt, n)
             }
         }

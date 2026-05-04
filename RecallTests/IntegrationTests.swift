@@ -53,9 +53,9 @@ final class IntegrationTests: XCTestCase {
 
     func testDeduplication_SameContentTwice_OneItemWithUpdatedTimestamp() throws {
         // Insert A then B (B is newer, so B is first in fetchAll)
-        try store.insert(item: .text("alpha"))
+        try store.insert(item: .text("alpha", rtf: nil))
         Thread.sleep(forTimeInterval: 1.1)
-        try store.insert(item: .text("beta"))
+        try store.insert(item: .text("beta", rtf: nil))
 
         let beforeReinsert = try store.fetchAll()
         XCTAssertEqual(beforeReinsert[0].text, "beta")
@@ -63,7 +63,7 @@ final class IntegrationTests: XCTestCase {
 
         // Re-insert "alpha" (duplicate). Its updated_at should be bumped, moving it to top.
         Thread.sleep(forTimeInterval: 1.1)
-        let dup = try store.insert(item: .text("alpha"))
+        let dup = try store.insert(item: .text("alpha", rtf: nil))
         XCTAssertNotNil(dup, "duplicate insert should return the existing item")
         XCTAssertEqual(dup?.text, "alpha")
 
@@ -79,7 +79,7 @@ final class IntegrationTests: XCTestCase {
         testSettings.historyLimit = 500
 
         for i in 0..<501 {
-            try store.insert(item: .text("item \(i)"))
+            try store.insert(item: .text("item \(i)", rtf: nil))
         }
         let count = try store.count()
         XCTAssertEqual(count, 500)
@@ -93,8 +93,8 @@ final class IntegrationTests: XCTestCase {
     // MARK: - Persistence across store close/reopen
 
     func testPersistence_ItemsSurviveStoreReopenOnDisk() throws {
-        try store.insert(item: .text("persist me"))
-        try store.insert(item: .text("persist me too"))
+        try store.insert(item: .text("persist me", rtf: nil))
+        try store.insert(item: .text("persist me too", rtf: nil))
 
         // Simulate closing by releasing and reopening on the same file
         store = nil

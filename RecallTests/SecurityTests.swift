@@ -172,7 +172,7 @@ final class HistoryStoreSensitiveTests: XCTestCase {
     }
 
     func testSensitiveItemStoredWithFlag() throws {
-        let item = try XCTUnwrap(store.insert(item: .text("my-password"), isSensitive: true))
+        let item = try XCTUnwrap(store.insert(item: .text("my-password", rtf: nil), isSensitive: true))
         XCTAssertTrue(item.isSensitive)
         XCTAssertNotNil(item.expiresAt)
         let all = try store.fetchAll()
@@ -182,7 +182,7 @@ final class HistoryStoreSensitiveTests: XCTestCase {
 
     func testSensitiveItemExpiresAt15Minutes() throws {
         let before = Date()
-        let item = try XCTUnwrap(store.insert(item: .text("temp-secret"), isSensitive: true))
+        let item = try XCTUnwrap(store.insert(item: .text("temp-secret", rtf: nil), isSensitive: true))
         let after = Date()
         let expiresAt = try XCTUnwrap(item.expiresAt)
         XCTAssertGreaterThanOrEqual(expiresAt.timeIntervalSince(before), 14 * 60)
@@ -190,13 +190,13 @@ final class HistoryStoreSensitiveTests: XCTestCase {
     }
 
     func testNonSensitiveItemHasNoExpiry() throws {
-        let item = try XCTUnwrap(store.insert(item: .text("normal text"), isSensitive: false))
+        let item = try XCTUnwrap(store.insert(item: .text("normal text", rtf: nil), isSensitive: false))
         XCTAssertFalse(item.isSensitive)
         XCTAssertNil(item.expiresAt)
     }
 
     func testExpiredSensitiveItemExcludedFromFetchAll() throws {
-        try store.insert(item: .text("expired-secret"), isSensitive: true)
+        try store.insert(item: .text("expired-secret", rtf: nil), isSensitive: true)
         // Backdate the expires_at to the past so the item is now expired.
         let pastMicros = Int64((Date().timeIntervalSince1970 - 1) * 1_000_000)
         try store.overrideExpiresAt(pastMicros)
@@ -205,13 +205,13 @@ final class HistoryStoreSensitiveTests: XCTestCase {
     }
 
     func testNonExpiredSensitiveItemAppearsInFetchAll() throws {
-        try store.insert(item: .text("fresh-secret"), isSensitive: true)
+        try store.insert(item: .text("fresh-secret", rtf: nil), isSensitive: true)
         let all = try store.fetchAll()
         XCTAssertEqual(all.count, 1)
     }
 
     func testSweepExpiredSensitiveDeletesExpiredRows() throws {
-        try store.insert(item: .text("sweep-target"), isSensitive: true)
+        try store.insert(item: .text("sweep-target", rtf: nil), isSensitive: true)
         let pastMicros = Int64((Date().timeIntervalSince1970 - 1) * 1_000_000)
         try store.overrideExpiresAt(pastMicros)
         try store.sweepExpiredSensitive()
@@ -219,13 +219,13 @@ final class HistoryStoreSensitiveTests: XCTestCase {
     }
 
     func testSweepLeavesNonExpiredSensitiveItemsAlone() throws {
-        try store.insert(item: .text("not-yet-expired"), isSensitive: true)
+        try store.insert(item: .text("not-yet-expired", rtf: nil), isSensitive: true)
         try store.sweepExpiredSensitive()
         XCTAssertEqual(try store.count(), 1)
     }
 
     func testSweepDoesNotAffectNonSensitiveItems() throws {
-        try store.insert(item: .text("normal"), isSensitive: false)
+        try store.insert(item: .text("normal", rtf: nil), isSensitive: false)
         try store.sweepExpiredSensitive()
         XCTAssertEqual(try store.count(), 1)
     }
@@ -238,7 +238,7 @@ final class HistoryStoreSensitiveTests: XCTestCase {
         let offSettings = SettingsManager(defaults: offDefaults)
         let offStore = HistoryStore(db: store.testDB, imagesDir: tempDir.appendingPathComponent("images"), settings: offSettings)
 
-        let result = try offStore.insert(item: .text("password"), isSensitive: true)
+        let result = try offStore.insert(item: .text("password", rtf: nil), isSensitive: true)
         XCTAssertNil(result, "Should return nil when storeSensitiveItems is off")
         XCTAssertEqual(try offStore.count(), 0)
 
@@ -253,7 +253,7 @@ final class HistoryStoreSensitiveTests: XCTestCase {
         let offSettings = SettingsManager(defaults: offDefaults)
         let offStore = HistoryStore(db: store.testDB, imagesDir: tempDir.appendingPathComponent("images"), settings: offSettings)
 
-        let result = try offStore.insert(item: .text("normal text"), isSensitive: false)
+        let result = try offStore.insert(item: .text("normal text", rtf: nil), isSensitive: false)
         XCTAssertNotNil(result)
         XCTAssertEqual(try offStore.count(), 1)
 

@@ -77,6 +77,12 @@ struct SettingsManager {
         nonmutating set { defaults.set(newValue, forKey: "storeSensitiveItems") }
     }
 
+    // When true, always paste as plain text even when rich text (RTF) is available.
+    var pasteAsPlainText: Bool {
+        get { defaults.bool(forKey: "pasteAsPlainText") } // false when unset
+        nonmutating set { defaults.set(newValue, forKey: "pasteAsPlainText") }
+    }
+
     func setHotkey(keyCode: UInt32, modifiers: UInt32) {
         self.hotkeyKeyCode = keyCode
         self.hotkeyModifiers = modifiers
@@ -91,7 +97,7 @@ final class SettingsWindowController: NSWindowController {
 
     convenience init() {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 340, height: 345),
+            contentRect: NSRect(x: 0, y: 0, width: 340, height: 380),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -127,6 +133,7 @@ struct SettingsView: View {
     @State private var maxAgeSecs: Int = SettingsManager.shared.itemMaxAgeSecs
     @State private var openAtLogin: Bool = SettingsManager.shared.openAtLogin
     @State private var storeSensitiveItems: Bool = SettingsManager.shared.storeSensitiveItems
+    @State private var pasteAsPlainText: Bool = SettingsManager.shared.pasteAsPlainText
     @State private var showClearConfirm = false
 
     var body: some View {
@@ -194,6 +201,19 @@ struct SettingsView: View {
                     .labelsHidden()
                     .onChange(of: storeSensitiveItems) { newValue in
                         SettingsManager.shared.storeSensitiveItems = newValue
+                    }
+                Spacer()
+            }
+
+            // Paste as plain text row
+            HStack {
+                Text("Plain Text Only")
+                    .frame(width: 130, alignment: .leading)
+                Toggle("", isOn: $pasteAsPlainText)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .onChange(of: pasteAsPlainText) { newValue in
+                        SettingsManager.shared.pasteAsPlainText = newValue
                     }
                 Spacer()
             }
