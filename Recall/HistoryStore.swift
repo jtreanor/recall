@@ -12,6 +12,7 @@ struct HistoryItem {
     let createdAt: Date
     var isSensitive: Bool = false
     var expiresAt: Date? = nil
+    var detectedURL: URL? = nil
 
     enum Kind: String {
         case text, image
@@ -155,7 +156,8 @@ final class HistoryStore {
         return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, rtfData: rtfData,
                            contentHash: hash, sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000),
-                           isSensitive: isSensitive, expiresAt: expiresDate)
+                           isSensitive: isSensitive, expiresAt: expiresDate,
+                           detectedURL: detectFirstURL(in: text))
     }
 
     private func insertImage(png: Data, sourceBundleId: String?, isSensitive: Bool) throws -> HistoryItem? {
@@ -206,16 +208,19 @@ final class HistoryStore {
               let ts = r["created_at"]?.int64Value else { return nil }
         let isSensitive = (r["is_sensitive"]?.int64Value ?? 0) != 0
         let expiresAt = r["expires_at"]?.int64Value.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
+        let text = r["text_content"]?.stringValue
+        let detectedURL = text.flatMap { detectFirstURL(in: $0) }
         return HistoryItem(
             id: id, kind: kind,
-            text: r["text_content"]?.stringValue,
+            text: text,
             imagePath: r["image_path"]?.stringValue,
             rtfData: r["rtf_data"]?.blobValue,
             contentHash: hash,
             sourceBundleId: r["source_bundle_id"]?.stringValue,
             createdAt: Date(timeIntervalSince1970: TimeInterval(ts) / 1_000_000),
             isSensitive: isSensitive,
-            expiresAt: expiresAt
+            expiresAt: expiresAt,
+            detectedURL: detectedURL
         )
     }
 

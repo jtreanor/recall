@@ -31,15 +31,15 @@ _Capture and restore formatting when the clipboard contains rich text._
 - [x] Update card rendering: type label shows "Rich Text" when RTF data is present
 - [x] Tests: rich-text round-trip, plain-text-only mode, fallback when no RTF stored (`RichTextTests.swift`)
 
-### Phase 6 — URL Detection
+### Phase 6 — URL Detection ✓
 
 _Recognise URLs as a first-class item type._
 
-- [ ] On capture (and on DB load), run a lightweight URL detector over text items
-- [ ] Annotate matching items with a `url` type in the data layer
-- [ ] Card UI: show domain as a secondary label (e.g. `github.com`) and a URL-type badge
-- [ ] (Optional) Fetch and cache favicon; display on card — defer if fetch latency is a concern
-- [ ] Tests: URL detection accuracy (plain URL, URL mid-sentence, non-URL text), card label rendering
+- [x] On capture (and on DB load), run a lightweight URL detector over text items
+- [x] Annotate matching items with a `url` type in the data layer
+- [x] Card UI: show domain as a secondary label (e.g. `github.com`) and a URL-type badge
+- [ ] (Optional) Fetch and cache favicon; display on card — deferred
+- [x] Tests: URL detection accuracy (plain URL, URL mid-sentence, non-URL text), card label rendering
 
 ### Phase 7 — File Handling
 
@@ -76,5 +76,5 @@ _Make the README compelling and useful for people discovering the app for the fi
 
 ## Current Status
 
-**Version:** 1.1.0-dev (Phase 5 complete)  
-**Next:** Phase 6 — URL Detection
+**Version:** 1.1.0-dev (Phase 6 complete)  
+**Next:** Phase 7 — File Handling

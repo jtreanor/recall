@@ -128,13 +128,14 @@ struct ClipboardItemCard: View {
     private static let cornerRadius: CGFloat = 14
 
     private var isCodeItem: Bool {
-        item.kind == .text && looksLikeCode(item.text)
+        item.kind == .text && item.detectedURL == nil && looksLikeCode(item.text)
     }
 
     private var typeLabel: String {
         if item.isSensitive { return "Password" }
         switch item.kind {
         case .text:
+            if item.detectedURL != nil { return "URL" }
             if isCodeItem { return "Code" }
             return item.rtfData != nil ? "Rich Text" : "Text"
         case .image: return "Image"
@@ -148,6 +149,8 @@ struct ClipboardItemCard: View {
                 sensitiveCardContent
             } else if item.kind == .image, let path = item.imagePath {
                 imageCardContent(path: path)
+            } else if item.detectedURL != nil {
+                urlCardContent
             } else {
                 textCardContent
             }
@@ -295,6 +298,33 @@ struct ClipboardItemCard: View {
                 .foregroundStyle(isCodeItem ? Color.white.opacity(0.88) : Color(nsColor: .labelColor))
                 .lineLimit(isCodeItem ? 8 : 6)
                 .truncationMode(.tail)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+        .padding(12)
+    }
+
+    private var urlCardContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            cardHeader(foregroundIsDark: false)
+                .padding(.bottom, 6)
+
+            if let host = item.detectedURL?.host {
+                HStack(spacing: 4) {
+                    Image(systemName: "link")
+                        .font(.system(size: 10, weight: .medium))
+                    Text(host)
+                        .font(.system(size: 12, weight: .medium))
+                }
+                .foregroundStyle(Color.accentColor)
+                .lineLimit(1)
+                .padding(.bottom, 5)
+            }
+
+            Text(item.text ?? "")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .lineLimit(4)
+                .truncationMode(.middle)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .padding(12)
