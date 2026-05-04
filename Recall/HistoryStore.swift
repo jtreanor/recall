@@ -6,6 +6,7 @@ struct HistoryItem {
     let kind: Kind
     let text: String?
     let imagePath: String?
+    var rtfData: Data? = nil
     let contentHash: String
     let sourceBundleId: String?
     let createdAt: Date
@@ -42,8 +43,8 @@ final class HistoryStore {
     func insert(item: ClipboardItem, sourceBundleId: String? = nil, isSensitive: Bool = false) throws -> HistoryItem? {
         if isSensitive && !settings.storeSensitiveItems { return nil }
         switch item {
-        case .text(let s):       return try insertText(s, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
-        case .image(let png, _): return try insertImage(png: png, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
+        case .text(let s, let rtf): return try insertText(s, rtfData: rtf, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
+        case .image(let png, _):    return try insertImage(png: png, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
         }
     }
 
@@ -51,7 +52,7 @@ final class HistoryStore {
         let nowMicros = Int64(Date().timeIntervalSince1970 * 1_000_000)
         return try db.query(
             """
-            SELECT id, created_at, type, text_content, image_path, content_hash,
+            SELECT id, created_at, type, text_content, image_path, rtf_data, content_hash,
                    source_bundle_id, is_sensitive, expires_at
             FROM items
             WHERE NOT (is_sensitive = 1 AND expires_at IS NOT NULL AND expires_at < ?)
@@ -130,7 +131,7 @@ final class HistoryStore {
 
     // MARK: - Private
 
-    private func insertText(_ text: String, sourceBundleId: String?, isSensitive: Bool) throws -> HistoryItem? {
+    private func insertText(_ text: String, rtfData: Data?, sourceBundleId: String?, isSensitive: Bool) throws -> HistoryItem? {
         guard let data = text.data(using: .utf8) else { return nil }
         let hash = sha256(data)
         let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
@@ -141,17 +142,18 @@ final class HistoryStore {
         let bundleParam: DBParam = sourceBundleId.map { .text($0) } ?? .null
         let expiresAt: Int64? = isSensitive ? now + Int64(15 * 60 * 1_000_000) : nil
         let expiresParam: DBParam = expiresAt.map { .int64($0) } ?? .null
+        let rtfParam: DBParam = rtfData.map { .blob($0) } ?? .null
         try db.run(
-            "INSERT INTO items (created_at, updated_at, type, text_content, content_hash, source_bundle_id, is_sensitive, expires_at) VALUES (?,?,?,?,?,?,?,?)",
-            .int64(now), .int64(now), .text("text"), .text(text), .text(hash), bundleParam,
+            "INSERT INTO items (created_at, updated_at, type, text_content, rtf_data, content_hash, source_bundle_id, is_sensitive, expires_at) VALUES (?,?,?,?,?,?,?,?,?)",
+            .int64(now), .int64(now), .text("text"), .text(text), rtfParam, .text(hash), bundleParam,
             .int64(isSensitive ? 1 : 0), expiresParam
         )
         let id = db.lastInsertRowid
         try pruneToLimit(settings.historyLimit)
         try pruneExpired(settings.itemMaxAgeSecs)
         let expiresDate = expiresAt.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
-        return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, contentHash: hash,
-                           sourceBundleId: sourceBundleId,
+        return HistoryItem(id: id, kind: .text, text: text, imagePath: nil, rtfData: rtfData,
+                           contentHash: hash, sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000),
                            isSensitive: isSensitive, expiresAt: expiresDate)
     }
@@ -177,15 +179,15 @@ final class HistoryStore {
         try pruneToLimit(settings.historyLimit)
         try pruneExpired(settings.itemMaxAgeSecs)
         let expiresDate = expiresAt.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
-        return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, contentHash: hash,
-                           sourceBundleId: sourceBundleId,
+        return HistoryItem(id: id, kind: .image, text: nil, imagePath: filePath, rtfData: nil,
+                           contentHash: hash, sourceBundleId: sourceBundleId,
                            createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000),
                            isSensitive: isSensitive, expiresAt: expiresDate)
     }
 
     private func itemForHash(_ hash: String) throws -> HistoryItem? {
         let rows = try db.query(
-            "SELECT id, created_at, type, text_content, image_path, content_hash, source_bundle_id, is_sensitive, expires_at FROM items WHERE content_hash = ? LIMIT 1",
+            "SELECT id, created_at, type, text_content, image_path, rtf_data, content_hash, source_bundle_id, is_sensitive, expires_at FROM items WHERE content_hash = ? LIMIT 1",
             .text(hash)
         )
         return rows.first.flatMap(row(from:))
@@ -208,6 +210,7 @@ final class HistoryStore {
             id: id, kind: kind,
             text: r["text_content"]?.stringValue,
             imagePath: r["image_path"]?.stringValue,
+            rtfData: r["rtf_data"]?.blobValue,
             contentHash: hash,
             sourceBundleId: r["source_bundle_id"]?.stringValue,
             createdAt: Date(timeIntervalSince1970: TimeInterval(ts) / 1_000_000),

@@ -153,7 +153,7 @@ final class HistoryStoreClearAllTests: XCTestCase {
     }
 
     func testClearAllRemovesItems() throws {
-        let item = ClipboardItem.text("hello")
+        let item = ClipboardItem.text("hello", rtf: nil)
         try store.insert(item: item)
         XCTAssertEqual(try store.count(), 1)
         try store.clearAll()
@@ -178,9 +178,9 @@ final class HistoryStoreClearAllTests: XCTestCase {
 
     func testPruneExpiredRemovesOldItems() throws {
         // Insert an item then back-date it beyond the cutoff
-        try store.insert(item: .text("old"))
+        try store.insert(item: .text("old", rtf: nil))
         backdateAllItems(by: 200)
-        try store.insert(item: .text("new"))
+        try store.insert(item: .text("new", rtf: nil))
         // Prune items older than 100s; "old" is 200s old, "new" is fresh
         try store.pruneExpired(100)
         XCTAssertEqual(try store.count(), 1)
@@ -189,7 +189,7 @@ final class HistoryStoreClearAllTests: XCTestCase {
     }
 
     func testPruneExpiredWithZeroIsNoop() throws {
-        try store.insert(item: .text("item"))
+        try store.insert(item: .text("item", rtf: nil))
         backdateAllItems(by: 9999)
         try store.pruneExpired(0) // 0 = never expire
         XCTAssertEqual(try store.count(), 1)

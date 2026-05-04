@@ -152,6 +152,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let pb = NSPasteboard.general
         pb.clearContents()
         if item.kind == .text, let text = item.text {
+            if let rtf = item.rtfData, !SettingsManager.shared.pasteAsPlainText {
+                pb.setData(rtf, forType: .rtf)
+            }
             pb.setString(text, forType: .string)
         } else if item.kind == .image, let path = item.imagePath,
                   let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {

@@ -30,7 +30,7 @@ final class HistoryStoreTests: XCTestCase {
     // MARK: - insert / fetchAll
 
     func testInsertTextAndFetch() throws {
-        let item = try XCTUnwrap(store.insert(item: .text("hello")))
+        let item = try XCTUnwrap(store.insert(item: .text("hello", rtf: nil)))
         XCTAssertEqual(item.kind, .text)
         XCTAssertEqual(item.text, "hello")
         let all = try store.fetchAll()
@@ -39,9 +39,9 @@ final class HistoryStoreTests: XCTestCase {
     }
 
     func testDuplicateTextMovesToTop() throws {
-        try store.insert(item: .text("hello"))
-        try store.insert(item: .text("world"))
-        let dup = try XCTUnwrap(store.insert(item: .text("hello")))
+        try store.insert(item: .text("hello", rtf: nil))
+        try store.insert(item: .text("world", rtf: nil))
+        let dup = try XCTUnwrap(store.insert(item: .text("hello", rtf: nil)))
         XCTAssertEqual(dup.text, "hello")
         let all = try store.fetchAll()
         XCTAssertEqual(all.count, 2)
@@ -49,8 +49,8 @@ final class HistoryStoreTests: XCTestCase {
     }
 
     func testFetchAllNewestFirst() throws {
-        try store.insert(item: .text("first"))
-        try store.insert(item: .text("second"))
+        try store.insert(item: .text("first", rtf: nil))
+        try store.insert(item: .text("second", rtf: nil))
         let all = try store.fetchAll()
         XCTAssertEqual(all[0].text, "second")
         XCTAssertEqual(all[1].text, "first")
@@ -63,21 +63,21 @@ final class HistoryStoreTests: XCTestCase {
     // MARK: - delete
 
     func testDeleteRemovesItem() throws {
-        let item = try XCTUnwrap(store.insert(item: .text("delete me")))
+        let item = try XCTUnwrap(store.insert(item: .text("delete me", rtf: nil)))
         try store.delete(id: item.id)
         XCTAssertTrue(try store.fetchAll().isEmpty)
     }
 
     func testDeleteUnknownIdIsNoop() throws {
-        try store.insert(item: .text("keep"))
+        try store.insert(item: .text("keep", rtf: nil))
         try store.delete(id: 9999)
         XCTAssertEqual(try store.fetchAll().count, 1)
     }
 
     func testDeleteOneOfManyLeavesOthersIntact() throws {
-        try store.insert(item: .text("alpha"))
-        let target = try XCTUnwrap(store.insert(item: .text("beta")))
-        try store.insert(item: .text("gamma"))
+        try store.insert(item: .text("alpha", rtf: nil))
+        let target = try XCTUnwrap(store.insert(item: .text("beta", rtf: nil)))
+        try store.insert(item: .text("gamma", rtf: nil))
         try store.delete(id: target.id)
         let remaining = try store.fetchAll()
         XCTAssertEqual(remaining.count, 2)
@@ -90,7 +90,7 @@ final class HistoryStoreTests: XCTestCase {
 
     func testPruneToLimitReducesCount() throws {
         for i in 0..<10 {
-            try store.insert(item: .text("item \(i)"))
+            try store.insert(item: .text("item \(i)", rtf: nil))
         }
         try store.pruneToLimit(5)
         XCTAssertEqual(try store.fetchAll().count, 5)
@@ -98,7 +98,7 @@ final class HistoryStoreTests: XCTestCase {
 
     func testPruneKeepsNewest() throws {
         for i in 0..<5 {
-            try store.insert(item: .text("item \(i)"))
+            try store.insert(item: .text("item \(i)", rtf: nil))
         }
         try store.pruneToLimit(3)
         let all = try store.fetchAll()
@@ -107,7 +107,7 @@ final class HistoryStoreTests: XCTestCase {
     }
 
     func testPruneBelowExistingCountIsNoop() throws {
-        try store.insert(item: .text("a"))
+        try store.insert(item: .text("a", rtf: nil))
         try store.pruneToLimit(500)
         XCTAssertEqual(try store.fetchAll().count, 1)
     }
@@ -162,13 +162,13 @@ final class HistoryStoreTests: XCTestCase {
     // MARK: - sourceBundleId
 
     func testInsertTextPersistsBundleId() throws {
-        try store.insert(item: .text("bundle test"), sourceBundleId: "com.apple.finder")
+        try store.insert(item: .text("bundle test", rtf: nil), sourceBundleId: "com.apple.finder")
         let all = try store.fetchAll()
         XCTAssertEqual(all[0].sourceBundleId, "com.apple.finder")
     }
 
     func testInsertTextNilBundleIdIsNil() throws {
-        try store.insert(item: .text("no bundle"))
+        try store.insert(item: .text("no bundle", rtf: nil))
         let all = try store.fetchAll()
         XCTAssertNil(all[0].sourceBundleId)
     }
@@ -183,8 +183,8 @@ final class HistoryStoreTests: XCTestCase {
     // MARK: - count
 
     func testCountMatchesFetchAll() throws {
-        try store.insert(item: .text("a"))
-        try store.insert(item: .text("b"))
+        try store.insert(item: .text("a", rtf: nil))
+        try store.insert(item: .text("b", rtf: nil))
         XCTAssertEqual(try store.count(), try store.fetchAll().count)
     }
 
