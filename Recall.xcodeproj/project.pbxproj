@@ -34,6 +34,7 @@
 		D17E0011E35427C7EFC8A1C8 /* OverlayViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4398C8568120709C883538CD /* OverlayViewTests.swift */; };
 		F178D4CABC5822EA5D2FF4BA /* AppDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD78F074918D0E5AAB1B4790 /* AppDelegateTests.swift */; };
 		F200AC9C10D052E3CE3D31DB /* HotkeyManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB263E6D3E579EC679C2251A /* HotkeyManagerTests.swift */; };
+		F2EB261ED0A756EDC639F63F /* FileHandlingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D951C018FBBA427C35C75F49 /* FileHandlingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		C2F28DE604BDCFE84A1CCCAA /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		C4646E22534FFA6986EBF387 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CD78F074918D0E5AAB1B4790 /* AppDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateTests.swift; sourceTree = "<group>"; };
+		D951C018FBBA427C35C75F49 /* FileHandlingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandlingTests.swift; sourceTree = "<group>"; };
 		E0299D3B7B2584D1147D4DB4 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
 		E55FB9A4BE83E6136E1CEBB3 /* RecallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecallApp.swift; sourceTree = "<group>"; };
 		E5B5A6E3B0A86A30944609A6 /* ClipboardMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitorTests.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 				8B6B3F2B6973E26BB0C23B2F /* AccessibilityManagerTests.swift */,
 				CD78F074918D0E5AAB1B4790 /* AppDelegateTests.swift */,
 				E5B5A6E3B0A86A30944609A6 /* ClipboardMonitorTests.swift */,
+				D951C018FBBA427C35C75F49 /* FileHandlingTests.swift */,
 				B2DB98E87C158327C5CD8FE6 /* HistoryStoreTests.swift */,
 				BB263E6D3E579EC679C2251A /* HotkeyManagerTests.swift */,
 				2A38AD8FFE37E9D3FC87AFCB /* IntegrationTests.swift */,
@@ -235,6 +238,7 @@
 				07A8230F76ECFABC21E6A20B /* AccessibilityManagerTests.swift in Sources */,
 				F178D4CABC5822EA5D2FF4BA /* AppDelegateTests.swift in Sources */,
 				29FE19950B539E815340FF6E /* ClipboardMonitorTests.swift in Sources */,
+				F2EB261ED0A756EDC639F63F /* FileHandlingTests.swift in Sources */,
 				637624C57A5049C273770226 /* HistoryStoreTests.swift in Sources */,
 				F200AC9C10D052E3CE3D31DB /* HotkeyManagerTests.swift in Sources */,
 				25CB9ED2ABA546937854B6E7 /* IntegrationTests.swift in Sources */,

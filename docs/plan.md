@@ -41,16 +41,17 @@ _Recognise URLs as a first-class item type._
 - [ ] (Optional) Fetch and cache favicon; display on card — deferred
 - [x] Tests: URL detection accuracy (plain URL, URL mid-sentence, non-URL text), card label rendering
 
-### Phase 7 — File Handling
+### Phase 7 — File Handling ✓
 
 _Surface copied files and their paths as usable clipboard items._
 
-- [ ] **Research first:** determine best strategy for files — `NSPasteboard` file promises vs. paths vs. actual file data. Key question: on paste, should Recall re-paste the file object (so it lands in Finder/apps as a file) or paste the path string? Document the decision in `docs/research.md`.
-- [ ] Extend `ClipboardMonitor` to detect `NSFilenamesPboardType` / `public.file-url` items
-- [ ] Store file items: path(s), display name, UTI/icon reference; handle multi-file selections as a single item
-- [ ] Card UI: filename + file-type icon; multi-file items show count badge
-- [ ] Paste-back: implement the strategy decided during research
-- [ ] Tests: single file capture, multi-file capture, paste-back behaviour
+- [x] **Research first:** paste file URLs back to `NSPasteboard` (not path strings); documented in `docs/research.md`.
+- [x] Extend `ClipboardMonitor` to detect `public.file-url` items (checked before text to avoid path-string captures)
+- [x] Store file items: path(s) as JSON in `file_paths` column; display name derived from filename(s); multi-file handled as single item; hash from sorted paths (order-insensitive deduplication)
+- [x] Card UI: SF Symbol file icon (type-aware), filename, `+N` count badge for multi-file selections
+- [x] Paste-back: write `NSURL` objects via `writeObjects`; fall back to path string if files no longer exist
+- [x] DB migration: table rebuild to extend CHECK constraint to allow `'file'` type + add `file_paths` column
+- [x] Tests: single file, multi-file, paste-back, fallback, deduplication, order-insensitive hash, monitor detection, search (`FileHandlingTests.swift`)
 
 ### Phase 8 — README Refresh
 
@@ -76,5 +77,5 @@ _Make the README compelling and useful for people discovering the app for the fi
 
 ## Current Status
 
-**Version:** 1.1.0-dev (Phase 6 complete)  
-**Next:** Phase 7 — File Handling
+**Version:** 1.1.0-dev (Phase 7 complete)  
+**Next:** Phase 8 — README Refresh

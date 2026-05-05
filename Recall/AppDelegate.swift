@@ -159,6 +159,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else if item.kind == .image, let path = item.imagePath,
                   let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
             pb.setData(data, forType: .png)
+        } else if item.kind == .file, let paths = item.filePaths {
+            let existingURLs = paths.map(URL.init(fileURLWithPath:)).filter { FileManager.default.fileExists(atPath: $0.path) }
+            if existingURLs.isEmpty {
+                // All files gone — fall back to path strings so at least something is pasted.
+                pb.setString(paths.joined(separator: "\n"), forType: .string)
+            } else {
+                pb.writeObjects(existingURLs as [NSURL])
+            }
         }
     }
 
@@ -266,8 +274,15 @@ final class OverlayState: ObservableObject {
         guard !searchQuery.isEmpty else { return items }
         let q = searchQuery.lowercased()
         return items.filter { item in
-            guard item.kind == .text, let text = item.text else { return false }
-            return text.lowercased().contains(q)
+            switch item.kind {
+            case .text:
+                return item.text?.lowercased().contains(q) == true
+            case .file:
+                let paths = item.filePaths ?? []
+                return paths.contains { $0.lowercased().contains(q) }
+            case .image:
+                return false
+            }
         }
     }
 

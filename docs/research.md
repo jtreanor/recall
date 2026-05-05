@@ -281,3 +281,39 @@ keyUp?.post(tap: .cghidEventTap)
 - [NSPanel](https://developer.apple.com/documentation/appkit/nspanel)
 - [NSHostingView](https://developer.apple.com/documentation/swiftui/nshostingview)
 - Carbon `RegisterEventHotKey` — available via `<Carbon/Carbon.h>` (still in macOS SDK as of macOS 15)
+
+---
+
+## Phase 7 — File Handling Strategy
+
+### The key question: paste file object or paste path string?
+
+**Decision: paste file URLs back to `NSPasteboard` (file object approach).**
+
+On paste-back, write `NSURL` file objects via `NSPasteboard.writeObjects([url1, url2, ...])`. This is exactly what the system clipboard does when you copy a file in Finder, and is the format that Finder, file-open dialogs, and file-aware apps expect. Pasting path strings as plain text would be useless in the vast majority of paste targets.
+
+If a stored file no longer exists at its path when paste-back is triggered, fall back to pasting the path as a plain text string — the content is preserved even if the file reference is stale.
+
+### Detection
+
+Check for file URLs in `poll()` **before** text, because file copies in Finder include both `public.file-url` / `NSFilenamesPboardType` _and_ a text representation of the path. Without priority ordering, file copies would be captured as plain text items.
+
+Read via:
+```swift
+NSPasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true])
+```
+
+### Storage
+
+- `type = 'file'` in the DB (requires rebuilding the table to extend the CHECK constraint)
+- `file_paths TEXT` column holds a JSON array of absolute path strings
+- `text_content` holds the display name: last path component for single files, `"N Files"` for multi-file selections
+- `content_hash` = SHA-256 of sorted paths joined by newline — ensures deduplication for the same file set regardless of selection order
+
+### Multi-file
+
+Multiple selected files (e.g., ⌘-click in Finder) are captured as a single item. Card shows the first filename + a count badge for extras (e.g. `"report.pdf  +2"`).
+
+### DB migration
+
+SQLite does not support `ALTER TABLE … MODIFY CHECK`. To extend `type IN ('text','image')` to include `'file'`, the migration rebuilds the table: rename → create new → copy → drop old. The `file_paths` column is added in the same migration.

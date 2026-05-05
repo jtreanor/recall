@@ -128,7 +128,7 @@ struct ClipboardItemCard: View {
     private static let cornerRadius: CGFloat = 14
 
     private var isCodeItem: Bool {
-        item.kind == .text && item.detectedURL == nil && looksLikeCode(item.text)
+        item.kind == .text && item.detectedURL == nil && item.filePaths == nil && looksLikeCode(item.text)
     }
 
     private var typeLabel: String {
@@ -139,6 +139,9 @@ struct ClipboardItemCard: View {
             if isCodeItem { return "Code" }
             return item.rtfData != nil ? "Rich Text" : "Text"
         case .image: return "Image"
+        case .file:
+            let count = item.filePaths?.count ?? 1
+            return count == 1 ? "File" : "\(count) Files"
         }
     }
 
@@ -149,6 +152,8 @@ struct ClipboardItemCard: View {
                 sensitiveCardContent
             } else if item.kind == .image, let path = item.imagePath {
                 imageCardContent(path: path)
+            } else if item.kind == .file {
+                fileCardContent
             } else if item.detectedURL != nil {
                 urlCardContent
             } else {
@@ -328,6 +333,55 @@ struct ClipboardItemCard: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .padding(12)
+    }
+
+    private var fileCardContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            cardHeader(foregroundIsDark: false)
+                .padding(.bottom, 6)
+
+            Spacer()
+
+            HStack(alignment: .bottom, spacing: 10) {
+                Image(systemName: fileSymbol(for: item.filePaths?.first))
+                    .font(.system(size: 38, weight: .light))
+                    .foregroundStyle(Color.accentColor.opacity(0.8))
+
+                if let paths = item.filePaths, paths.count > 1 {
+                    Text("+\(paths.count - 1)")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.bottom, 4)
+                }
+            }
+            .padding(.bottom, 6)
+
+            Text((item.filePaths?.first as NSString?)?.lastPathComponent ?? item.text ?? "")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color(nsColor: .labelColor))
+                .lineLimit(2)
+                .truncationMode(.middle)
+        }
+        .padding(12)
+    }
+
+    private func fileSymbol(for path: String?) -> String {
+        guard let path else { return "doc" }
+        let ext = (path as NSString).pathExtension.lowercased()
+        switch ext {
+        case "pdf":                                     return "doc.richtext"
+        case "png", "jpg", "jpeg", "gif", "heic", "webp", "tiff": return "photo"
+        case "mp4", "mov", "avi", "mkv", "m4v":        return "film"
+        case "mp3", "aac", "wav", "flac", "m4a":       return "music.note"
+        case "zip", "gz", "tar", "rar", "7z":          return "archivebox"
+        case "swift", "py", "js", "ts", "go", "rb", "rs", "c", "cpp", "h": return "chevron.left.forwardslash.chevron.right"
+        case "md", "txt", "rtf":                       return "doc.text"
+        case "xls", "xlsx", "csv":                     return "tablecells"
+        case "ppt", "pptx":                            return "rectangle.on.rectangle"
+        case "app":                                     return "app"
+        case "dmg":                                     return "externaldrive"
+        default:                                        return "doc"
+        }
     }
 
     private var sensitiveCardContent: some View {

@@ -13,9 +13,17 @@ struct HistoryItem {
     var isSensitive: Bool = false
     var expiresAt: Date? = nil
     var detectedURL: URL? = nil
+    var filePaths: [String]? = nil
 
     enum Kind: String {
-        case text, image
+        case text, image, file
+    }
+
+    var fileDisplayName: String? {
+        guard kind == .file, let paths = filePaths, !paths.isEmpty else { return nil }
+        let first = (paths[0] as NSString).lastPathComponent
+        if paths.count == 1 { return first }
+        return "\(first)  +\(paths.count - 1)"
     }
 }
 
@@ -46,6 +54,7 @@ final class HistoryStore {
         switch item {
         case .text(let s, let rtf): return try insertText(s, rtfData: rtf, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
         case .image(let png, _):    return try insertImage(png: png, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
+        case .file(let urls):       return try insertFile(urls: urls, sourceBundleId: sourceBundleId, isSensitive: isSensitive)
         }
     }
 
@@ -53,7 +62,7 @@ final class HistoryStore {
         let nowMicros = Int64(Date().timeIntervalSince1970 * 1_000_000)
         return try db.query(
             """
-            SELECT id, created_at, type, text_content, image_path, rtf_data, content_hash,
+            SELECT id, created_at, type, text_content, image_path, rtf_data, file_paths, content_hash,
                    source_bundle_id, is_sensitive, expires_at
             FROM items
             WHERE NOT (is_sensitive = 1 AND expires_at IS NOT NULL AND expires_at < ?)
@@ -189,7 +198,7 @@ final class HistoryStore {
 
     private func itemForHash(_ hash: String) throws -> HistoryItem? {
         let rows = try db.query(
-            "SELECT id, created_at, type, text_content, image_path, rtf_data, content_hash, source_bundle_id, is_sensitive, expires_at FROM items WHERE content_hash = ? LIMIT 1",
+            "SELECT id, created_at, type, text_content, image_path, rtf_data, file_paths, content_hash, source_bundle_id, is_sensitive, expires_at FROM items WHERE content_hash = ? LIMIT 1",
             .text(hash)
         )
         return rows.first.flatMap(row(from:))
@@ -209,7 +218,10 @@ final class HistoryStore {
         let isSensitive = (r["is_sensitive"]?.int64Value ?? 0) != 0
         let expiresAt = r["expires_at"]?.int64Value.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
         let text = r["text_content"]?.stringValue
-        let detectedURL = text.flatMap { detectFirstURL(in: $0) }
+        let detectedURL = kind == .text ? text.flatMap { detectFirstURL(in: $0) } : nil
+        let filePaths: [String]? = r["file_paths"]?.stringValue.flatMap {
+            try? JSONDecoder().decode([String].self, from: Data($0.utf8))
+        }
         return HistoryItem(
             id: id, kind: kind,
             text: text,
@@ -220,7 +232,52 @@ final class HistoryStore {
             createdAt: Date(timeIntervalSince1970: TimeInterval(ts) / 1_000_000),
             isSensitive: isSensitive,
             expiresAt: expiresAt,
-            detectedURL: detectedURL
+            detectedURL: detectedURL,
+            filePaths: filePaths
+        )
+    }
+
+    private func insertFile(urls: [URL], sourceBundleId: String?, isSensitive: Bool) throws -> HistoryItem? {
+        guard !urls.isEmpty else { return nil }
+        let sortedPaths = urls.map(\.path).sorted()
+        let hashInput = sortedPaths.joined(separator: "\n")
+        guard let hashData = hashInput.data(using: .utf8) else { return nil }
+        let hash = sha256(hashData)
+        let now = Int64(Date().timeIntervalSince1970 * 1_000_000)
+        if let existing = try itemForHash(hash) {
+            try db.run("UPDATE items SET updated_at = ? WHERE id = ?", .int64(now), .int64(existing.id))
+            return existing
+        }
+        let displayName: String
+        if sortedPaths.count == 1 {
+            displayName = (sortedPaths[0] as NSString).lastPathComponent
+        } else {
+            let first = (sortedPaths[0] as NSString).lastPathComponent
+            displayName = "\(first)  +\(sortedPaths.count - 1)"
+        }
+        let pathsJSON = (try? JSONEncoder().encode(sortedPaths)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        let bundleParam: DBParam = sourceBundleId.map { .text($0) } ?? .null
+        let expiresAt: Int64? = isSensitive ? now + Int64(15 * 60 * 1_000_000) : nil
+        let expiresParam: DBParam = expiresAt.map { .int64($0) } ?? .null
+        try db.run(
+            "INSERT INTO items (created_at, updated_at, type, text_content, file_paths, content_hash, source_bundle_id, is_sensitive, expires_at) VALUES (?,?,?,?,?,?,?,?,?)",
+            .int64(now), .int64(now), .text("file"), .text(displayName), .text(pathsJSON), .text(hash),
+            bundleParam, .int64(isSensitive ? 1 : 0), expiresParam
+        )
+        let id = db.lastInsertRowid
+        try pruneToLimit(settings.historyLimit)
+        try pruneExpired(settings.itemMaxAgeSecs)
+        let expiresDate = expiresAt.map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000_000) }
+        return HistoryItem(
+            id: id, kind: .file,
+            text: displayName,
+            imagePath: nil, rtfData: nil,
+            contentHash: hash,
+            sourceBundleId: sourceBundleId,
+            createdAt: Date(timeIntervalSince1970: TimeInterval(now) / 1_000_000),
+            isSensitive: isSensitive,
+            expiresAt: expiresDate,
+            filePaths: sortedPaths
         )
     }
 
