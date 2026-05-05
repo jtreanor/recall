@@ -51,20 +51,27 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertEqual(vf.minX, screen.frame.minX)
     }
 
-    func testSlideAnimationTranslationMatchesPanelHeight() {
-        // The CABasicAnimation translate-Y distance must equal panelHeight so the content
-        // starts fully below the window's clip boundary.
-        let translation = CATransform3DMakeTranslation(0, -OverlayPanel.panelHeight, 0)
-        XCTAssertEqual(translation.m42, -OverlayPanel.panelHeight, accuracy: 0.5)
+    func testOffscreenFrameIsBelowVisibleFrame() {
+        let panel = OverlayPanel()
+        let vf = panel.visibleFrame()
+        let off = panel.offscreenFrame()
+
+        // Same x and width
+        XCTAssertEqual(off.minX, vf.minX)
+        XCTAssertEqual(off.width, vf.width)
+        XCTAssertEqual(off.height, vf.height)
+
+        // Starts exactly one panel-height below the visible frame
+        XCTAssertEqual(off.minY, vf.minY - OverlayPanel.panelHeight, accuracy: 0.5)
     }
 
-    func testVisibleFrameIsFullScreenWidth() {
-        guard let screen = NSScreen.main else { return }
+    func testOffscreenFrameTopEdgeIsAtScreenBottom() {
         let panel = OverlayPanel()
-        // Animation keeps window fixed at visibleFrame() — it must span the full screen width
-        // so no x-movement is possible regardless of CALayer animation.
-        XCTAssertEqual(panel.visibleFrame().width, screen.frame.width)
-        XCTAssertEqual(panel.visibleFrame().minX, screen.frame.minX)
+        let vf = panel.visibleFrame()
+        let off = panel.offscreenFrame()
+
+        // The top of the off-screen frame should be exactly at the visible frame's bottom edge
+        XCTAssertEqual(off.maxY, vf.minY, accuracy: 0.5)
     }
 
     // MARK: - M3.4 callbacks

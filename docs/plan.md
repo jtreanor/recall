@@ -66,6 +66,10 @@ _Make the README compelling and useful for people discovering the app for the fi
 
 ---
 
+## Known Bugs
+
+- **Opening animation has a slight horizontal drift (gap visible on left side).** Two approaches attempted: (1) deriving start frame from target to avoid double `visibleFrame()` call; (2) replacing `NSAnimationContext setFrame` with a `CABasicAnimation` on the content view's `transform` layer — neither fixed it. Root cause is unclear; suspect `NSVisualEffectView` or the window compositor introducing a horizontal component. Needs further investigation (possibly: `NSWindow.animator()` with y-only `setFrameOrigin`, or a wrapper clip view inside the visual effect view).
+
 ## Implementation Notes
 
 - Keep `NSPanel` subclass minimal; prefer SwiftUI for all rendered content
