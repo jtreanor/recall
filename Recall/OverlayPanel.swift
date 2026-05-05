@@ -1,4 +1,5 @@
 import AppKit
+import QuartzCore
 
 final class OverlayPanel: NSPanel {
     static let panelHeight: CGFloat = 260
@@ -53,10 +54,14 @@ final class OverlayPanel: NSPanel {
     }
 
     func show() {
-        let target = visibleFrame()
-        let start = target.offsetBy(dx: 0, dy: -target.height)
+        // Cancel any in-flight hide animation and snap layer back to identity.
+        contentView?.layer?.removeAllAnimations()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        contentView?.layer?.transform = CATransform3DIdentity
+        CATransaction.commit()
 
-        setFrame(start, display: false)
+        setFrame(visibleFrame(), display: false)
         makeKeyAndOrderFront(nil)
 
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
@@ -108,26 +113,41 @@ final class OverlayPanel: NSPanel {
             }
         }
 
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.15
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            self.animator().setFrame(target, display: true)
-        }
+        // Slide content up via layer transform. The window frame stays fixed at visibleFrame()
+        // so x can never drift during animation.
+        let slideIn = CABasicAnimation(keyPath: "transform")
+        slideIn.fromValue = NSValue(caTransform3D: CATransform3DMakeTranslation(0, -OverlayPanel.panelHeight, 0))
+        slideIn.duration = 0.15
+        slideIn.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        // toValue defaults to the model value (CATransform3DIdentity).
+        contentView?.layer?.add(slideIn, forKey: "slide")
     }
 
     func hide() {
         removeEventMonitors()
         onDismiss?()
 
-        let end = visibleFrame().offsetBy(dx: 0, dy: -OverlayPanel.panelHeight)
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.15
-            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
-            self.animator().setFrame(end, display: true)
-        } completionHandler: {
+        let slideOut = CABasicAnimation(keyPath: "transform")
+        slideOut.toValue = NSValue(caTransform3D: CATransform3DMakeTranslation(0, -OverlayPanel.panelHeight, 0))
+        slideOut.duration = 0.15
+        slideOut.timingFunction = CAMediaTimingFunction(name: .easeIn)
+        // fillMode keeps the final frame visible until orderOut removes the window.
+        slideOut.fillMode = .forwards
+        slideOut.isRemovedOnCompletion = false
+
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { [weak self] in
+            guard let self else { return }
+            self.contentView?.layer?.removeAllAnimations()
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            self.contentView?.layer?.transform = CATransform3DIdentity
+            CATransaction.commit()
             self.orderOut(nil)
             self.onHidden?()
         }
+        contentView?.layer?.add(slideOut, forKey: "slide")
+        CATransaction.commit()
     }
 
     private func removeEventMonitors() {

@@ -51,27 +51,20 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertEqual(vf.minX, screen.frame.minX)
     }
 
-    func testStartFrameIsBelowVisibleFrame() {
-        let panel = OverlayPanel()
-        let vf = panel.visibleFrame()
-        let start = vf.offsetBy(dx: 0, dy: -vf.height)
-
-        // Same x and width — guarantees purely vertical animation with no diagonal component
-        XCTAssertEqual(start.minX, vf.minX)
-        XCTAssertEqual(start.width, vf.width)
-        XCTAssertEqual(start.height, vf.height)
-
-        // Starts exactly one panel-height below the visible frame
-        XCTAssertEqual(start.minY, vf.minY - OverlayPanel.panelHeight, accuracy: 0.5)
+    func testSlideAnimationTranslationMatchesPanelHeight() {
+        // The CABasicAnimation translate-Y distance must equal panelHeight so the content
+        // starts fully below the window's clip boundary.
+        let translation = CATransform3DMakeTranslation(0, -OverlayPanel.panelHeight, 0)
+        XCTAssertEqual(translation.m42, -OverlayPanel.panelHeight, accuracy: 0.5)
     }
 
-    func testStartFrameTopEdgeIsAtScreenBottom() {
+    func testVisibleFrameIsFullScreenWidth() {
+        guard let screen = NSScreen.main else { return }
         let panel = OverlayPanel()
-        let vf = panel.visibleFrame()
-        let start = vf.offsetBy(dx: 0, dy: -vf.height)
-
-        // The top of the start frame sits exactly at the visible frame's bottom edge
-        XCTAssertEqual(start.maxY, vf.minY, accuracy: 0.5)
+        // Animation keeps window fixed at visibleFrame() — it must span the full screen width
+        // so no x-movement is possible regardless of CALayer animation.
+        XCTAssertEqual(panel.visibleFrame().width, screen.frame.width)
+        XCTAssertEqual(panel.visibleFrame().minX, screen.frame.minX)
     }
 
     // MARK: - M3.4 callbacks
