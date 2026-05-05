@@ -107,6 +107,42 @@ final class Database {
         try? exec("ALTER TABLE items ADD COLUMN is_sensitive INTEGER NOT NULL DEFAULT 0")
         try? exec("ALTER TABLE items ADD COLUMN expires_at INTEGER")
         try? exec("ALTER TABLE items ADD COLUMN rtf_data BLOB")
+        // Rebuild table to allow 'file' type and add file_paths column if not done yet.
+        try migrateAddFileType()
+    }
+
+    private func migrateAddFileType() throws {
+        let rows = try query("SELECT sql FROM sqlite_master WHERE type='table' AND name='items'")
+        guard let sql = rows.first?["sql"]?.stringValue, !sql.contains("'file'") else { return }
+        // Rebuild: rename → create new schema → copy → drop old → recreate index.
+        try exec("ALTER TABLE items RENAME TO items_old")
+        try exec("""
+        CREATE TABLE items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          type TEXT NOT NULL CHECK(type IN ('text','image','file')),
+          text_content TEXT,
+          image_path TEXT,
+          content_hash TEXT NOT NULL UNIQUE,
+          source_bundle_id TEXT,
+          is_sensitive INTEGER NOT NULL DEFAULT 0,
+          expires_at INTEGER,
+          rtf_data BLOB,
+          file_paths TEXT
+        )
+        """)
+        try exec("""
+        INSERT INTO items
+          (id,created_at,updated_at,type,text_content,image_path,content_hash,
+           source_bundle_id,is_sensitive,expires_at,rtf_data)
+        SELECT
+          id,created_at,updated_at,type,text_content,image_path,content_hash,
+          source_bundle_id,is_sensitive,expires_at,rtf_data
+        FROM items_old
+        """)
+        try exec("DROP TABLE items_old")
+        try exec("CREATE INDEX IF NOT EXISTS idx_updated ON items(updated_at DESC)")
     }
 
     private func prepare(_ sql: String) throws -> OpaquePointer? {

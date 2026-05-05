@@ -4,6 +4,7 @@ import Combine
 enum ClipboardItem {
     case text(String, rtf: Data?)
     case image(png: Data, thumbnail: NSImage)
+    case file(paths: [URL])
 }
 
 struct CapturedItem {
@@ -119,6 +120,14 @@ final class ClipboardMonitor {
         let isSensitive = hasConcealed
             || bundleId.map { Self.passwordManagerBundleIds.contains($0) } == true
             || fromBrowserExtension
+
+        // Check for file URLs before text — file copies include both file URLs and path strings.
+        let fileURLOptions: [NSPasteboard.ReadingOptionKey: Any] = [.urlReadingFileURLsOnly: true]
+        if let fileURLs = pb.readObjects(forClasses: [NSURL.self], options: fileURLOptions) as? [URL],
+           !fileURLs.isEmpty {
+            itemPublisher.send(CapturedItem(item: .file(paths: fileURLs), sourceBundleId: bundleId, isSensitive: isSensitive))
+            return
+        }
 
         if let text = pb.string(forType: .string), !text.isEmpty {
             let rtf = pb.data(forType: .rtf)
