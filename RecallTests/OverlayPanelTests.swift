@@ -51,27 +51,27 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertEqual(vf.minX, screen.frame.minX)
     }
 
-    func testOffscreenFrameIsBelowVisibleFrame() {
+    func testStartFrameIsBelowVisibleFrame() {
         let panel = OverlayPanel()
         let vf = panel.visibleFrame()
-        let off = panel.offscreenFrame()
+        let start = vf.offsetBy(dx: 0, dy: -vf.height)
 
-        // Same x and width
-        XCTAssertEqual(off.minX, vf.minX)
-        XCTAssertEqual(off.width, vf.width)
-        XCTAssertEqual(off.height, vf.height)
+        // Same x and width — guarantees purely vertical animation with no diagonal component
+        XCTAssertEqual(start.minX, vf.minX)
+        XCTAssertEqual(start.width, vf.width)
+        XCTAssertEqual(start.height, vf.height)
 
         // Starts exactly one panel-height below the visible frame
-        XCTAssertEqual(off.minY, vf.minY - OverlayPanel.panelHeight, accuracy: 0.5)
+        XCTAssertEqual(start.minY, vf.minY - OverlayPanel.panelHeight, accuracy: 0.5)
     }
 
-    func testOffscreenFrameTopEdgeIsAtScreenBottom() {
+    func testStartFrameTopEdgeIsAtScreenBottom() {
         let panel = OverlayPanel()
         let vf = panel.visibleFrame()
-        let off = panel.offscreenFrame()
+        let start = vf.offsetBy(dx: 0, dy: -vf.height)
 
-        // The top of the off-screen frame should be exactly at the visible frame's bottom edge
-        XCTAssertEqual(off.maxY, vf.minY, accuracy: 0.5)
+        // The top of the start frame sits exactly at the visible frame's bottom edge
+        XCTAssertEqual(start.maxY, vf.minY, accuracy: 0.5)
     }
 
     // MARK: - M3.4 callbacks

@@ -52,15 +52,9 @@ final class OverlayPanel: NSPanel {
         )
     }
 
-    // Returns the off-screen starting frame (below the screen edge).
-    func offscreenFrame() -> CGRect {
-        let vf = visibleFrame()
-        return vf.offsetBy(dx: 0, dy: -OverlayPanel.panelHeight)
-    }
-
     func show() {
         let target = visibleFrame()
-        let start = offscreenFrame()
+        let start = target.offsetBy(dx: 0, dy: -target.height)
 
         setFrame(start, display: false)
         makeKeyAndOrderFront(nil)
@@ -125,7 +119,7 @@ final class OverlayPanel: NSPanel {
         removeEventMonitors()
         onDismiss?()
 
-        let end = offscreenFrame()
+        let end = visibleFrame().offsetBy(dx: 0, dy: -OverlayPanel.panelHeight)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
