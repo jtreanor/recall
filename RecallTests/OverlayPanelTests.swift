@@ -110,4 +110,76 @@ final class OverlayPanelTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 1.0)
     }
+
+    // MARK: - Space change dismissal
+
+    func testShowPinsPanelToActiveSpace() {
+        let panel = OverlayPanel()
+        panel.show()
+
+        // Shown panel must not join all spaces, or it would ride along on a
+        // space switch and flash before the dismissal notification arrives
+        XCTAssertFalse(panel.collectionBehavior.contains(.canJoinAllSpaces))
+        XCTAssertTrue(panel.collectionBehavior.contains(.fullScreenAuxiliary))
+
+        panel.hide(animated: false)
+    }
+
+    func testHideRestoresCanJoinAllSpaces() {
+        let panel = OverlayPanel()
+        panel.show()
+        panel.hide(animated: false)
+
+        XCTAssertTrue(panel.collectionBehavior.contains(.canJoinAllSpaces))
+        XCTAssertTrue(panel.collectionBehavior.contains(.fullScreenAuxiliary))
+    }
+
+    func testWarmUpJoinsAllSpaces() {
+        let panel = OverlayPanel()
+        panel.warmUp()
+
+        XCTAssertTrue(panel.collectionBehavior.contains(.canJoinAllSpaces))
+        XCTAssertEqual(panel.alphaValue, 0)
+    }
+
+    func testSpaceChangeWhileShownDismissesPanelImmediately() {
+        let panel = OverlayPanel()
+        var dismissCalled = false
+        var hiddenCalled = false
+        panel.onDismiss = { dismissCalled = true }
+        panel.onHidden = { hiddenCalled = true }
+        panel.show()
+
+        NSWorkspace.shared.notificationCenter.post(
+            name: NSWorkspace.activeSpaceDidChangeNotification,
+            object: NSWorkspace.shared
+        )
+
+        // Unanimated path: fully hidden synchronously, no slide-out
+        XCTAssertTrue(dismissCalled)
+        XCTAssertTrue(hiddenCalled)
+        XCTAssertEqual(panel.alphaValue, 0)
+    }
+
+    func testSpaceChangeAfterHideDoesNotDismissAgain() {
+        let panel = OverlayPanel()
+        var dismissCount = 0
+        panel.onDismiss = { dismissCount += 1 }
+        panel.show()
+        panel.hide()
+        XCTAssertEqual(dismissCount, 1)
+
+        NSWorkspace.shared.notificationCenter.post(
+            name: NSWorkspace.activeSpaceDidChangeNotification,
+            object: NSWorkspace.shared
+        )
+
+        XCTAssertEqual(dismissCount, 1)
+
+        let expectation = XCTestExpectation(description: "slide-out completes")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
 }

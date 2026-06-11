@@ -9,6 +9,7 @@ final class OverlayPanel: NSPanel {
     weak var overlayState: OverlayState?
     private var localEventMonitor: Any?
     private var globalEventMonitor: Any?
+    private var spaceChangeObserver: Any?
 
     init() {
         super.init(
@@ -45,6 +46,7 @@ final class OverlayPanel: NSPanel {
     func warmUp() {
         alphaValue = 0
         ignoresMouseEvents = true
+        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         setFrame(visibleFrame(), display: true)
         orderFrontRegardless()
     }
@@ -75,12 +77,29 @@ final class OverlayPanel: NSPanel {
         let start = offscreenFrame()
 
         ignoresMouseEvents = false
+        // Pin to the active space while shown: a panel that joins all spaces
+        // rides along on a space switch and flashes on the new space before
+        // the space-change notification can hide it. Pinned, it stays behind
+        // on the old space and the switch never shows it. warmUp() restores
+        // canJoinAllSpaces so the hidden panel can be summoned anywhere.
+        collectionBehavior = [.fullScreenAuxiliary]
         setFrame(start, display: false)
         alphaValue = 1
         makeKeyAndOrderFront(nil)
 
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             self?.hide()
+        }
+        // Switching spaces takes key status from the panel (it joins all
+        // spaces but stays unfocused), leaving Escape dead — dismiss instead.
+        // Unanimated: the slide-out would play on the new space, making the
+        // panel pop in just to animate away.
+        spaceChangeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.hide(animated: false)
         }
         localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
@@ -135,9 +154,14 @@ final class OverlayPanel: NSPanel {
         }
     }
 
-    func hide() {
+    func hide(animated: Bool = true) {
         removeEventMonitors()
         onDismiss?()
+
+        guard animated else {
+            finishHide()
+            return
+        }
 
         let end = offscreenFrame()
         NSAnimationContext.runAnimationGroup { context in
@@ -145,14 +169,18 @@ final class OverlayPanel: NSPanel {
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             self.animator().setFrame(end, display: true)
         } completionHandler: {
-            // Approach M: resign key via orderOut as before, then immediately
-            // re-warm the panel (back in the window list, alpha 0, resting
-            // frame) so the Window Server's first-composite settle decays
-            // invisibly now instead of on the next show().
-            self.orderOut(nil)
-            self.warmUp()
-            self.onHidden?()
+            self.finishHide()
         }
+    }
+
+    // Approach M: resign key via orderOut as before, then immediately
+    // re-warm the panel (back in the window list, alpha 0, resting
+    // frame) so the Window Server's first-composite settle decays
+    // invisibly now instead of on the next show().
+    private func finishHide() {
+        orderOut(nil)
+        warmUp()
+        onHidden?()
     }
 
     private func removeEventMonitors() {
@@ -163,6 +191,10 @@ final class OverlayPanel: NSPanel {
         if let monitor = localEventMonitor {
             NSEvent.removeMonitor(monitor)
             localEventMonitor = nil
+        }
+        if let observer = spaceChangeObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+            spaceChangeObserver = nil
         }
     }
 }
