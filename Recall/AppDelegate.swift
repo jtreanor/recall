@@ -57,6 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.onPaste = { [weak self] in self?.pasteSelectedItem() }
         panel.onDelete = { [weak self] in self?.deleteSelectedItem() }
         overlayPanel = panel
+        panel.warmUp()
     }
 
     private func startClipboardMonitor() {

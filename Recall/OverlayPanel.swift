@@ -37,6 +37,18 @@ final class OverlayPanel: NSPanel {
 
     override var canBecomeKey: Bool { true }
 
+    // Approach M: order the panel in once at launch and keep it in the window
+    // list permanently (alpha 0 while hidden), so the Window Server never
+    // composites it from cold in show() — the cause of the first-composite
+    // settle. Parked at the resting frame because a fully offscreen window may
+    // not be composited, which would re-cold-start the backdrop.
+    func warmUp() {
+        alphaValue = 0
+        ignoresMouseEvents = true
+        setFrame(visibleFrame(), display: true)
+        orderFrontRegardless()
+    }
+
     func positionAtScreenBottom() {
         setFrame(visibleFrame(), display: false)
     }
@@ -62,7 +74,9 @@ final class OverlayPanel: NSPanel {
         let target = visibleFrame()
         let start = offscreenFrame()
 
+        ignoresMouseEvents = false
         setFrame(start, display: false)
+        alphaValue = 1
         makeKeyAndOrderFront(nil)
 
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
@@ -131,7 +145,12 @@ final class OverlayPanel: NSPanel {
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             self.animator().setFrame(end, display: true)
         } completionHandler: {
+            // Approach M: resign key via orderOut as before, then immediately
+            // re-warm the panel (back in the window list, alpha 0, resting
+            // frame) so the Window Server's first-composite settle decays
+            // invisibly now instead of on the next show().
             self.orderOut(nil)
+            self.warmUp()
             self.onHidden?()
         }
     }
