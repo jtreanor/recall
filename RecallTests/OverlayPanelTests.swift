@@ -113,6 +113,35 @@ final class OverlayPanelTests: XCTestCase {
 
     // MARK: - Space change dismissal
 
+    func testShowPinsPanelToActiveSpace() {
+        let panel = OverlayPanel()
+        panel.show()
+
+        // Shown panel must not join all spaces, or it would ride along on a
+        // space switch and flash before the dismissal notification arrives
+        XCTAssertFalse(panel.collectionBehavior.contains(.canJoinAllSpaces))
+        XCTAssertTrue(panel.collectionBehavior.contains(.fullScreenAuxiliary))
+
+        panel.hide(animated: false)
+    }
+
+    func testHideRestoresCanJoinAllSpaces() {
+        let panel = OverlayPanel()
+        panel.show()
+        panel.hide(animated: false)
+
+        XCTAssertTrue(panel.collectionBehavior.contains(.canJoinAllSpaces))
+        XCTAssertTrue(panel.collectionBehavior.contains(.fullScreenAuxiliary))
+    }
+
+    func testWarmUpJoinsAllSpaces() {
+        let panel = OverlayPanel()
+        panel.warmUp()
+
+        XCTAssertTrue(panel.collectionBehavior.contains(.canJoinAllSpaces))
+        XCTAssertEqual(panel.alphaValue, 0)
+    }
+
     func testSpaceChangeWhileShownDismissesPanelImmediately() {
         let panel = OverlayPanel()
         var dismissCalled = false

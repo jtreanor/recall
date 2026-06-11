@@ -46,6 +46,7 @@ final class OverlayPanel: NSPanel {
     func warmUp() {
         alphaValue = 0
         ignoresMouseEvents = true
+        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         setFrame(visibleFrame(), display: true)
         orderFrontRegardless()
     }
@@ -76,6 +77,12 @@ final class OverlayPanel: NSPanel {
         let start = offscreenFrame()
 
         ignoresMouseEvents = false
+        // Pin to the active space while shown: a panel that joins all spaces
+        // rides along on a space switch and flashes on the new space before
+        // the space-change notification can hide it. Pinned, it stays behind
+        // on the old space and the switch never shows it. warmUp() restores
+        // canJoinAllSpaces so the hidden panel can be summoned anywhere.
+        collectionBehavior = [.fullScreenAuxiliary]
         setFrame(start, display: false)
         alphaValue = 1
         makeKeyAndOrderFront(nil)
