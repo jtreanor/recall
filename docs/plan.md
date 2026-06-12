@@ -27,22 +27,9 @@ _Living document. Update when implementation diverges from plan. Granular detail
 
 Failed approaches (A, C–L), forensic timeline, and the reusable capture harness — Darwin-notification toggle, 60fps `screencapture -v` workflow, quantitative left-edge detector, per-frame MAE motion profiling, baseline-control protocol — are preserved in this file's git history (PR #40, commit `1cb8c74`).
 
+**Phase 8 (README Refresh, #45):** Rewrote opening hook around the core loop (summon → glance → paste); animated demo GIF (`docs/assets/demo.gif`); "Why Recall?" section (keyboard-first, privacy, open source); clearer install section with Accessibility permission note; Usage section; Features list dissolved into "Why Recall?" and Usage.
+
 > **Notarization** (optional upgrade): if Apple Developer Program membership is obtained, wire up `scripts/distribute.sh --notarize` in CI and drop the `postflight` quarantine removal from the cask.
-
----
-
-## Version 1.1.0
-
-### Phase 8 — README Refresh
-
-_Make the README compelling and useful for people discovering the app for the first time._
-
-- [x] Rewrite the opening hook: lead with the core value proposition (summon → glance → paste) rather than a feature list
-- [x] Add a short animated GIF showing the overlay in action (`docs/assets/demo.gif`, ~10 s, 2.9 MB, encoded with gifski for color fidelity)
-- [x] Add a "Why Recall?" section: contrast with system clipboard and other clipboard managers; call out keyboard-first, privacy (no cloud), open source
-- [x] Improve install section: clearer Homebrew one-liner, note the Accessibility permission prompt and why it's needed
-- [x] Add a Usage section: hotkey, search, keyboard controls — enough for a new user to feel productive immediately
-- [x] Review and tighten all existing sections for clarity and brevity (Features list dissolved into "Why Recall?" and Usage; app icon added to header)
 
 ---
 
@@ -57,5 +44,5 @@ _Make the README compelling and useful for people discovering the app for the fi
 
 ## Current Status
 
-**Version:** 1.1.0-dev (Phase 8 complete: README rewrite done, demo GIF recorded and embedded)  
-**Next:** merge PR #45, then cut 1.1.0
+**Version:** 1.1.0 (released 2026-06-12 — rich text paste, URL detection, file handling, README refresh)  
+**Next:** no phase planned; gather feedback on 1.1.0
