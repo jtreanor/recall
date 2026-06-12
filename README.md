@@ -6,11 +6,9 @@
 
 <p align="center">Keyboard-first clipboard history for macOS.</p>
 
-<!-- Demo GIF goes here once recorded — see docs/demo-gif.md for the capture plan.
 <p align="center">
   <img src="docs/assets/demo.gif" width="720" alt="Summon the overlay, arrow to an item, Enter to paste">
 </p>
--->
 
 Press **⌘⇧V** in any app and your recent clipboard slides up from the bottom of the screen. Glance, arrow to the item you want, hit **Enter** — it's pasted right where you were typing. Your hands never leave the keyboard, and the overlay is gone before you've finished the thought.
 
