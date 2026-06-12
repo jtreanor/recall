@@ -8,7 +8,7 @@ Full notarization requires a paid Apple Developer Program membership ($99/year);
 
 ### The signing certificate
 
-- Generated once by `scripts/make_signing_cert.sh` (10-year validity); lives in `~/.recall-signing/` on the maintainer's machine — **back it up**. If it is lost and regenerated, the signing identity changes and every user gets one TCC re-prompt on their next upgrade.
+- Generated once by `scripts/make_signing_cert.sh` (10-year validity); lives in `~/.recall-signing/` on the maintainer's machine and is backed up in 1Password ("Recall Code Signing Certificate" in the Private vault — the `.p12` plus its password fully reconstruct everything). If it is lost and regenerated, the signing identity changes and every user gets one TCC re-prompt on their next upgrade.
 - Stored in GitHub Actions secrets `SIGNING_CERT_P12` (base64) and `SIGNING_CERT_PASSWORD`; the release workflow imports it into a throwaway keychain, trusts it on the runner, and signs the build with it.
 - To sign a local build with the same identity, import the cert into your keychain, trust it for code signing, then:
 
