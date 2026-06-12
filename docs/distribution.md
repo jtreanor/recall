@@ -2,7 +2,19 @@
 
 ## Current status
 
-Recall is distributed as an **ad-hoc signed** build. Users must bypass Gatekeeper once on first launch (see [User instructions](#user-instructions-for-ad-hoc-builds) below). Full notarization requires a paid Apple Developer Program membership ($99/year); the script supports it when a Developer ID cert is available.
+Recall releases are signed with a **stable self-signed certificate** ("Recall Code Signing"). This is not notarization — users still bypass Gatekeeper once on first install (see [User instructions](#user-instructions-for-ad-hoc-builds) below) — but because every release shares the same signing identity, macOS TCC recognizes upgrades as the same app and **Accessibility grants persist across versions**. (Ad-hoc builds get a new code hash every build, so TCC re-prompted on every upgrade.)
+
+Full notarization requires a paid Apple Developer Program membership ($99/year); the script supports it when a Developer ID cert is available.
+
+### The signing certificate
+
+- Generated once by `scripts/make_signing_cert.sh` (10-year validity); lives in `~/.recall-signing/` on the maintainer's machine — **back it up**. If it is lost and regenerated, the signing identity changes and every user gets one TCC re-prompt on their next upgrade.
+- Stored in GitHub Actions secrets `SIGNING_CERT_P12` (base64) and `SIGNING_CERT_PASSWORD`; the release workflow imports it into a throwaway keychain, trusts it on the runner, and signs the build with it.
+- To sign a local build with the same identity, import the cert into your keychain, trust it for code signing, then:
+
+```bash
+SIGN_IDENTITY="Recall Code Signing" ./scripts/distribute.sh
+```
 
 ---
 

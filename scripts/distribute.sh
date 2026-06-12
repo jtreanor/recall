@@ -4,6 +4,10 @@
 # Ad-hoc mode (default, no Apple Developer Program required):
 #   ./scripts/distribute.sh
 #
+# Stable-identity mode (self-signed cert in keychain; keeps TCC grants across
+# upgrades — see scripts/make_signing_cert.sh):
+#   SIGN_IDENTITY="Recall Code Signing" ./scripts/distribute.sh
+#
 # Notarized mode (requires paid Apple Developer Program + Developer ID cert):
 #   TEAM_ID=XXXXXXXXXX APPLE_ID=you@example.com APP_PASSWORD=xxxx-xxxx-xxxx-xxxx \
 #     ./scripts/distribute.sh --notarize
@@ -26,8 +30,10 @@ if [[ "${1:-}" == "--notarize" ]]; then
   : "${APPLE_ID:?APPLE_ID must be set for notarization}"
   : "${APP_PASSWORD:?APP_PASSWORD must be set for notarization}"
   SIGN_IDENTITY="Developer ID Application"
+  TIMESTAMP_FLAG="--timestamp"  # notarization requires a secure timestamp
 else
-  SIGN_IDENTITY="-"  # ad-hoc
+  SIGN_IDENTITY="${SIGN_IDENTITY:--}"  # env override for stable identity; ad-hoc otherwise
+  TIMESTAMP_FLAG="--timestamp=none"
 fi
 
 # ── 1. Build ──────────────────────────────────────────────────────────────────
@@ -35,12 +41,14 @@ echo "▸ Building ${APP_NAME} (Release)…"
 rm -rf "${BUILD_DIR}"
 mkdir -p "${BUILD_DIR}/app"
 
+# Build is always signed ad-hoc; the real identity is applied in the re-sign
+# step below. This keeps xcodebuild out of the keychain entirely.
 xcodebuild build \
   -project "$(cd "$(dirname "$0")/.." && pwd)/Recall.xcodeproj" \
   -scheme "${APP_NAME}" \
   -configuration Release \
   CONFIGURATION_BUILD_DIR="${BUILD_DIR}/app" \
-  CODE_SIGN_IDENTITY="${SIGN_IDENTITY}" \
+  CODE_SIGN_IDENTITY="-" \
   CODE_SIGN_STYLE=Manual \
   DEVELOPMENT_TEAM="${TEAM_ID:-}" \
   AD_HOC_CODE_SIGNING_ALLOWED=YES \
@@ -59,7 +67,7 @@ echo "▸ Signing with clean entitlements…"
 codesign --deep --force --sign "${SIGN_IDENTITY}" \
   -o runtime \
   --entitlements "${ENTITLEMENTS}" \
-  --timestamp=none \
+  "${TIMESTAMP_FLAG}" \
   "${APP_PATH}"
 echo "  ✓ Signed"
 
@@ -116,7 +124,13 @@ if [[ "${NOTARIZE}" == true ]]; then
   echo "  ✓ Gatekeeper accepts DMG"
 else
   echo ""
-  echo "  ℹ Ad-hoc build complete. Users must right-click → Open on first launch,"
+  if [[ "${SIGN_IDENTITY}" == "-" ]]; then
+    echo "  ℹ Ad-hoc build complete. TCC grants will NOT survive upgrades —"
+    echo "    use SIGN_IDENTITY=\"Recall Code Signing\" for releases."
+  else
+    echo "  ℹ Signed with stable identity '${SIGN_IDENTITY}' — TCC grants survive upgrades."
+  fi
+  echo "  ℹ Users must right-click → Open on first launch,"
   echo "    or run: xattr -dr com.apple.quarantine Recall.app"
   echo "  ℹ To notarize later: TEAM_ID=… APPLE_ID=… APP_PASSWORD=… ./scripts/distribute.sh --notarize"
 fi
