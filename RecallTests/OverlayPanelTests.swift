@@ -35,6 +35,26 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertEqual(panel.frame, first)
     }
 
+    // MARK: - Deactivation behavior
+
+    func testPanelDoesNotHideOnDeactivate() {
+        // NSPanel defaults hidesOnDeactivate to true, which lets AppKit order
+        // the panel out instantly when Recall deactivates (paste-back activates
+        // the previous app before hide()), skipping the close slide and
+        // evicting the warm panel.
+        let panel = OverlayPanel()
+        XCTAssertFalse(panel.hidesOnDeactivate)
+    }
+
+    func testConstrainFrameRectDoesNotClampOffscreenFrames() {
+        // AppKit's default constraining snaps the slide's offscreen start/end
+        // frames to the screen edge when Recall is the active app, turning
+        // both slides into instant jumps.
+        let panel = OverlayPanel()
+        let off = panel.offscreenFrame()
+        XCTAssertEqual(panel.constrainFrameRect(off, to: NSScreen.main), off)
+    }
+
     // MARK: - Slide animation frame tests
 
     func testVisibleFrameMatchesScreenBottom() {

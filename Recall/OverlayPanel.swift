@@ -21,6 +21,13 @@ final class OverlayPanel: NSPanel {
         isMovableByWindowBackground = false
         isFloatingPanel = true
         level = .floating
+        // NSPanel defaults this to true, so AppKit orders the panel out the
+        // instant Recall deactivates — paste-back activates the previous app
+        // before hide(), which skipped the close slide whenever Recall was
+        // active (e.g. after using Settings). It would also evict the warm
+        // panel (approach M) on every deactivation, re-cold-starting the
+        // backdrop.
+        hidesOnDeactivate = false
         backgroundColor = .clear
         hasShadow = false
         isOpaque = false
@@ -37,6 +44,16 @@ final class OverlayPanel: NSPanel {
     }
 
     override var canBecomeKey: Bool { true }
+
+    // The slide animates through deliberately-offscreen frames (one panel
+    // height below the screen). When Recall is the active app, AppKit's
+    // default constraining snaps those frames back to the screen edge, so
+    // both slides ran as instant jumps whenever Recall was active (e.g.
+    // right after using Settings). All our frames are computed internally —
+    // never constrain them.
+    override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+        frameRect
+    }
 
     // Approach M: order the panel in once at launch and keep it in the window
     // list permanently (alpha 0 while hidden), so the Window Server never
