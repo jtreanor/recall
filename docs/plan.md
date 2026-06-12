@@ -37,12 +37,12 @@ Failed approaches (A, C–L), forensic timeline, and the reusable capture harnes
 
 _Make the README compelling and useful for people discovering the app for the first time._
 
-- [ ] Rewrite the opening hook: lead with the core value proposition (summon → glance → paste) rather than a feature list
-- [ ] Add a short animated GIF or screen recording showing the overlay in action
-- [ ] Add a "Why Recall?" section: contrast with system clipboard and other clipboard managers; call out keyboard-first, privacy (no cloud), open source
-- [ ] Improve install section: clearer Homebrew one-liner, note the Accessibility permission prompt and why it's needed
-- [ ] Add a Usage section: hotkey, search, keyboard controls — enough for a new user to feel productive immediately
-- [ ] Review and tighten all existing sections for clarity and brevity
+- [x] Rewrite the opening hook: lead with the core value proposition (summon → glance → paste) rather than a feature list
+- [x] Add a short animated GIF showing the overlay in action (`docs/assets/demo.gif`, ~10 s, 2.9 MB, encoded with gifski for color fidelity)
+- [x] Add a "Why Recall?" section: contrast with system clipboard and other clipboard managers; call out keyboard-first, privacy (no cloud), open source
+- [x] Improve install section: clearer Homebrew one-liner, note the Accessibility permission prompt and why it's needed
+- [x] Add a Usage section: hotkey, search, keyboard controls — enough for a new user to feel productive immediately
+- [x] Review and tighten all existing sections for clarity and brevity (Features list dissolved into "Why Recall?" and Usage; app icon added to header)
 
 ---
 
@@ -57,5 +57,5 @@ _Make the README compelling and useful for people discovering the app for the fi
 
 ## Current Status
 
-**Version:** 1.1.0-dev (Phase 7 complete; overlay compositing bug fixed)  
-**Next:** Phase 8 — README Refresh
+**Version:** 1.1.0-dev (Phase 8 complete: README rewrite done, demo GIF recorded and embedded)  
+**Next:** merge PR #45, then cut 1.1.0
