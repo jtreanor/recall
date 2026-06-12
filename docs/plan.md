@@ -57,5 +57,5 @@ _Make the README compelling and useful for people discovering the app for the fi
 
 ## Current Status
 
-**Version:** 1.1.0-dev (Phase 8 complete: README rewrite done, demo GIF recorded and embedded)  
-**Next:** merge PR #45, then cut 1.1.0
+**Version:** 1.1.0 released  
+**Next:** stable signing identity lands in the next release (1.1.1+); releases are now signed with a persistent self-signed cert so Accessibility grants survive upgrades (one final re-prompt on the first upgrade after the switch)

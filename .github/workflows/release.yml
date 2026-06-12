@@ -30,20 +30,55 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
 
+      # Import the stable self-signed cert (scripts/make_signing_cert.sh) so
+      # every release shares one signing identity and users' Accessibility
+      # grants survive upgrades.
+      - name: Import signing certificate
+        env:
+          SIGNING_CERT_P12: ${{ secrets.SIGNING_CERT_P12 }}
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$SIGNING_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$SIGNING_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          # codesign needs to build a trust chain; for a self-signed cert that
+          # means trusting it as a root on the runner.
+          openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -clcerts -nokeys \
+            -passin "pass:$SIGNING_CERT_PASSWORD" -out "$RUNNER_TEMP/cert.pem"
+          sudo security add-trusted-cert -d -r trustRoot \
+            -k /Library/Keychains/System.keychain "$RUNNER_TEMP/cert.pem"
+          rm "$RUNNER_TEMP/cert.p12"
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
       - name: Build DMG
+        env:
+          SIGN_IDENTITY: Recall Code Signing
         run: VERSION=$VERSION ./scripts/distribute.sh
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
+          PRERELEASE=""
+          [[ "${GITHUB_REF_NAME}" == *-* ]] && PRERELEASE="--prerelease"
+          gh release create "${GITHUB_REF_NAME}" ${PRERELEASE} \
             --title "Recall ${GITHUB_REF_NAME}" \
             --generate-notes \
             "build/dist/Recall-${VERSION}.dmg#Recall-${VERSION}.dmg"
 
   update-tap:
     needs: release
+    # Pre-release tags (anything with a hyphen, e.g. v1.1.0-test1) never reach
+    # the Homebrew tap — they exist only as GitHub prereleases for testing.
+    if: ${{ !contains(github.ref_name, '-') }}
     runs-on: ubuntu-latest
     steps:
       - name: Extract version
