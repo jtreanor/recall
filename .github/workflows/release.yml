@@ -67,13 +67,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
+          PRERELEASE=""
+          [[ "${GITHUB_REF_NAME}" == *-* ]] && PRERELEASE="--prerelease"
+          gh release create "${GITHUB_REF_NAME}" ${PRERELEASE} \
             --title "Recall ${GITHUB_REF_NAME}" \
             --generate-notes \
             "build/dist/Recall-${VERSION}.dmg#Recall-${VERSION}.dmg"
 
   update-tap:
     needs: release
+    # Pre-release tags (anything with a hyphen, e.g. v1.1.0-test1) never reach
+    # the Homebrew tap — they exist only as GitHub prereleases for testing.
+    if: ${{ !contains(github.ref_name, '-') }}
     runs-on: ubuntu-latest
     steps:
       - name: Extract version
