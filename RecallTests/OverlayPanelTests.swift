@@ -46,15 +46,6 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertFalse(panel.hidesOnDeactivate)
     }
 
-    func testConstrainFrameRectDoesNotClampOffscreenFrames() {
-        // AppKit's default constraining snaps the slide's offscreen start/end
-        // frames to the screen edge when Recall is the active app, turning
-        // both slides into instant jumps.
-        let panel = OverlayPanel()
-        let off = panel.offscreenFrame()
-        XCTAssertEqual(panel.constrainFrameRect(off, to: NSScreen.main), off)
-    }
-
     // MARK: - Slide animation frame tests
 
     func testVisibleFrameMatchesScreenBottom() {
@@ -71,27 +62,60 @@ final class OverlayPanelTests: XCTestCase {
         XCTAssertEqual(vf.minX, screen.frame.minX)
     }
 
-    func testOffscreenFrameIsBelowVisibleFrame() {
+    // MARK: - Approach O: content-layer slide transform
+
+    func testWarmUpRestsContentTransformAtIdentity() {
+        // The window never moves; the slide is a transform on slideView's
+        // layer. warmUp() must park that transform at identity (resting) so
+        // the next show() starts from a known state.
         let panel = OverlayPanel()
-        let vf = panel.visibleFrame()
-        let off = panel.offscreenFrame()
-
-        // Same x and width
-        XCTAssertEqual(off.minX, vf.minX)
-        XCTAssertEqual(off.width, vf.width)
-        XCTAssertEqual(off.height, vf.height)
-
-        // Starts exactly one panel-height below the visible frame
-        XCTAssertEqual(off.minY, vf.minY - OverlayPanel.panelHeight, accuracy: 0.5)
+        panel.warmUp()
+        let t = panel.slideView.layer?.transform ?? CATransform3DIdentity
+        XCTAssertTrue(CATransform3DIsIdentity(t))
     }
 
-    func testOffscreenFrameTopEdgeIsAtScreenBottom() {
+    func testShowSettlesContentModelAtIdentityAndAddsSlideAnimation() {
+        // show() drives the presentation up from one panel-height below the
+        // edge while the model rests at identity, via an explicit
+        // CABasicAnimation (immune to activation races) keyed "slide".
         let panel = OverlayPanel()
-        let vf = panel.visibleFrame()
-        let off = panel.offscreenFrame()
+        panel.show()
 
-        // The top of the off-screen frame should be exactly at the visible frame's bottom edge
-        XCTAssertEqual(off.maxY, vf.minY, accuracy: 0.5)
+        let model = panel.slideView.layer?.transform ?? CATransform3DIdentity
+        XCTAssertTrue(CATransform3DIsIdentity(model))
+        XCTAssertNotNil(panel.slideView.layer?.animation(forKey: "slide"))
+
+        panel.hide(animated: false)
+    }
+
+    func testHideAnimatedSettlesContentModelOffscreen() {
+        // The animated close settles the model one panel-height below the edge
+        // (m42 == -panelHeight) and drives the presentation down to meet it.
+        let panel = OverlayPanel()
+        panel.show()
+        panel.hide()
+
+        let model = panel.slideView.layer?.transform ?? CATransform3DIdentity
+        XCTAssertEqual(model.m42, -OverlayPanel.panelHeight, accuracy: 0.5)
+        XCTAssertNotNil(panel.slideView.layer?.animation(forKey: "slide"))
+
+        // Let the slide-out completion (finishHide) run before the next test.
+        let expectation = XCTestExpectation(description: "slide-out completes")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+
+    func testHideUnanimatedResetsContentTransformToIdentity() {
+        // The unanimated path (space switch) goes straight to finishHide ->
+        // warmUp, which resets the content transform to identity.
+        let panel = OverlayPanel()
+        panel.show()
+        panel.hide(animated: false)
+
+        let t = panel.slideView.layer?.transform ?? CATransform3DIdentity
+        XCTAssertTrue(CATransform3DIsIdentity(t))
     }
 
     // MARK: - M3.4 callbacks
