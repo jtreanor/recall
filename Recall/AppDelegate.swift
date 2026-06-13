@@ -43,8 +43,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let rootView = OverlayRootView(state: overlayState, onPaste: { [weak self] in self?.pasteSelectedItem() })
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
-        (panel.contentView as? NSVisualEffectView)?.addSubview(hostingView)
-        hostingView.frame = panel.contentView?.bounds ?? .zero
+        // Approach O: the SwiftUI content lives inside the slideView so it
+        // rides the content-layer slide transform along with the backdrop.
+        panel.slideView.addSubview(hostingView)
+        hostingView.frame = panel.slideView.bounds
         panel.overlayState = overlayState
         panel.onDismiss = { [weak self] in
             self?.isOverlayVisible = false

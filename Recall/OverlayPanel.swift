@@ -11,6 +11,14 @@ final class OverlayPanel: NSPanel {
     private var globalEventMonitor: Any?
     private var spaceChangeObserver: Any?
 
+    // Approach O: the window never moves. The slide is a Core Animation
+    // transform on this layer-backed view, which holds the backdrop and the
+    // SwiftUI content. Render-server transform animations are immune to the
+    // key/activation transitions that cancel window-frame (`animator().setFrame`)
+    // slides — the exact race the paste flow triggers (activate previous app +
+    // hide back-to-back). AppDelegate adds the hosting view as a subview of this.
+    let slideView = NSVisualEffectView()
+
     init() {
         super.init(
             contentRect: .zero,
@@ -21,19 +29,34 @@ final class OverlayPanel: NSPanel {
         isMovableByWindowBackground = false
         isFloatingPanel = true
         level = .floating
+        // NSPanel defaults this to true, so AppKit orders the panel out the
+        // instant Recall deactivates. Kept false from approach N so the warm
+        // panel survives deactivation; the slide itself no longer depends on it.
+        hidesOnDeactivate = false
         backgroundColor = .clear
         hasShadow = false
         isOpaque = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
-        let visual = NSVisualEffectView()
-        visual.material = .hudWindow
-        visual.state = .active
-        visual.wantsLayer = true
-        visual.layer?.cornerRadius = 12
-        visual.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        visual.layer?.masksToBounds = true
-        contentView = visual
+        slideView.material = .hudWindow
+        slideView.state = .active
+        slideView.wantsLayer = true
+        slideView.layer?.cornerRadius = 12
+        slideView.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        slideView.layer?.masksToBounds = true
+
+        // A plain layer-backed container is the contentView: we animate the
+        // child slideView's layer transform, not the window's root content
+        // layer (which AppKit re-lays-out and can reset). The container clips
+        // the slideView to the window bounds as it travels below the edge.
+        let container = NSView()
+        container.wantsLayer = true
+        container.layer?.masksToBounds = true
+        container.autoresizesSubviews = true
+        slideView.autoresizingMask = [.width, .height]
+        container.addSubview(slideView)
+        contentView = container
+        slideView.frame = container.bounds
     }
 
     override var canBecomeKey: Bool { true }
@@ -41,12 +64,13 @@ final class OverlayPanel: NSPanel {
     // Approach M: order the panel in once at launch and keep it in the window
     // list permanently (alpha 0 while hidden), so the Window Server never
     // composites it from cold in show() — the cause of the first-composite
-    // settle. Parked at the resting frame because a fully offscreen window may
-    // not be composited, which would re-cold-start the backdrop.
+    // settle. The content transform is reset to identity (resting) here so the
+    // next show() starts from a known state.
     func warmUp() {
         alphaValue = 0
         ignoresMouseEvents = true
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        setContentTransform(CATransform3DIdentity)
         setFrame(visibleFrame(), display: true)
         orderFrontRegardless()
     }
@@ -55,7 +79,7 @@ final class OverlayPanel: NSPanel {
         setFrame(visibleFrame(), display: false)
     }
 
-    // Returns the on-screen resting frame.
+    // Returns the on-screen resting frame. The window stays here permanently.
     func visibleFrame() -> CGRect {
         guard let screen = NSScreen.main else { return .zero }
         return CGRect(
@@ -66,16 +90,18 @@ final class OverlayPanel: NSPanel {
         )
     }
 
-    // Returns the off-screen starting frame (below the screen edge).
-    func offscreenFrame() -> CGRect {
-        let vf = visibleFrame()
-        return vf.offsetBy(dx: 0, dy: -OverlayPanel.panelHeight)
+    // Content offset (layer space) that parks the slideView one panel-height
+    // below the window's bottom edge — fully clipped, i.e. off-screen.
+    private var hiddenTranslationY: CGFloat { -OverlayPanel.panelHeight }
+
+    private func setContentTransform(_ transform: CATransform3D) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        slideView.layer?.transform = transform
+        CATransaction.commit()
     }
 
     func show() {
-        let target = visibleFrame()
-        let start = offscreenFrame()
-
         ignoresMouseEvents = false
         // Pin to the active space while shown: a panel that joins all spaces
         // rides along on a space switch and flashes on the new space before
@@ -83,7 +109,15 @@ final class OverlayPanel: NSPanel {
         // on the old space and the switch never shows it. warmUp() restores
         // canJoinAllSpaces so the hidden panel can be summoned anywhere.
         collectionBehavior = [.fullScreenAuxiliary]
-        setFrame(start, display: false)
+        setFrame(visibleFrame(), display: false)
+
+        // Pre-position the content fully below the edge with implicit actions
+        // disabled, then flush so the render server has committed the
+        // off-screen transform BEFORE alpha goes to 1 — otherwise a single
+        // at-rest (on-screen) frame leaks before the slide starts.
+        setContentTransform(CATransform3DMakeTranslation(0, hiddenTranslationY, 0))
+        CATransaction.flush()
+
         alphaValue = 1
         makeKeyAndOrderFront(nil)
 
@@ -147,11 +181,17 @@ final class OverlayPanel: NSPanel {
             }
         }
 
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.15
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            self.animator().setFrame(target, display: true)
-        }
+        // Settle the model at the resting transform, then drive the
+        // presentation up from the off-screen offset. The explicit
+        // CABasicAnimation (not the window animator) is what makes the slide
+        // immune to activation races.
+        setContentTransform(CATransform3DIdentity)
+        let anim = CABasicAnimation(keyPath: "transform.translation.y")
+        anim.fromValue = hiddenTranslationY
+        anim.toValue = 0
+        anim.duration = 0.15
+        anim.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        slideView.layer?.add(anim, forKey: "slide")
     }
 
     func hide(animated: Bool = true) {
@@ -163,20 +203,26 @@ final class OverlayPanel: NSPanel {
             return
         }
 
-        let end = offscreenFrame()
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.15
-            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
-            self.animator().setFrame(end, display: true)
-        } completionHandler: {
-            self.finishHide()
+        // Settle the model at the off-screen offset, drive the presentation
+        // down to meet it, and finish (order out + re-warm) on completion.
+        setContentTransform(CATransform3DMakeTranslation(0, hiddenTranslationY, 0))
+        let anim = CABasicAnimation(keyPath: "transform.translation.y")
+        anim.fromValue = 0
+        anim.toValue = hiddenTranslationY
+        anim.duration = 0.15
+        anim.timingFunction = CAMediaTimingFunction(name: .easeIn)
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { [weak self] in
+            self?.finishHide()
         }
+        slideView.layer?.add(anim, forKey: "slide")
+        CATransaction.commit()
     }
 
-    // Approach M: resign key via orderOut as before, then immediately
-    // re-warm the panel (back in the window list, alpha 0, resting
-    // frame) so the Window Server's first-composite settle decays
-    // invisibly now instead of on the next show().
+    // Approach M: resign key via orderOut, then immediately re-warm the panel
+    // (back in the window list, alpha 0, content transform reset) so the
+    // Window Server's first-composite settle decays invisibly now instead of
+    // on the next show().
     private func finishHide() {
         orderOut(nil)
         warmUp()
